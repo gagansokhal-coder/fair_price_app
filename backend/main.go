@@ -9,10 +9,16 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/joho/godotenv"
 	"pds-backend/handlers"
+	"pds-backend/models"
 )
 
 func main() {
+	// ─── Environment config ───────────────────────────────
+	// Ignore error if .env doesn't exist (when running in container)
+	_ = godotenv.Load()
+
 	// ─── Database Connection ──────────────────────────────
 	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
@@ -53,8 +59,11 @@ func main() {
 	jwtSecret := os.Getenv("SUPABASE_JWT_SECRET")
 
 	// ─── Handlers ─────────────────────────────────────────
-	authHandler := handlers.NewAuthHandler(pool, supabaseURL, supabaseKey)
+	authHandler := handlers.NewAuthHandler(pool, supabaseURL, supabaseKey, jwtSecret)
 	lgdHandler := handlers.NewLgdHandler(pool)
+	pollHandler := handlers.NewPollHandler(pool)
+	officerHandler := handlers.NewOfficerHandler(pool)
+	analyticsHandler := handlers.NewAnalyticsHandler(pool)
 
 	// ─── Routes ───────────────────────────────────────────
 	api := router.Group("/api/v1")
@@ -74,6 +83,40 @@ func main() {
 			lgd.GET("/districts", lgdHandler.GetDistricts)
 			lgd.GET("/subdistricts", lgdHandler.GetSubdistricts)
 			lgd.GET("/villages", lgdHandler.GetVillages)
+		}
+
+		// Poll endpoints (all protected by JWT)
+		polls := api.Group("/polls")
+		polls.Use(handlers.SupabaseAuthMiddleware(jwtSecret))
+		{
+			polls.GET("", pollHandler.GetActivePolls)
+			polls.GET("/my-responses", pollHandler.GetMyResponses)
+			polls.POST("/submit", handlers.PollRateLimitMiddleware(), pollHandler.SubmitPoll)
+		}
+
+		// Admin / Officer Management (JWT + RBAC)
+		admin := api.Group("/admin")
+		admin.Use(handlers.SupabaseAuthMiddleware(jwtSecret))
+		admin.Use(handlers.RBACMiddleware(pool, models.RoleAdminBlock))
+		{
+			// Officer CRUD
+			admin.POST("/create-officer", officerHandler.CreateOfficer)
+			admin.GET("/officers", officerHandler.GetOfficers)
+			admin.PUT("/officer/:id", officerHandler.UpdateOfficer)
+			admin.PATCH("/officer/:id/deactivate", officerHandler.DeactivateOfficer)
+
+			// LGD blocks for admin dropdowns
+			admin.GET("/blocks", officerHandler.GetBlocks)
+
+			// Poll management (hierarchy-scoped)
+			admin.POST("/create-poll", pollHandler.CreatePoll)
+			admin.GET("/polls", pollHandler.GetPollAnalytics)
+			admin.PATCH("/poll/:id/close", pollHandler.ClosePoll)
+
+			// Analytics engine (Phases 5-8)
+			admin.GET("/analytics/summary", analyticsHandler.GetAnalyticsSummary)
+			admin.GET("/analytics/poll/:id", analyticsHandler.GetPollAnalyticsDetail)
+			admin.GET("/analytics/zones", analyticsHandler.GetZoneClassification)
 		}
 	}
 
