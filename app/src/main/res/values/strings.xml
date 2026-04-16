@@ -1,0 +1,58 @@
+<resources>
+    <string name="app_name">Ration Prahari</string>
+    <string name="app_tagline">Protecting Your Entitlements</string>
+
+    <!-- Auth -->
+    <string name="welcome_back">Welcome Back</string>
+    <string name="select_role">Select Your Role</string>
+    <string name="citizen">Citizen</string>
+    <string name="officer">Officer</string>
+    <string name="citizen_desc">NFSA Beneficiary</string>
+    <string name="officer_desc">District / Block Admin</string>
+    <string name="ration_card_no">Ration Card Number</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="enter_otp">Enter OTP</string>
+    <string name="verify">Verify</string>
+    <string name="login">Login</string>
+    <string name="officer_id">Officer ID</string>
+    <string name="password">Password</string>
+    <string name="select_designation">Select Designation</string>
+
+    <!-- Dashboard -->
+    <string name="home">Home</string>
+    <string name="history">History</string>
+    <string name="profile">Profile</string>
+    <string name="notifications">Notifications</string>
+    <string name="active_polls">Active Polls</string>
+    <string name="your_fps">Your Fair Price Shop</string>
+    <string name="quick_actions">Quick Actions</string>
+    <string name="file_complaint">File a Complaint</string>
+    <string name="give_feedback">Give Feedback</string>
+
+    <!-- Poll -->
+    <string name="verify_ration">Verify Ration Receipt</string>
+    <string name="did_you_receive">Did you receive your ration?</string>
+    <string name="yes_received">Yes, I Received</string>
+    <string name="no_not_received">No, Not Received</string>
+    <string name="submit_response">Submit Response</string>
+    <string name="response_recorded">Response Recorded!</string>
+    <string name="geofence_warning">You must be at your Fair Price Shop</string>
+    <string name="location_verified">Location Verified</string>
+
+    <!-- Admin -->
+    <string name="create_poll">Create New Poll</string>
+    <string name="target_level">Target Level</string>
+    <string name="select_commodity">Select Commodity</string>
+    <string name="zone_analysis">Zone Analysis</string>
+    <string name="response_rate">Response Rate</string>
+    <string name="total_responses">Total Responses</string>
+    <string name="discrepancies">Discrepancies</string>
+
+    <!-- General -->
+    <string name="submit">Submit</string>
+    <string name="cancel">Cancel</string>
+    <string name="back">Back</string>
+    <string name="loading">Loading…</string>
+    <string name="error_occurred">An error occurred</string>
+    <string name="retry">Retry</string>
+</resources>
