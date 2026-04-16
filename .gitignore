@@ -43,3 +43,7 @@ Thumbs.db
 
 # Captures
 captures/
+
+# Environment and test binaries
+.env
+test_build
