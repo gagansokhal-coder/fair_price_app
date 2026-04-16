@@ -32,4 +32,61 @@ interface ApiService {
 
     @GET("api/v1/lgd/villages")
     suspend fun getVillages(@Query("subdistrict_code") subdistrictCode: Int): Response<VillagesResponse>
+
+    // ─── Citizen Polls ──────────────────────────────────────
+
+    @GET("api/v1/polls")
+    suspend fun getActivePolls(): Response<PollListResponse>
+
+    @POST("api/v1/polls/submit")
+    suspend fun submitPoll(@Body request: PollSubmitRequest): Response<PollSubmitResponse>
+
+    @GET("api/v1/polls/my-responses")
+    suspend fun getMyResponses(): Response<MyResponsesListResponse>
+
+    // ─── Admin Polls ────────────────────────────────────────
+
+    @POST("api/v1/admin/create-poll")
+    suspend fun createPoll(@Body request: CreatePollRequest): Response<CreatePollResponse>
+
+    @GET("api/v1/admin/polls")
+    suspend fun getPollAnalytics(): Response<PollListResponse>
+
+    @retrofit2.http.PATCH("api/v1/admin/poll/{id}/close")
+    suspend fun closePoll(@retrofit2.http.Path("id") id: String): Response<ClosePollResponse>
+
+    // ─── Admin Analytics ─────────────────────────────────────
+
+    @GET("api/v1/admin/analytics/summary")
+    suspend fun getAnalyticsSummary(): Response<AnalyticsSummaryResponse>
+
+    @GET("api/v1/admin/analytics/poll/{id}")
+    suspend fun getPollAnalyticsDetail(@retrofit2.http.Path("id") id: String): Response<PollAnalyticsDetailResponse>
+
+    @GET("api/v1/admin/analytics/zones")
+    suspend fun getZoneClassification(): Response<ZoneClassificationResponse>
+
+    // ─── Admin Officers ──────────────────────────────────────
+
+    @GET("api/v1/admin/blocks")
+    suspend fun getBlocks(@Query("district_code") districtCode: Int): Response<BlocksResponse>
+
+    @POST("api/v1/admin/create-officer")
+    suspend fun createOfficer(@Body request: CreateOfficerRequest): Response<CreateOfficerResponse>
+
+    @GET("api/v1/admin/officers")
+    suspend fun getOfficers(
+        @Query("district_code") districtCode: Int? = null,
+        @Query("block_code") blockCode: Int? = null,
+        @Query("role") role: String? = null
+    ): Response<OfficerListResponse>
+
+    @retrofit2.http.PUT("api/v1/admin/officer/{id}")
+    suspend fun updateOfficer(
+        @retrofit2.http.Path("id") id: String,
+        @Body request: UpdateOfficerRequest
+    ): Response<UpdateOfficerResponse>
+
+    @retrofit2.http.PATCH("api/v1/admin/officer/{id}/deactivate")
+    suspend fun deactivateOfficer(@retrofit2.http.Path("id") id: String): Response<UpdateOfficerResponse>
 }
