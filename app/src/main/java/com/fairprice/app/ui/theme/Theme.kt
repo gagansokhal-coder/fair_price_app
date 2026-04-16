@@ -3,6 +3,7 @@ package com.fairprice.app.ui.theme
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
@@ -13,7 +14,7 @@ import androidx.core.view.WindowCompat
 /**
  * PDS Fair Price App — Material 3 Theme
  *
- * Light-only theme as per design system ("The Dignified Anchor").
+ * Supports Light ("The Dignified Anchor") and Dark ("Midnight Canopy") modes.
  * The palette is specifically calibrated for outdoor visibility
  * in rural Indian contexts — high contrast, warm surfaces.
  */
@@ -74,21 +75,80 @@ private val FairPriceLightColorScheme = lightColorScheme(
     scrim = Scrim,
 )
 
+private val FairPriceDarkColorScheme = darkColorScheme(
+    // Primary
+    primary = DarkPrimary,
+    onPrimary = DarkOnPrimary,
+    primaryContainer = DarkPrimaryContainer,
+    onPrimaryContainer = DarkOnPrimaryContainer,
+
+    // Secondary
+    secondary = DarkSecondary,
+    onSecondary = DarkOnSecondary,
+    secondaryContainer = DarkSecondaryContainer,
+    onSecondaryContainer = DarkOnSecondaryContainer,
+
+    // Tertiary
+    tertiary = DarkTertiary,
+    onTertiary = DarkOnTertiary,
+    tertiaryContainer = DarkTertiaryContainer,
+    onTertiaryContainer = DarkOnTertiaryContainer,
+
+    // Error
+    error = DarkError,
+    onError = DarkOnError,
+    errorContainer = DarkErrorContainer,
+    onErrorContainer = DarkOnErrorContainer,
+
+    // Surface tiers
+    surface = DarkSurface,
+    onSurface = DarkOnSurface,
+    surfaceVariant = DarkSurfaceVariant,
+    onSurfaceVariant = DarkOnSurfaceVariant,
+    surfaceTint = DarkSurfaceTint,
+    surfaceBright = DarkSurfaceBright,
+    surfaceDim = DarkSurfaceDim,
+    surfaceContainer = DarkSurfaceContainer,
+    surfaceContainerHigh = DarkSurfaceContainerHigh,
+    surfaceContainerHighest = DarkSurfaceContainerHighest,
+    surfaceContainerLow = DarkSurfaceContainerLow,
+    surfaceContainerLowest = DarkSurfaceContainerLowest,
+
+    // Background
+    background = DarkBackground,
+    onBackground = DarkOnBackground,
+
+    // Inverse
+    inverseSurface = DarkInverseSurface,
+    inverseOnSurface = DarkInverseOnSurface,
+    inversePrimary = DarkInversePrimary,
+
+    // Outline
+    outline = DarkOutline,
+    outlineVariant = DarkOutlineVariant,
+
+    // Scrim
+    scrim = Scrim,
+)
+
 @Composable
 fun FairPriceTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = FairPriceLightColorScheme
+    val colorScheme = if (darkTheme) FairPriceDarkColorScheme else FairPriceLightColorScheme
     val view = LocalView.current
 
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
+            @Suppress("DEPRECATION")
             window.statusBarColor = colorScheme.surface.toArgb()
+            @Suppress("DEPRECATION")
             window.navigationBarColor = colorScheme.surface.toArgb()
             WindowCompat.getInsetsController(window, view).apply {
-                isAppearanceLightStatusBars = true
-                isAppearanceLightNavigationBars = true
+                isAppearanceLightStatusBars = !darkTheme
+                isAppearanceLightNavigationBars = !darkTheme
             }
         }
     }

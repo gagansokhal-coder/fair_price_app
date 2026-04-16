@@ -76,11 +76,65 @@ val OnBackground = Color(0xFF1A1C1C)
 // ─── Scrim ─────────────────────────────────────────────────────
 val Scrim = Color(0xFF000000)
 
+// ═══════════════════════════════════════════════════════════════
+// ─── DARK MODE: "Midnight Canopy" ──────────────────────────────
+// Deep blacks with emerald luminance — dignified night identity.
+// ═══════════════════════════════════════════════════════════════
+
+val DarkPrimary = Color(0xFF88D982)
+val DarkOnPrimary = Color(0xFF003909)
+val DarkPrimaryContainer = Color(0xFF0A5115)
+val DarkOnPrimaryContainer = Color(0xFFA3F69C)
+
+val DarkSecondary = Color(0xFFADD0A6)
+val DarkOnSecondary = Color(0xFF1A3718)
+val DarkSecondaryContainer = Color(0xFF304E2D)
+val DarkOnSecondaryContainer = Color(0xFFC9ECC1)
+
+val DarkTertiary = Color(0xFFFFB1C7)
+val DarkOnTertiary = Color(0xFF5C1133)
+val DarkTertiaryContainer = Color(0xFF7A2849)
+val DarkOnTertiaryContainer = Color(0xFFFFD9E2)
+
+val DarkError = Color(0xFFFFB4AB)
+val DarkOnError = Color(0xFF690005)
+val DarkErrorContainer = Color(0xFF93000A)
+val DarkOnErrorContainer = Color(0xFFFFDAD6)
+
+val DarkSurface = Color(0xFF121412)
+val DarkOnSurface = Color(0xFFE2E3DE)
+val DarkSurfaceBright = Color(0xFF383A37)
+val DarkSurfaceDim = Color(0xFF121412)
+
+val DarkSurfaceContainerLowest = Color(0xFF0D0F0D)
+val DarkSurfaceContainerLow = Color(0xFF1A1C1A)
+val DarkSurfaceContainer = Color(0xFF1E201E)
+val DarkSurfaceContainerHigh = Color(0xFF292B28)
+val DarkSurfaceContainerHighest = Color(0xFF343633)
+
+val DarkSurfaceVariant = Color(0xFF414941)
+val DarkOnSurfaceVariant = Color(0xFFC1C9BC)
+val DarkSurfaceTint = Color(0xFF88D982)
+
+val DarkInverseSurface = Color(0xFFE2E3DE)
+val DarkInverseOnSurface = Color(0xFF2F3131)
+val DarkInversePrimary = Color(0xFF0D631B)
+
+val DarkOutline = Color(0xFF8B9387)
+val DarkOutlineVariant = Color(0xFF414941)
+
+val DarkBackground = Color(0xFF121412)
+val DarkOnBackground = Color(0xFFE2E3DE)
+
 // ─── Extended Palette (Custom tokens for app-specific use) ─────
 object FairPriceColors {
     // Gradient endpoints for primary CTA buttons
     val GradientStart = Primary           // #0d631b
     val GradientEnd = PrimaryContainer    // #2e7d32
+
+    // Dark mode gradient
+    val DarkGradientStart = DarkPrimary
+    val DarkGradientEnd = DarkPrimaryContainer
 
     // Status Colors
     val StatusSuccess = Primary
@@ -90,6 +144,7 @@ object FairPriceColors {
 
     // Glassmorphism
     val GlassBackground = Surface.copy(alpha = 0.80f)
+    val DarkGlassBackground = DarkSurface.copy(alpha = 0.85f)
 
     // Ghost Border (15% opacity of outline-variant)
     val GhostBorder = OutlineVariant.copy(alpha = 0.15f)

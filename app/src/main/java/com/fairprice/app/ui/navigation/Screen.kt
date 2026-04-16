@@ -34,6 +34,9 @@ sealed class Screen(val route: String) {
     // ─── Admin Flow ────────────────────────────────
     data object AdminDashboard : Screen("admin_dashboard")
     data object CreatePoll : Screen("create_poll")
+    data object PollAnalytics : Screen("poll_analytics")
     data object ZoneAnalysis : Screen("zone_analysis")
     data object Notifications : Screen("notifications")
+    data object OfficerList : Screen("officer_list")
+    data object CreateOfficer : Screen("create_officer")
 }

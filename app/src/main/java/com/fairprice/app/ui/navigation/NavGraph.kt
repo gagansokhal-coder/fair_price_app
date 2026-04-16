@@ -204,6 +204,8 @@ fun NavGraph(
         composable(Screen.AdminDashboard.route) {
             AdminDashboardScreen(
                 onCreatePoll = { navController.navigate(Screen.CreatePoll.route) },
+                onManageOfficers = { navController.navigate(Screen.OfficerList.route) },
+                onPollAnalytics = { navController.navigate(Screen.PollAnalytics.route) },
                 onZoneAnalysis = { navController.navigate(Screen.ZoneAnalysis.route) },
             )
         }
@@ -211,6 +213,12 @@ fun NavGraph(
         composable(Screen.CreatePoll.route) {
             CreatePollScreen(
                 onPollCreated = { navController.popBackStack() },
+                onBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(Screen.PollAnalytics.route) {
+            PollAnalyticsScreen(
                 onBack = { navController.popBackStack() },
             )
         }
@@ -224,6 +232,20 @@ fun NavGraph(
         composable(Screen.Notifications.route) {
             NotificationsScreen(
                 onBack = { navController.popBackStack() },
+            )
+        }
+        
+        composable(Screen.OfficerList.route) {
+            OfficerListScreen(
+                onCreateOfficerClick = { navController.navigate(Screen.CreateOfficer.route) },
+                onBack = { navController.popBackStack() }
+            )
+        }
+        
+        composable(Screen.CreateOfficer.route) {
+            CreateOfficerScreen(
+                onOfficerCreated = { navController.popBackStack() },
+                onBack = { navController.popBackStack() }
             )
         }
     }
