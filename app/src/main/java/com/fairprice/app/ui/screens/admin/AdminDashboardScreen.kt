@@ -77,6 +77,8 @@ private val mockRecentPolls = listOf(
 @Composable
 fun AdminDashboardScreen(
     onCreatePoll: () -> Unit,
+    onManageOfficers: () -> Unit,
+    onPollAnalytics: () -> Unit,
     onZoneAnalysis: () -> Unit,
 ) {
     var isVisible by remember { mutableStateOf(false) }
@@ -177,6 +179,20 @@ fun AdminDashboardScreen(
             GradientButton(
                 text = "Create New Poll",
                 onClick = onCreatePoll,
+            )
+        }
+
+        item {
+            OutlinedActionButton(
+                text = "Poll Analytics",
+                onClick = onPollAnalytics,
+            )
+        }
+
+        item {
+            OutlinedActionButton(
+                text = "Manage Officers",
+                onClick = onManageOfficers,
             )
         }
 

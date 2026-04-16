@@ -1,5 +1,9 @@
 package com.fairprice.app.ui.screens.admin
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,13 +20,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Analytics
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.LocationCity
-import androidx.compose.material.icons.rounded.TrendingDown
-import androidx.compose.material.icons.rounded.TrendingUp
 import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,50 +39,82 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.fairprice.app.network.AnalyticsSummaryResponse
+import com.fairprice.app.network.RetrofitClient
+import com.fairprice.app.network.ZoneClassificationResponse
+import com.fairprice.app.network.ZoneEntry
 import com.fairprice.app.ui.components.FairPriceCard
 import com.fairprice.app.ui.components.StatCard
 import com.fairprice.app.ui.components.StatusBadge
 import com.fairprice.app.ui.components.BadgeType
 import com.fairprice.app.ui.theme.ShapeTokens
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 
 /**
- * Zone Analysis Screen — Geographical breakdown of poll responses.
+ * Zone Analysis & Analytics Dashboard — Phases 5-8
  *
- * Shows zone-wise summary stats, response rates, and discrepancy
- * indicators across administrative areas.
+ * Real-time visualization of poll results with:
+ *  - Summary stats (total responses, zone distribution)
+ *  - Donut-style pie chart for overall positive/negative split
+ *  - Zone classification list (GREEN/YELLOW/RED)
+ *  - Bar-level comparison with progress indicators
  */
 
-private data class ZoneData(
-    val name: String,
-    val level: String,
-    val totalBeneficiaries: Int,
-    val responses: Int,
-    val discrepancies: Int,
-) {
-    val responseRate: Float get() = if (totalBeneficiaries > 0) responses.toFloat() / totalBeneficiaries else 0f
-}
-
-private val mockZones = listOf(
-    ZoneData("Sadar Block", "Block", 500, 342, 18),
-    ZoneData("Mohanlalganj Block", "Block", 380, 298, 12),
-    ZoneData("Malihabad Block", "Block", 420, 210, 35),
-    ZoneData("Bakshi Ka Talab Block", "Block", 350, 290, 8),
-    ZoneData("Chinhat Block", "Block", 480, 100, 42),
-    ZoneData("Kakori Block", "Block", 290, 240, 5),
-)
+// Zone colors
+val ZoneGreen = Color(0xFF22C55E)
+val ZoneYellow = Color(0xFFF59E0B)
+val ZoneRed = Color(0xFFEF4444)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ZoneAnalysisScreen(
     onBack: () -> Unit,
 ) {
+    var summaryData by remember { mutableStateOf<AnalyticsSummaryResponse?>(null) }
+    var zoneData by remember { mutableStateOf<ZoneClassificationResponse?>(null) }
+    var isLoading by remember { mutableStateOf(true) }
+    var errorMsg by remember { mutableStateOf<String?>(null) }
+
+    // Fetch data from backend
+    LaunchedEffect(Unit) {
+        try {
+            coroutineScope {
+                val summaryDeferred = async { RetrofitClient.apiService.getAnalyticsSummary() }
+                val zonesDeferred = async { RetrofitClient.apiService.getZoneClassification() }
+
+                val summaryResp = summaryDeferred.await()
+                val zonesResp = zonesDeferred.await()
+
+                if (summaryResp.isSuccessful) summaryData = summaryResp.body()
+                if (zonesResp.isSuccessful) zoneData = zonesResp.body()
+            }
+        } catch (e: Exception) {
+            errorMsg = "Failed to load analytics: ${e.localizedMessage}"
+        } finally {
+            isLoading = false
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -91,7 +130,7 @@ fun ZoneAnalysisScreen(
         TopAppBar(
             title = {
                 Text(
-                    text = "Zone Analysis",
+                    text = "Analytics & Zones",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -109,84 +148,363 @@ fun ZoneAnalysisScreen(
             ),
         )
 
-        LazyColumn(
-            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            // Overview Stats
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    StatCard(
-                        icon = Icons.Rounded.Analytics,
-                        label = "Avg Response",
-                        value = "62%",
-                        modifier = Modifier.weight(1f),
-                        subtitle = "Across all zones",
-                    )
-                    StatCard(
-                        icon = Icons.Rounded.Warning,
-                        label = "Hotspots",
-                        value = "2",
-                        modifier = Modifier.weight(1f),
-                        subtitle = "Below 50% rate",
-                        iconTint = MaterialTheme.colorScheme.tertiary,
-                        iconBackground = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.15f),
+        when {
+            isLoading -> {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            }
+            errorMsg != null -> {
+                Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = errorMsg ?: "",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center,
                     )
                 }
             }
-
-            item {
-                Text(
-                    text = "Zone Breakdown",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
+            else -> {
+                AnalyticsContent(summaryData, zoneData)
             }
-
-            items(mockZones.sortedByDescending { it.responseRate }) { zone ->
-                ZoneCard(zone)
-            }
-
-            item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
 }
 
 @Composable
-private fun ZoneCard(zone: ZoneData) {
-    val responsePercent = (zone.responseRate * 100).toInt()
-    val isLowResponse = responsePercent < 50
+private fun AnalyticsContent(
+    summary: AnalyticsSummaryResponse?,
+    zones: ZoneClassificationResponse?,
+) {
+    LazyColumn(
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        // ─── Overview Stats Row ──────────────────────────
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                StatCard(
+                    icon = Icons.Rounded.Analytics,
+                    label = "Responses",
+                    value = "${summary?.totalResponses ?: 0}",
+                    modifier = Modifier.weight(1f),
+                    subtitle = "Total votes cast",
+                )
+                StatCard(
+                    icon = Icons.Rounded.Warning,
+                    label = "Red Zones",
+                    value = "${zones?.redZones ?: 0}",
+                    modifier = Modifier.weight(1f),
+                    subtitle = "Below 40% positive",
+                    iconTint = ZoneRed,
+                    iconBackground = ZoneRed.copy(alpha = 0.12f),
+                )
+            }
+        }
+
+        // ─── Donut Chart: Overall Positive/Negative Split ─
+        if (summary != null && summary.totalResponses > 0) {
+            item {
+                FairPriceCard {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Text(
+                            text = "Overall Positive Rate",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        DonutChart(
+                            positivePct = summary.avgPositivePct.toFloat(),
+                            modifier = Modifier.size(180.dp),
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Legend
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                        ) {
+                            LegendItem(color = ZoneGreen, label = "Positive", value = "${summary.avgPositivePct}%")
+                            LegendItem(
+                                color = ZoneRed,
+                                label = "Negative",
+                                value = "${(100.0 - summary.avgPositivePct).let { "%.1f".format(it) }}%"
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // ─── Zone Distribution Bar ──────────────────────
+        if (zones != null && zones.totalZones > 0) {
+            item {
+                FairPriceCard {
+                    Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                        Text(
+                            text = "Zone Distribution",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        // Stacked bar showing GREEN/YELLOW/RED proportions
+                        val totalZones = zones.totalZones.toFloat()
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(24.dp)
+                                .clip(RoundedCornerShape(12.dp)),
+                        ) {
+                            if (zones.greenZones > 0) {
+                                Box(
+                                    modifier = Modifier
+                                        .weight(zones.greenZones / totalZones)
+                                        .height(24.dp)
+                                        .background(ZoneGreen)
+                                )
+                            }
+                            if (zones.yellowZones > 0) {
+                                Box(
+                                    modifier = Modifier
+                                        .weight(zones.yellowZones / totalZones)
+                                        .height(24.dp)
+                                        .background(ZoneYellow)
+                                )
+                            }
+                            if (zones.redZones > 0) {
+                                Box(
+                                    modifier = Modifier
+                                        .weight(zones.redZones / totalZones)
+                                        .height(24.dp)
+                                        .background(ZoneRed)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                        ) {
+                            ZoneCountBadge("🟢", "Green", zones.greenZones, ZoneGreen)
+                            ZoneCountBadge("🟡", "Yellow", zones.yellowZones, ZoneYellow)
+                            ZoneCountBadge("🔴", "Red", zones.redZones, ZoneRed)
+                        }
+                    }
+                }
+            }
+        }
+
+        // ─── Zone Classification List ───────────────────
+        item {
+            Text(
+                text = "Zone Classification",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+
+        val zoneList = zones?.zones ?: emptyList()
+        if (zoneList.isEmpty()) {
+            item {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(32.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = "No zone data available yet.\nCreate polls and collect responses to see results.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            }
+        } else {
+            items(zoneList.sortedByDescending { it.totalResponses }) { zone ->
+                ZoneCard(zone)
+            }
+        }
+
+        item { Spacer(modifier = Modifier.height(48.dp)) }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COMPOSABLES: Custom Charts & Zone Cards
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Animated donut chart showing positive percentage.
+ */
+@Composable
+private fun DonutChart(
+    positivePct: Float,
+    modifier: Modifier = Modifier,
+) {
+    var animationPlayed by remember { mutableStateOf(false) }
+    val sweepAngle by animateFloatAsState(
+        targetValue = if (animationPlayed) positivePct / 100f * 360f else 0f,
+        animationSpec = tween(durationMillis = 1200),
+        label = "donut_sweep"
+    )
+
+    LaunchedEffect(Unit) { animationPlayed = true }
+
+    val zoneColor = when {
+        positivePct >= 70f -> ZoneGreen
+        positivePct >= 40f -> ZoneYellow
+        else -> ZoneRed
+    }
+
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        Canvas(modifier = Modifier.matchParentSize()) {
+            val strokeWidth = 28f
+            val padding = strokeWidth / 2
+            val arcSize = Size(size.width - strokeWidth, size.height - strokeWidth)
+
+            // Background track
+            drawArc(
+                color = Color.Gray.copy(alpha = 0.15f),
+                startAngle = -90f,
+                sweepAngle = 360f,
+                useCenter = false,
+                topLeft = Offset(padding, padding),
+                size = arcSize,
+                style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+            )
+
+            // Positive arc
+            drawArc(
+                color = zoneColor,
+                startAngle = -90f,
+                sweepAngle = sweepAngle,
+                useCenter = false,
+                topLeft = Offset(padding, padding),
+                size = arcSize,
+                style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+            )
+        }
+
+        // Center label
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = "%.1f%%".format(positivePct),
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = zoneColor,
+            )
+            Text(
+                text = "positive",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+private fun LegendItem(color: Color, label: String, value: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .size(10.dp)
+                .clip(CircleShape)
+                .background(color)
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Column {
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ZoneCountBadge(emoji: String, label: String, count: Int, color: Color) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = emoji, fontSize = 20.sp)
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = "$count",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = color,
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+/**
+ * Individual zone card showing area name, zone badge, response count,
+ * and an animated progress bar for positive percentage.
+ */
+@Composable
+private fun ZoneCard(zone: ZoneEntry) {
+    val zoneColor = when (zone.zone) {
+        "GREEN" -> ZoneGreen
+        "YELLOW" -> ZoneYellow
+        "RED" -> ZoneRed
+        else -> Color.Gray
+    }
+
+    val badgeType = when (zone.zone) {
+        "GREEN" -> BadgeType.SUCCESS
+        "YELLOW" -> BadgeType.WARNING
+        else -> BadgeType.ERROR
+    }
+
+    var animationPlayed by remember { mutableStateOf(false) }
+    val animatedProgress by animateFloatAsState(
+        targetValue = if (animationPlayed) (zone.positivePct / 100f).toFloat() else 0f,
+        animationSpec = tween(durationMillis = 800),
+        label = "zone_progress_${zone.areaCode}"
+    )
+    LaunchedEffect(Unit) { animationPlayed = true }
 
     FairPriceCard {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth(),
         ) {
+            // Zone color indicator circle
             Box(
                 modifier = Modifier
                     .size(44.dp)
                     .clip(CircleShape)
-                    .background(
-                        if (isLowResponse) {
-                            MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f)
-                        } else {
-                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
-                        }
-                    ),
+                    .background(zoneColor.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                    imageVector = Icons.Rounded.LocationCity,
-                    contentDescription = zone.name,
-                    tint = if (isLowResponse) {
-                        MaterialTheme.colorScheme.tertiary
-                    } else {
-                        MaterialTheme.colorScheme.primary
+                    imageVector = when (zone.zone) {
+                        "GREEN" -> Icons.Rounded.Check
+                        "RED" -> Icons.Rounded.Warning
+                        else -> Icons.Rounded.LocationCity
                     },
+                    contentDescription = zone.zone,
+                    tint = zoneColor,
                     modifier = Modifier.size(22.dp),
                 )
             }
@@ -199,31 +517,36 @@ private fun ZoneCard(zone: ZoneData) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
-                        text = zone.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = zone.areaName,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        if (zone.parentName != null) {
+                            Text(
+                                text = zone.parentName,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
                     StatusBadge(
-                        text = if (isLowResponse) "Low" else "Good",
-                        type = if (isLowResponse) BadgeType.WARNING else BadgeType.SUCCESS,
+                        text = zone.zone,
+                        type = badgeType,
                     )
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Progress bar
+                // Animated progress bar
                 LinearProgressIndicator(
-                    progress = { zone.responseRate },
+                    progress = { animatedProgress },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(6.dp)
                         .clip(ShapeTokens.StatusBadge),
-                    color = if (isLowResponse) {
-                        MaterialTheme.colorScheme.tertiary
-                    } else {
-                        MaterialTheme.colorScheme.primary
-                    },
+                    color = zoneColor,
                     trackColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                     strokeCap = StrokeCap.Round,
                 )
@@ -235,19 +558,15 @@ private fun ZoneCard(zone: ZoneData) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
-                        text = "${zone.responses}/${zone.totalBeneficiaries} responses ($responsePercent%)",
+                        text = "${zone.totalResponses} responses",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
-                        text = "${zone.discrepancies} flagged",
+                        text = "${zone.positivePct}% positive",
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Medium,
-                        color = if (zone.discrepancies > 20) {
-                            MaterialTheme.colorScheme.error
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                        },
+                        color = zoneColor,
                     )
                 }
             }
