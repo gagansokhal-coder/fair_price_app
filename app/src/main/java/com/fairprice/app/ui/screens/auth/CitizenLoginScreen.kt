@@ -31,7 +31,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import com.fairprice.app.network.LoginRequest
+import com.fairprice.app.network.RetrofitClient
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -57,7 +63,9 @@ fun CitizenLoginScreen(
     var phoneNumber by remember { mutableStateOf("") }
     var rationCardError by remember { mutableStateOf<String?>(null) }
     var phoneError by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
     var isVisible by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) { isVisible = true }
 
@@ -178,7 +186,7 @@ fun CitizenLoginScreen(
 
                 // Login Button
                 GradientButton(
-                    text = "Get OTP",
+                    text = if (isLoading) "Requesting..." else "Get OTP",
                     onClick = {
                         var hasError = false
                         if (rationCardNo.length != 12) {
@@ -190,10 +198,28 @@ fun CitizenLoginScreen(
                             hasError = true
                         }
                         if (!hasError) {
-                            onNavigateToVerification(phoneNumber)
+                            isLoading = true
+                            coroutineScope.launch {
+                                try {
+                                    val response = withContext(Dispatchers.IO) {
+                                        RetrofitClient.apiService.login(
+                                            LoginRequest(rationCardNo, phoneNumber)
+                                        )
+                                    }
+                                    if (response.isSuccessful) {
+                                        onNavigateToVerification(phoneNumber)
+                                    } else {
+                                        rationCardError = "Login failed: ${response.code()}"
+                                    }
+                                } catch (e: Exception) {
+                                    rationCardError = "Network error: ${e.message}"
+                                } finally {
+                                    isLoading = false
+                                }
+                            }
                         }
                     },
-                    enabled = isFormValid,
+                    enabled = isFormValid && !isLoading,
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))

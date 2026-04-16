@@ -41,6 +41,7 @@ private val authRoutes = setOf(
     Screen.CitizenLogin.route,
     Screen.OfficerLogin.route,
     Screen.Verification.route,
+    Screen.ProfileSetup.route,
 )
 
 @Composable

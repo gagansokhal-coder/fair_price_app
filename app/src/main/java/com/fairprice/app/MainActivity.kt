@@ -10,6 +10,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import com.fairprice.app.ui.theme.FairPriceTheme
 
+import com.fairprice.app.network.RetrofitClient
+
 /**
  * Main entry point — Single Activity with Compose.
  * Edge-to-edge rendering for the premium "Dignified Anchor" design.
@@ -17,6 +19,7 @@ import com.fairprice.app.ui.theme.FairPriceTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        RetrofitClient.initialize(this)
         enableEdgeToEdge()
         setContent {
             FairPriceTheme {

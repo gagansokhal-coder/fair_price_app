@@ -22,7 +22,7 @@ import com.fairprice.app.ui.theme.SteadyPulseEasing
  * PDS Fair Price App — Navigation Graph
  *
  * Full navigation with "Steady Pulse" transitions (300ms cubic-bezier).
- * Flow: Splash → RoleSelection → Login → Main (with bottom nav)
+ * Flow: Splash → RoleSelection → Login → Verification → ProfileSetup → Main
  */
 @Composable
 fun NavGraph(
@@ -107,12 +107,30 @@ fun NavGraph(
             val phone = backStackEntry.arguments?.getString("phone") ?: ""
             VerificationScreen(
                 phone = phone,
-                onVerificationSuccess = {
+                onVerificationSuccess = { userId ->
+                    // After OTP → go to mandatory ProfileSetup
+                    // userId is returned from the verification API
+                    navController.navigate(Screen.ProfileSetup.createRoute(userId)) {
+                        popUpTo(Screen.CitizenLogin.route) { inclusive = true }
+                    }
+                },
+                onBack = { navController.popBackStack() },
+            )
+        }
+
+        // ─── Profile Setup (Mandatory) ─────────────────
+        composable(
+            route = Screen.ProfileSetup.route,
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: ""
+            ProfileSetupScreen(
+                userId = userId,
+                onProfileComplete = {
                     navController.navigate(Screen.CitizenHome.route) {
                         popUpTo(Screen.RoleSelection.route) { inclusive = true }
                     }
                 },
-                onBack = { navController.popBackStack() },
             )
         }
 

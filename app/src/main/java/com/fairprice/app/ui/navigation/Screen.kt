@@ -16,6 +16,9 @@ sealed class Screen(val route: String) {
     data object Verification : Screen("verification/{phone}") {
         fun createRoute(phone: String) = "verification/$phone"
     }
+    data object ProfileSetup : Screen("profile_setup/{userId}") {
+        fun createRoute(userId: String) = "profile_setup/$userId"
+    }
 
     // ─── Citizen Flow ──────────────────────────────
     data object CitizenHome : Screen("citizen_home")

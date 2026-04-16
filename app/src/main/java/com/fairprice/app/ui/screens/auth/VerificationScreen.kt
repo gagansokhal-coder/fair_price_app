@@ -50,6 +50,10 @@ import androidx.compose.ui.unit.dp
 import com.fairprice.app.ui.components.VerificationPulse
 import com.fairprice.app.ui.theme.ShapeTokens
 import com.fairprice.app.ui.theme.SteadyPulseEasing
+import com.fairprice.app.network.RetrofitClient
+import com.fairprice.app.network.VerifyOtpRequest
+import com.fairprice.app.utils.SessionManager
+import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.delay
 
 /**
@@ -65,7 +69,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun VerificationScreen(
     phone: String,
-    onVerificationSuccess: () -> Unit,
+    onVerificationSuccess: (String) -> Unit,
     onBack: () -> Unit,
 ) {
     var otpValue by remember { mutableStateOf("") }
@@ -73,6 +77,8 @@ fun VerificationScreen(
     var countdown by remember { mutableIntStateOf(30) }
     var canResend by remember { mutableStateOf(false) }
     var isVisible by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) { isVisible = true }
 
@@ -90,10 +96,37 @@ fun VerificationScreen(
 
     // Auto-submit when OTP is 6 digits
     LaunchedEffect(otpValue) {
-        if (otpValue.length == 6) {
+        if (otpValue.length == 6 && !isVerifying) {
             isVerifying = true
-            delay(2000) // Simulate verification
-            onVerificationSuccess()
+            errorMessage = null
+            try {
+                val response = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                    RetrofitClient.apiService.verifyOtp(VerifyOtpRequest(phone, otpValue))
+                }
+                
+                if (response.isSuccessful && response.body()?.verified == true) {
+                    val body = response.body()!!
+                    // Save JWT securely
+                    SessionManager.getInstance(context).saveAuthData(
+                        accessToken = body.accessToken,
+                        userId = body.userId
+                    )
+                    
+                    if (body.profileRequired) {
+                        onVerificationSuccess(body.userId)
+                    } else {
+                        onVerificationSuccess(body.userId) // Adjust if bypassing profile setup in NavGraph
+                    }
+                } else {
+                    errorMessage = "Invalid OTP or expired."
+                    otpValue = ""
+                    isVerifying = false
+                }
+            } catch (e: Exception) {
+                errorMessage = "Network error occurred."
+                otpValue = ""
+                isVerifying = false
+            }
         }
     }
 
@@ -161,7 +194,18 @@ fun VerificationScreen(
                     modifier = Modifier.fillMaxWidth(),
                 )
 
-                Spacer(modifier = Modifier.height(48.dp))
+                if (errorMessage != null) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = errorMessage!!,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
 
                 if (isVerifying) {
                     // Show verification pulse

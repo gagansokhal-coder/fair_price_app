@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: postgis/postgis:15-3.4
+    container_name: pds_fairprice_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: pds_fairprice
+      POSTGRES_USER: pds_admin
+      POSTGRES_PASSWORD: pds_secure_2024
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pds_admin -d pds_fairprice"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pds_fairprice_backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: "host=postgres port=5432 user=pds_admin dbname=pds_fairprice sslmode=disable"
+      PORT: "8080"
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+    driver: local
