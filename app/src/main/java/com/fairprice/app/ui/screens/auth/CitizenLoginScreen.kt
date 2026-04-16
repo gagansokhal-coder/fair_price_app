@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import com.fairprice.app.ui.components.GradientButton
 import com.fairprice.app.ui.components.SoftTrayInput
 import com.fairprice.app.ui.theme.SteadyPulseEasing
+import com.fairprice.app.utils.DeviceUtils
 
 /**
  * Citizen Login Screen — Ration Card + Phone authentication.
@@ -66,8 +67,34 @@ fun CitizenLoginScreen(
     var isLoading by remember { mutableStateOf(false) }
     var isVisible by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    // GPS state for login verification
+    var gpsLat by remember { androidx.compose.runtime.mutableDoubleStateOf(0.0) }
+    var gpsLng by remember { androidx.compose.runtime.mutableDoubleStateOf(0.0) }
+    var gpsStatus by remember { mutableStateOf("Acquiring GPS…") }
 
     LaunchedEffect(Unit) { isVisible = true }
+
+    // Fetch GPS coordinates on screen launch
+    LaunchedEffect(Unit) {
+        try {
+            val location = DeviceUtils.getCurrentLocation(context)
+            if (location != null) {
+                if (DeviceUtils.isMockLocation(location)) {
+                    gpsStatus = "⚠️ Mock location detected"
+                } else {
+                    gpsLat = location.latitude
+                    gpsLng = location.longitude
+                    gpsStatus = "✅ GPS: ${String.format("%.4f", gpsLat)}, ${String.format("%.4f", gpsLng)}"
+                }
+            } else {
+                gpsStatus = "⚠️ GPS unavailable"
+            }
+        } catch (_: Exception) {
+            gpsStatus = "⚠️ GPS permission required"
+        }
+    }
 
     val isFormValid = rationCardNo.length == 12 && phoneNumber.length == 10
 
@@ -203,7 +230,12 @@ fun CitizenLoginScreen(
                                 try {
                                     val response = withContext(Dispatchers.IO) {
                                         RetrofitClient.apiService.login(
-                                            LoginRequest(rationCardNo, phoneNumber)
+                                            LoginRequest(
+                                                rationCardNo = rationCardNo,
+                                                phoneNo = phoneNumber,
+                                                gpsLat = gpsLat,
+                                                gpsLng = gpsLng,
+                                            )
                                         )
                                     }
                                     if (response.isSuccessful) {
