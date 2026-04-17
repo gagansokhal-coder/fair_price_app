@@ -57,6 +57,11 @@ func main() {
 	supabaseURL := os.Getenv("SUPABASE_URL")
 	supabaseKey := os.Getenv("SUPABASE_KEY")
 	jwtSecret := os.Getenv("SUPABASE_JWT_SECRET")
+	if jwtSecret == "" {
+		fmt.Printf("[CRITICAL] SUPABASE_JWT_SECRET is not set\n")
+	} else {
+		fmt.Printf("[INFO] JWT configuration loaded (length: %d)\n", len(jwtSecret))
+	}
 
 	// ─── Handlers ─────────────────────────────────────────
 	authHandler := handlers.NewAuthHandler(pool, supabaseURL, supabaseKey, jwtSecret)

@@ -229,15 +229,14 @@ func (h *AuthHandler) VerifyOtp(c *gin.Context) {
 	})
 }
 
-// RegisterProfile handles mandatory profile setup after login.
+// RegisterProfile handles citizen profile completion.
 // POST /api/v1/auth/register-profile
 func (h *AuthHandler) RegisterProfile(c *gin.Context) {
+	fmt.Printf("[DEBUG] RegisterProfile started\n")
 	var req models.RegisterProfileRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "INVALID_INPUT",
-			Message: "All fields are required: full_name, address, district, subdistrict, village, hardware_uuid, gps",
-		})
+		fmt.Printf("[ERROR] RegisterProfile: invalid payload: %v\n", err)
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{Error: "INVALID_REQUEST", Message: "Invalid profile data format"})
 		return
 	}
 
@@ -268,7 +267,7 @@ func (h *AuthHandler) RegisterProfile(c *gin.Context) {
 	}
 
 	// Update user profile
-	_, err = h.DB.Exec(context.Background(),
+	commandTag, err := h.DB.Exec(context.Background(),
 		`UPDATE users SET 
 			full_name = $1, 
 			address = $2, 
@@ -287,6 +286,7 @@ func (h *AuthHandler) RegisterProfile(c *gin.Context) {
 		req.HardwareUUID, req.GpsLat, req.GpsLng, req.UserID)
 
 	if err != nil {
+		fmt.Printf("[ERROR] RegisterProfile DB fail: %v\n", err)
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Error:   "DB_ERROR",
 			Message: "Failed to save profile. Please try again.",
@@ -294,9 +294,19 @@ func (h *AuthHandler) RegisterProfile(c *gin.Context) {
 		return
 	}
 
+	if commandTag.RowsAffected() == 0 {
+		fmt.Printf("[ERROR] RegisterProfile: no user found with ID %s\n", req.UserID)
+		c.JSON(http.StatusNotFound, models.ErrorResponse{
+			Error:   "USER_NOT_FOUND",
+			Message: "Account profile could not be found to update.",
+		})
+		return
+	}
+
+	fmt.Printf("[DEBUG] RegisterProfile success for user %s\n", req.UserID)
 	c.JSON(http.StatusOK, models.RegisterProfileResponse{
 		Success: true,
-		Message: "Profile registered successfully",
+		Message: "Profile updated successfully.",
 	})
 }
 
@@ -337,8 +347,8 @@ func (h *AuthHandler) OfficerLogin(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "OFFICER_NOT_FOUND",
-			Message: "No officer registered with this phone number",
+			Error:   "INVALID_CREDENTIALS",
+			Message: "Invalid phone number or password",
 		})
 		return
 	}
