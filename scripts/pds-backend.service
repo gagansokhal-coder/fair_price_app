@@ -1,0 +1,43 @@
+[Unit]
+Description=PDS Fair Price Backend (Go/Gin)
+Documentation=https://github.com/gagansokhal-coder/fair_price_app
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pds
+Group=pds
+
+# Working directory & binary
+WorkingDirectory=/opt/pds-backend
+ExecStart=/opt/pds-backend/pds-backend
+
+# Environment file for secrets (DATABASE_URL, SUPABASE_*, etc.)
+EnvironmentFile=/opt/pds-backend/.env
+
+# Restart policy
+Restart=on-failure
+RestartSec=5
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/pds-backend
+PrivateTmp=true
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=pds-backend
+
+# Graceful shutdown (10s)
+TimeoutStopSec=10
+KillMode=mixed
+KillSignal=SIGTERM
+
+[Install]
+WantedBy=multi-user.target
