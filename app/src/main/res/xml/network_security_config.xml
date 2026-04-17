@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Network Security Configuration for PDS Fair Price App.
+  Allows cleartext (HTTP) traffic to the AWS EC2 backend.
+  Remove this when migrating to HTTPS.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">65.1.86.83</domain>
+    </domain-config>
+</network-security-config>
