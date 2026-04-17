@@ -44,7 +44,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.fairprice.app.network.Officer
-import com.fairprice.app.network.RetrofitClient
+import com.fairprice.app.network.ApiRepository
+import com.fairprice.app.network.NetworkResult
 import com.fairprice.app.ui.components.FairPriceCard
 import com.fairprice.app.ui.components.StatusBadge
 import com.fairprice.app.ui.components.BadgeType
@@ -65,20 +66,12 @@ fun OfficerListScreen(
 
     LaunchedEffect(Unit) {
         scope.launch {
-            try {
-                val response = withContext(Dispatchers.IO) {
-                    RetrofitClient.apiService.getOfficers()
-                }
-                if (response.isSuccessful) {
-                    officers = response.body()?.officers ?: emptyList()
-                } else {
-                    errorMessage = "Failed to load officers directory"
-                }
-            } catch (e: Exception) {
-                errorMessage = "Network error: ${e.message}"
-            } finally {
-                isLoading = false
+            when (val result = ApiRepository.getOfficers()) {
+                is NetworkResult.Success -> officers = result.data.officers
+                is NetworkResult.Error -> errorMessage = result.message
+                else -> {}
             }
+            isLoading = false
         }
     }
 

@@ -37,7 +37,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.fairprice.app.network.CreateOfficerRequest
 import com.fairprice.app.network.LgdItem
-import com.fairprice.app.network.RetrofitClient
+import com.fairprice.app.network.ApiRepository
+import com.fairprice.app.network.NetworkResult
 import com.fairprice.app.ui.components.GradientButton
 import com.fairprice.app.ui.components.SoftTrayInput
 import kotlinx.coroutines.Dispatchers
@@ -79,33 +80,24 @@ fun CreateOfficerScreen(
     // Fetch initial districts
     LaunchedEffect(Unit) {
         isLoading = true
-        try {
-            val response = withContext(Dispatchers.IO) {
-                RetrofitClient.apiService.getDistricts()
-            }
-            if (response.isSuccessful) {
-                districts = response.body()?.districts ?: emptyList()
-            }
-        } catch (_: Exception) {
-            errorMessage = "Failed to load districts"
-        } finally {
-            isLoading = false
+        when (val result = ApiRepository.getDistricts()) {
+            is NetworkResult.Success -> districts = result.data.districts
+            is NetworkResult.Error -> errorMessage = result.message
+            else -> {}
         }
+        isLoading = false
     }
 
     // Fetch subdistricts when district changes
     LaunchedEffect(selectedDistrict) {
         if (selectedDistrict != null) {
-            try {
-                val response = withContext(Dispatchers.IO) {
-                    RetrofitClient.apiService.getSubdistricts(selectedDistrict!!.code)
-                }
-                if (response.isSuccessful) {
-                    subdistricts = response.body()?.subdistricts ?: emptyList()
+            when (val result = ApiRepository.getSubdistricts(selectedDistrict!!.code)) {
+                is NetworkResult.Success -> {
+                    subdistricts = result.data.subdistricts
                     selectedSubdistrict = null // Reset
                 }
-            } catch (_: Exception) {
-                errorMessage = "Failed to load subdistricts/blocks"
+                is NetworkResult.Error -> errorMessage = result.message
+                else -> {}
             }
         } else {
             subdistricts = emptyList()
@@ -328,16 +320,14 @@ fun CreateOfficerScreen(
                                 blockCode = selectedSubdistrict?.code, // Block and subdistrict codes are mapped 1:1 in this hierarchy view
                                 designation = designation.takeIf { it.isNotBlank() }
                             )
-                            val response = withContext(Dispatchers.IO) {
-                                RetrofitClient.apiService.createOfficer(req)
+                            when (val result = ApiRepository.createOfficer(req)) {
+                                is NetworkResult.Success -> {
+                                    if (result.data.success) onOfficerCreated()
+                                    else errorMessage = result.data.message
+                                }
+                                is NetworkResult.Error -> errorMessage = result.message
+                                else -> {}
                             }
-                            if (response.isSuccessful && response.body()?.success == true) {
-                                onOfficerCreated()
-                            } else {
-                                errorMessage = response.body()?.message ?: "Access Denied: You may not have jurisdiction."
-                            }
-                        } catch (e: Exception) {
-                            errorMessage = "Network error: ${e.message}"
                         } finally {
                             isSubmitting = false
                         }

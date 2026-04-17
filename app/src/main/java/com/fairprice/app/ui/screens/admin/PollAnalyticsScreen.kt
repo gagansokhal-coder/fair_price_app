@@ -51,7 +51,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.fairprice.app.network.RetrofitClient
+import com.fairprice.app.network.ApiRepository
+import com.fairprice.app.network.NetworkResult
 import com.fairprice.app.network.CustomPoll
 import com.fairprice.app.ui.theme.SteadyPulseEasing
 import kotlinx.coroutines.launch
@@ -76,52 +77,12 @@ fun PollAnalyticsScreen(
 
     LaunchedEffect(Unit) {
         isVisible = true
-        try {
-            val resp = RetrofitClient.apiService.getPollAnalytics()
-            if (resp.isSuccessful) {
-                polls = resp.body()?.polls ?: emptyList()
-            }
-        } catch (_: Exception) {
-            // Mock data for offline dev
-            polls = listOf(
-                CustomPoll(
-                    pollId = "mock-1",
-                    title = "Did you receive wheat ration this month?",
-                    description = null,
-                    targetLevel = "BLOCK",
-                    targetCode = 280,
-                    options = listOf("Yes, full quantity", "Partial quantity", "Not received"),
-                    isActive = true,
-                    createdAt = "2026-04-16",
-                    createdBy = null,
-                    totalResponses = 147,
-                    optionCounts = mapOf(
-                        "Yes, full quantity" to 98,
-                        "Partial quantity" to 31,
-                        "Not received" to 18,
-                    ),
-                ),
-                CustomPoll(
-                    pollId = "mock-2",
-                    title = "Is your FPS maintaining proper records?",
-                    description = null,
-                    targetLevel = "DISTRICT",
-                    targetCode = 12,
-                    options = listOf("Yes", "No", "Not sure"),
-                    isActive = false,
-                    createdAt = "2026-04-14",
-                    createdBy = null,
-                    totalResponses = 312,
-                    optionCounts = mapOf(
-                        "Yes" to 201,
-                        "No" to 89,
-                        "Not sure" to 22,
-                    ),
-                ),
-            )
-        } finally {
-            isLoading = false
+        when (val result = ApiRepository.getPollAnalytics()) {
+            is NetworkResult.Success -> polls = result.data.polls
+            is NetworkResult.Error -> { /* Show empty state */ }
+            else -> {}
         }
+        isLoading = false
     }
 
     Column(
@@ -203,16 +164,16 @@ fun PollAnalyticsScreen(
                             poll = poll,
                             onClose = {
                                 scope.launch {
-                                    try {
-                                        val resp = RetrofitClient.apiService.closePoll(poll.pollId)
-                                        if (resp.isSuccessful) {
+                                    when (val result = ApiRepository.closePoll(poll.pollId)) {
+                                        is NetworkResult.Success -> {
                                             polls = polls.map {
                                                 if (it.pollId == poll.pollId)
                                                     it.copy(isActive = false)
                                                 else it
                                             }
                                         }
-                                    } catch (_: Exception) { }
+                                        else -> {}
+                                    }
                                 }
                             },
                         )

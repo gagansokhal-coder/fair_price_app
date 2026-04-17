@@ -50,7 +50,8 @@ import androidx.compose.ui.unit.dp
 import com.fairprice.app.ui.components.VerificationPulse
 import com.fairprice.app.ui.theme.ShapeTokens
 import com.fairprice.app.ui.theme.SteadyPulseEasing
-import com.fairprice.app.network.RetrofitClient
+import com.fairprice.app.network.ApiRepository
+import com.fairprice.app.network.NetworkResult
 import com.fairprice.app.network.VerifyOtpRequest
 import com.fairprice.app.utils.SessionManager
 import androidx.compose.ui.platform.LocalContext
@@ -99,33 +100,29 @@ fun VerificationScreen(
         if (otpValue.length == 6 && !isVerifying) {
             isVerifying = true
             errorMessage = null
-            try {
-                val response = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                    RetrofitClient.apiService.verifyOtp(VerifyOtpRequest(phone, otpValue))
-                }
-                
-                if (response.isSuccessful && response.body()?.verified == true) {
-                    val body = response.body()!!
-                    // Save JWT securely
-                    SessionManager.getInstance(context).saveAuthData(
-                        accessToken = body.accessToken,
-                        userId = body.userId
-                    )
-                    
-                    if (body.profileRequired) {
+            val result = ApiRepository.verifyOtp(VerifyOtpRequest(phone, otpValue))
+            when (result) {
+                is NetworkResult.Success -> {
+                    val body = result.data
+                    if (body.verified) {
+                        // Save JWT securely
+                        SessionManager.getInstance(context).saveAuthData(
+                            accessToken = body.accessToken,
+                            userId = body.userId
+                        )
                         onVerificationSuccess(body.userId)
                     } else {
-                        onVerificationSuccess(body.userId) // Adjust if bypassing profile setup in NavGraph
+                        errorMessage = "Invalid OTP or expired."
+                        otpValue = ""
+                        isVerifying = false
                     }
-                } else {
-                    errorMessage = "Invalid OTP or expired."
+                }
+                is NetworkResult.Error -> {
+                    errorMessage = result.message
                     otpValue = ""
                     isVerifying = false
                 }
-            } catch (e: Exception) {
-                errorMessage = "Network error occurred."
-                otpValue = ""
-                isVerifying = false
+                else -> {}
             }
         }
     }

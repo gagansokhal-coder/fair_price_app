@@ -55,8 +55,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.fairprice.app.network.ApiErrorResponse
-import com.fairprice.app.network.RetrofitClient
+import com.fairprice.app.network.ApiRepository
+import com.fairprice.app.network.NetworkResult
 import com.fairprice.app.network.CustomPoll
 import com.fairprice.app.network.PollSubmitRequest
 import com.fairprice.app.ui.components.GradientButton
@@ -107,27 +107,16 @@ fun PollVotingScreen(
 
     // Load poll details
     LaunchedEffect(pollId) {
-        try {
-            val resp = RetrofitClient.apiService.getActivePolls()
-            if (resp.isSuccessful) {
-                poll = resp.body()?.polls?.find { it.pollId == pollId }
+        when (val result = ApiRepository.getActivePolls()) {
+            is NetworkResult.Success -> {
+                poll = result.data.polls.find { it.pollId == pollId }
             }
-        } catch (_: Exception) {
-            // Fallback mock for offline dev
-            poll = CustomPoll(
-                pollId = pollId,
-                title = "Did you receive wheat ration this month?",
-                description = "Verify your FPS distributed the correct amount.",
-                targetLevel = "BLOCK",
-                targetCode = 280,
-                options = listOf("Yes, full quantity", "Partial quantity", "Not received", "Shop was closed"),
-                isActive = true,
-                createdAt = "2026-04-16",
-                createdBy = null,
-            )
-        } finally {
-            isPollLoading = false
+            is NetworkResult.Error -> {
+                errorMessage = result.message
+            }
+            else -> {}
         }
+        isPollLoading = false
     }
 
     // REAL location verification using FusedLocationProviderClient
@@ -441,56 +430,52 @@ fun PollVotingScreen(
                             errorMessage = null
 
                             scope.launch {
-                                try {
-                                    val resp = RetrofitClient.apiService.submitPoll(
-                                        PollSubmitRequest(
-                                            pollId = pollId,
-                                            selectedOptionIndex = selectedOptionIndex,
-                                            gpsLat = gpsLat,
-                                            gpsLng = gpsLng,
-                                        )
+                                val result = ApiRepository.submitPoll(
+                                    PollSubmitRequest(
+                                        pollId = pollId,
+                                        selectedOptionIndex = selectedOptionIndex,
+                                        gpsLat = gpsLat,
+                                        gpsLng = gpsLng,
                                     )
-                                    if (resp.isSuccessful && resp.body()?.success == true) {
-                                        onSubmitSuccess()
-                                    } else {
-                                        // Parse structured error from server
-                                        val errBody = resp.errorBody()?.string()
-                                        val apiErr = try {
-                                            Gson().fromJson(errBody, ApiErrorResponse::class.java)
-                                        } catch (_: Exception) { null }
-
-                                        when (apiErr?.error) {
-                                            "ALREADY_VOTED" -> {
+                                )
+                                when (result) {
+                                    is NetworkResult.Success -> {
+                                        if (result.data.success) {
+                                            onSubmitSuccess()
+                                        } else {
+                                            errorMessage = result.data.message
+                                        }
+                                    }
+                                    is NetworkResult.Error -> {
+                                        // Map server error messages to UI-friendly display
+                                        val msg = result.message
+                                        when {
+                                            msg.contains("already voted", ignoreCase = true) -> {
                                                 hasAlreadyVoted = true
-                                                alreadyVotedText = apiErr.message
+                                                alreadyVotedText = msg
                                                     .substringAfter("voted '")
                                                     .substringBefore("' on")
                                                     .ifBlank { null }
                                                 errorMessage = "You have already voted on this poll."
                                             }
-                                            "RATE_LIMITED" -> {
+                                            msg.contains("rate", ignoreCase = true) || result.code == 429 -> {
                                                 errorMessage = "⏳ Too many attempts. Wait 60 seconds before trying again."
                                             }
-                                            "NOT_IN_TARGET_AREA" -> {
+                                            msg.contains("target area", ignoreCase = true) -> {
                                                 errorMessage = "🚫 This poll is not targeted at your area."
                                             }
-                                            "POLL_EXPIRED" -> {
+                                            msg.contains("expired", ignoreCase = true) -> {
                                                 errorMessage = "⏰ This poll has expired."
                                             }
-                                            "POLL_CLOSED" -> {
+                                            msg.contains("closed", ignoreCase = true) || msg.contains("no longer active", ignoreCase = true) -> {
                                                 errorMessage = "This poll is no longer active."
                                             }
-                                            else -> {
-                                                errorMessage = apiErr?.message
-                                                    ?: "Failed to submit vote. Please try again."
-                                            }
+                                            else -> errorMessage = msg
                                         }
                                     }
-                                } catch (e: Exception) {
-                                    errorMessage = "Network error: ${e.localizedMessage}"
-                                } finally {
-                                    isSubmitting = false
+                                    else -> {}
                                 }
+                                isSubmitting = false
                             }
                         },
                         enabled = canSubmit && !hasAlreadyVoted,

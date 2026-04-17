@@ -54,7 +54,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.fairprice.app.network.LgdItem
 import com.fairprice.app.network.RegisterProfileRequest
-import com.fairprice.app.network.RetrofitClient
+import com.fairprice.app.network.ApiRepository
+import com.fairprice.app.network.NetworkResult
 import com.fairprice.app.ui.components.GradientButton
 import com.fairprice.app.ui.components.SoftTrayInput
 import com.fairprice.app.ui.theme.ShapeTokens
@@ -137,12 +138,11 @@ fun ProfileSetupScreen(
 
     // Fetch districts on launch
     LaunchedEffect(Unit) {
-        try {
-            val response = RetrofitClient.apiService.getDistricts()
-            if (response.isSuccessful) {
-                districts = response.body()?.districts ?: emptyList()
-            }
-        } catch (_: Exception) { }
+        when (val result = ApiRepository.getDistricts()) {
+            is NetworkResult.Success -> districts = result.data.districts
+            is NetworkResult.Error -> errorMessage = result.message
+            else -> {}
+        }
         isLoadingDistricts = false
     }
 
@@ -153,12 +153,11 @@ fun ProfileSetupScreen(
             selectedSubdistrict = null
             selectedVillage = null
             villages = emptyList()
-            try {
-                val response = RetrofitClient.apiService.getSubdistricts(district.code)
-                if (response.isSuccessful) {
-                    subdistricts = response.body()?.subdistricts ?: emptyList()
-                }
-            } catch (_: Exception) { }
+            when (val result = ApiRepository.getSubdistricts(district.code)) {
+                is NetworkResult.Success -> subdistricts = result.data.subdistricts
+                is NetworkResult.Error -> errorMessage = result.message
+                else -> {}
+            }
             isLoadingSubdistricts = false
         }
     }
@@ -168,12 +167,11 @@ fun ProfileSetupScreen(
         selectedSubdistrict?.let { subdistrict ->
             isLoadingVillages = true
             selectedVillage = null
-            try {
-                val response = RetrofitClient.apiService.getVillages(subdistrict.code)
-                if (response.isSuccessful) {
-                    villages = response.body()?.villages ?: emptyList()
-                }
-            } catch (_: Exception) { }
+            when (val result = ApiRepository.getVillages(subdistrict.code)) {
+                is NetworkResult.Success -> villages = result.data.villages
+                is NetworkResult.Error -> errorMessage = result.message
+                else -> {}
+            }
             isLoadingVillages = false
         }
     }
@@ -414,28 +412,26 @@ fun ProfileSetupScreen(
                         scope.launch {
                             isSubmitting = true
                             errorMessage = null
-                            try {
-                                val response = RetrofitClient.apiService.registerProfile(
-                                    RegisterProfileRequest(
-                                        userId = userId,
-                                        fullName = fullName,
-                                        address = address,
-                                        districtCode = selectedDistrict!!.code,
-                                        subdistrictCode = selectedSubdistrict!!.code,
-                                        villageCode = selectedVillage!!.code,
-                                        hardwareUuid = hardwareUuid,
-                                        gpsLat = gpsLat,
-                                        gpsLng = gpsLng,
-                                    )
+                            val result = ApiRepository.registerProfile(
+                                RegisterProfileRequest(
+                                    userId = userId,
+                                    fullName = fullName,
+                                    address = address,
+                                    districtCode = selectedDistrict!!.code,
+                                    subdistrictCode = selectedSubdistrict!!.code,
+                                    villageCode = selectedVillage!!.code,
+                                    hardwareUuid = hardwareUuid,
+                                    gpsLat = gpsLat,
+                                    gpsLng = gpsLng,
                                 )
-                                if (response.isSuccessful && response.body()?.success == true) {
-                                    onProfileComplete()
-                                } else {
-                                    errorMessage = response.body()?.message
-                                        ?: "Registration failed. Please try again."
+                            )
+                            when (result) {
+                                is NetworkResult.Success -> {
+                                    if (result.data.success) onProfileComplete()
+                                    else errorMessage = result.data.message
                                 }
-                            } catch (e: Exception) {
-                                errorMessage = "Network error: ${e.localizedMessage}"
+                                is NetworkResult.Error -> errorMessage = result.message
+                                else -> {}
                             }
                             isSubmitting = false
                         }

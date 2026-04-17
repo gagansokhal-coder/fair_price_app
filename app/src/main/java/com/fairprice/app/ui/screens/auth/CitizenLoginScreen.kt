@@ -34,7 +34,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import com.fairprice.app.network.LoginRequest
-import com.fairprice.app.network.RetrofitClient
+import com.fairprice.app.network.ApiRepository
+import com.fairprice.app.network.NetworkResult
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -227,27 +228,20 @@ fun CitizenLoginScreen(
                         if (!hasError) {
                             isLoading = true
                             coroutineScope.launch {
-                                try {
-                                    val response = withContext(Dispatchers.IO) {
-                                        RetrofitClient.apiService.login(
-                                            LoginRequest(
-                                                rationCardNo = rationCardNo,
-                                                phoneNo = phoneNumber,
-                                                gpsLat = gpsLat,
-                                                gpsLng = gpsLng,
-                                            )
-                                        )
-                                    }
-                                    if (response.isSuccessful) {
-                                        onNavigateToVerification(phoneNumber)
-                                    } else {
-                                        rationCardError = "Login failed: ${response.code()}"
-                                    }
-                                } catch (e: Exception) {
-                                    rationCardError = "Network error: ${e.message}"
-                                } finally {
-                                    isLoading = false
+                                val result = ApiRepository.login(
+                                    LoginRequest(
+                                        rationCardNo = rationCardNo,
+                                        phoneNo = phoneNumber,
+                                        gpsLat = gpsLat,
+                                        gpsLng = gpsLng,
+                                    )
+                                )
+                                when (result) {
+                                    is NetworkResult.Success -> onNavigateToVerification(phoneNumber)
+                                    is NetworkResult.Error -> rationCardError = result.message
+                                    else -> {}
                                 }
+                                isLoading = false
                             }
                         }
                     },

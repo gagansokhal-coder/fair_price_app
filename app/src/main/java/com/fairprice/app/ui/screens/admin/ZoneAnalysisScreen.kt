@@ -58,7 +58,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fairprice.app.network.AnalyticsSummaryResponse
-import com.fairprice.app.network.RetrofitClient
+import com.fairprice.app.network.ApiRepository
+import com.fairprice.app.network.NetworkResult
 import com.fairprice.app.network.ZoneClassificationResponse
 import com.fairprice.app.network.ZoneEntry
 import com.fairprice.app.ui.components.FairPriceCard
@@ -99,14 +100,19 @@ fun ZoneAnalysisScreen(
     LaunchedEffect(Unit) {
         try {
             coroutineScope {
-                val summaryDeferred = async { RetrofitClient.apiService.getAnalyticsSummary() }
-                val zonesDeferred = async { RetrofitClient.apiService.getZoneClassification() }
+                val summaryDeferred = async { ApiRepository.getAnalyticsSummary() }
+                val zonesDeferred = async { ApiRepository.getZoneClassification() }
 
-                val summaryResp = summaryDeferred.await()
-                val zonesResp = zonesDeferred.await()
+                val summaryResult = summaryDeferred.await()
+                val zonesResult = zonesDeferred.await()
 
-                if (summaryResp.isSuccessful) summaryData = summaryResp.body()
-                if (zonesResp.isSuccessful) zoneData = zonesResp.body()
+                if (summaryResult is NetworkResult.Success) summaryData = summaryResult.data
+                if (zonesResult is NetworkResult.Success) zoneData = zonesResult.data
+
+                // Show error if both failed
+                if (summaryResult is NetworkResult.Error && zonesResult is NetworkResult.Error) {
+                    errorMsg = summaryResult.message
+                }
             }
         } catch (e: Exception) {
             errorMsg = "Failed to load analytics: ${e.localizedMessage}"

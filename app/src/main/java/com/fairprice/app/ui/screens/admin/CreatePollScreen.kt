@@ -52,7 +52,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.fairprice.app.network.RetrofitClient
+import com.fairprice.app.network.ApiRepository
+import com.fairprice.app.network.NetworkResult
 import com.fairprice.app.network.CreatePollRequest
 import com.fairprice.app.ui.components.GradientButton
 import com.fairprice.app.ui.components.SoftTrayInput
@@ -400,7 +401,7 @@ fun CreatePollScreen(
 
                         scope.launch {
                             try {
-                                val resp = RetrofitClient.apiService.createPoll(
+                                val result = ApiRepository.createPoll(
                                     CreatePollRequest(
                                         title = title.trim(),
                                         description = description.trim().ifBlank { null },
@@ -409,16 +410,21 @@ fun CreatePollScreen(
                                         options = options.filter { it.isNotBlank() }.map { it.trim() },
                                     )
                                 )
-                                if (resp.isSuccessful && resp.body()?.success == true) {
-                                    successMessage = resp.body()?.message ?: "Poll created!"
-                                    // Reset form after brief delay
-                                    kotlinx.coroutines.delay(1200)
-                                    onPollCreated()
-                                } else {
-                                    errorMessage = "Failed to create poll. Check jurisdiction and target code."
+                                when (result) {
+                                    is NetworkResult.Success -> {
+                                        if (result.data.success) {
+                                            successMessage = result.data.message
+                                            kotlinx.coroutines.delay(1200)
+                                            onPollCreated()
+                                        } else {
+                                            errorMessage = result.data.message
+                                        }
+                                    }
+                                    is NetworkResult.Error -> {
+                                        errorMessage = result.message
+                                    }
+                                    else -> {}
                                 }
-                            } catch (e: Exception) {
-                                errorMessage = "Network error: ${e.localizedMessage}"
                             } finally {
                                 isLoading = false
                             }
