@@ -55,7 +55,7 @@ suspend fun <T> safeApiCall(apiCall: suspend () -> Response<T>): NetworkResult<T
             val userMessage = when (response.code()) {
                 401 -> "Session expired. Please login again."
                 403 -> apiError?.message ?: "Access denied."
-                404 -> "Resource not found."
+                404 -> apiError?.message ?: "Resource not found."
                 429 -> apiError?.message ?: "Too many requests. Please wait and try again."
                 in 500..599 -> "Server error. Please try again later."
                 else -> apiError?.message ?: "Something went wrong (${response.code()})."

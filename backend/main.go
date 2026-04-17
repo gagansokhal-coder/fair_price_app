@@ -82,9 +82,8 @@ func main() {
 			auth.POST("/register-profile", handlers.SupabaseAuthMiddleware(jwtSecret), authHandler.RegisterProfile)
 		}
 
-		// LGD hierarchy endpoints
+		// LGD hierarchy endpoints (Public for registration/setup)
 		lgd := api.Group("/lgd")
-		lgd.Use(handlers.SupabaseAuthMiddleware(jwtSecret))
 		{
 			lgd.GET("/districts", lgdHandler.GetDistricts)
 			lgd.GET("/subdistricts", lgdHandler.GetSubdistricts)
