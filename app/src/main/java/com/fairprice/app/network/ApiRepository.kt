@@ -19,6 +19,9 @@ object ApiRepository {
     suspend fun verifyOtp(request: VerifyOtpRequest): NetworkResult<VerifyOtpResponse> =
         safeApiCall { api.verifyOtp(request) }
 
+    suspend fun officerLogin(request: OfficerLoginRequest): NetworkResult<OfficerLoginResponse> =
+        safeApiCall { api.officerLogin(request) }
+
     suspend fun registerProfile(request: RegisterProfileRequest): NetworkResult<RegisterProfileResponse> =
         safeApiCall { api.registerProfile(request) }
 

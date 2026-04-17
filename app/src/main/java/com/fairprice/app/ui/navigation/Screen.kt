@@ -13,8 +13,8 @@ sealed class Screen(val route: String) {
     data object RoleSelection : Screen("role_selection")
     data object CitizenLogin : Screen("citizen_login")
     data object OfficerLogin : Screen("officer_login")
-    data object Verification : Screen("verification/{phone}") {
-        fun createRoute(phone: String) = "verification/$phone"
+    data object Verification : Screen("verification/{phone}/{rationCardNo}") {
+        fun createRoute(phone: String, rationCardNo: String) = "verification/$phone/$rationCardNo"
     }
     data object ProfileSetup : Screen("profile_setup/{userId}") {
         fun createRoute(userId: String) = "profile_setup/$userId"

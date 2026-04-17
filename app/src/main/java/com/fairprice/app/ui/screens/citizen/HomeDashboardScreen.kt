@@ -26,8 +26,10 @@ import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Feedback
 import androidx.compose.material.icons.rounded.Grain
 import androidx.compose.material.icons.rounded.HowToVote
+import androidx.compose.material.icons.rounded.Poll
 import androidx.compose.material.icons.rounded.ReportProblem
 import androidx.compose.material.icons.rounded.Store
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -43,8 +45,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.fairprice.app.network.ApiRepository
+import com.fairprice.app.network.CustomPoll
+import com.fairprice.app.network.MyPollResponse
+import com.fairprice.app.network.NetworkResult
 import com.fairprice.app.ui.components.FairPriceCard
 import com.fairprice.app.ui.components.InfoSlab
 import com.fairprice.app.ui.components.StatCard
@@ -52,28 +60,17 @@ import com.fairprice.app.ui.components.StatusBadge
 import com.fairprice.app.ui.components.BadgeType
 import com.fairprice.app.ui.theme.ShapeTokens
 import com.fairprice.app.ui.theme.SteadyPulseEasing
+import com.fairprice.app.utils.SessionManager
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import java.util.Calendar
 
 /**
  * Citizen Home Dashboard — Main landing after login.
  *
- * Shows greeting, FPS info, active polls, and quick actions.
- * Uses mock data — ready for Supabase/Retrofit integration.
+ * Shows greeting, active polls from backend, stats from
+ * real API data, and quick actions.
  */
-
-// Mock data
-private data class MockPoll(
-    val id: String,
-    val commodity: String,
-    val fpsName: String,
-    val date: String,
-    val isActive: Boolean,
-)
-
-private val mockPolls = listOf(
-    MockPoll("poll_1", "Wheat (5 kg)", "Rampur FPS #127", "12 Apr 2026", true),
-    MockPoll("poll_2", "Rice (3 kg)", "Rampur FPS #127", "10 Apr 2026", true),
-    MockPoll("poll_3", "Sugar (1 kg)", "Rampur FPS #127", "08 Apr 2026", false),
-)
 
 @Composable
 fun HomeDashboardScreen(
@@ -82,7 +79,47 @@ fun HomeDashboardScreen(
     onFeedbackClick: () -> Unit,
 ) {
     var isVisible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { isVisible = true }
+    var isLoading by remember { mutableStateOf(true) }
+    var activePolls by remember { mutableStateOf<List<CustomPoll>>(emptyList()) }
+    var myResponses by remember { mutableStateOf<List<MyPollResponse>>(emptyList()) }
+
+    val context = LocalContext.current
+    val session = remember { SessionManager.getInstance(context) }
+    val citizenName = session.getCitizenName().ifEmpty { "Citizen" }
+
+    // Fetch real data from backend
+    LaunchedEffect(Unit) {
+        isVisible = true
+        try {
+            coroutineScope {
+                val pollsDeferred = async { ApiRepository.getActivePolls() }
+                val historyDeferred = async { ApiRepository.getMyResponses() }
+
+                val pollsResult = pollsDeferred.await()
+                val historyResult = historyDeferred.await()
+
+                if (pollsResult is NetworkResult.Success) {
+                    activePolls = pollsResult.data.polls
+                }
+                if (historyResult is NetworkResult.Success) {
+                    myResponses = historyResult.data.responses
+                }
+            }
+        } catch (_: Exception) {
+            // Graceful degradation
+        } finally {
+            isLoading = false
+        }
+    }
+
+    val greeting = remember {
+        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        when {
+            hour < 12 -> "Good Morning"
+            hour < 17 -> "Good Afternoon"
+            else -> "Good Evening"
+        }
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -109,13 +146,13 @@ fun HomeDashboardScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = "Good Afternoon",
+                        text = greeting,
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
 
                     Text(
-                        text = "Rajesh Kumar",
+                        text = citizenName,
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -124,17 +161,7 @@ fun HomeDashboardScreen(
             }
         }
 
-        // Your FPS Info
-        item {
-            InfoSlab(
-                icon = Icons.Rounded.Store,
-                title = "Your Fair Price Shop",
-                value = "Rampur FPS #127",
-                subtitle = "Dealer: Suresh Verma • Panchayat: Rampur",
-            )
-        }
-
-        // Stats Row
+        // Stats Row — real data
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -143,15 +170,14 @@ fun HomeDashboardScreen(
                 StatCard(
                     icon = Icons.Rounded.HowToVote,
                     label = "Polls Responded",
-                    value = "7",
+                    value = if (isLoading) "…" else "${myResponses.size}",
                     modifier = Modifier.weight(1f),
-                    subtitle = "This month",
-                    trend = "↑ 3",
+                    subtitle = "Total votes cast",
                 )
                 StatCard(
                     icon = Icons.Rounded.Campaign,
                     label = "Pending",
-                    value = "2",
+                    value = if (isLoading) "…" else "${activePolls.size}",
                     modifier = Modifier.weight(1f),
                     subtitle = "Active polls",
                     trendColor = MaterialTheme.colorScheme.tertiary,
@@ -169,48 +195,88 @@ fun HomeDashboardScreen(
             )
         }
 
-        items(mockPolls.filter { it.isActive }) { poll ->
-            FairPriceCard(
-                onClick = { onPollClick(poll.id) },
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth(),
+        if (isLoading) {
+            item {
+                Box(
+                    modifier = Modifier.fillMaxWidth().height(80.dp),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                            .background(
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
-                            ),
-                        contentAlignment = Alignment.Center,
-                    ) {
+                    CircularProgressIndicator(strokeWidth = 2.dp)
+                }
+            }
+        } else if (activePolls.isEmpty()) {
+            item {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(24.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
-                            imageVector = Icons.Rounded.Grain,
-                            contentDescription = poll.commodity,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp),
+                            imageVector = Icons.Rounded.Poll,
+                            contentDescription = null,
+                            modifier = Modifier.size(48.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
                         )
-                    }
-
-                    Spacer(modifier = Modifier.width(16.dp))
-
-                    Column(modifier = Modifier.weight(1f)) {
+                        Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = poll.commodity,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurface,
+                            text = "No active polls right now",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            textAlign = TextAlign.Center,
                         )
                         Text(
-                            text = "${poll.fpsName} • ${poll.date}",
+                            text = "Check back when new polls are created for your area",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                            textAlign = TextAlign.Center,
                         )
                     }
+                }
+            }
+        } else {
+            items(activePolls) { poll ->
+                FairPriceCard(
+                    onClick = { onPollClick(poll.pollId) },
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
+                                ),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Grain,
+                                contentDescription = poll.title,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp),
+                            )
+                        }
 
-                    StatusBadge(text = "Active", type = BadgeType.SUCCESS)
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = poll.title,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                            Text(
+                                text = "${poll.options.size} options • ${poll.targetLevel}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+
+                        StatusBadge(text = "Active", type = BadgeType.SUCCESS)
+                    }
                 }
             }
         }

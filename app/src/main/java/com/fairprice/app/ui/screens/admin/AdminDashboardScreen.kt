@@ -26,8 +26,10 @@ import androidx.compose.material.icons.rounded.Campaign
 import androidx.compose.material.icons.rounded.Grain
 import androidx.compose.material.icons.rounded.HowToVote
 import androidx.compose.material.icons.rounded.People
+import androidx.compose.material.icons.rounded.Poll
 import androidx.compose.material.icons.rounded.TrendingUp
 import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -42,7 +44,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.fairprice.app.network.AnalyticsSummaryResponse
+import com.fairprice.app.network.ApiRepository
+import com.fairprice.app.network.CustomPoll
+import com.fairprice.app.network.NetworkResult
+import com.fairprice.app.network.PollListResponse
 import com.fairprice.app.ui.components.FairPriceCard
 import com.fairprice.app.ui.components.GradientButton
 import com.fairprice.app.ui.components.OutlinedActionButton
@@ -50,29 +58,20 @@ import com.fairprice.app.ui.components.StatCard
 import com.fairprice.app.ui.components.StatusBadge
 import com.fairprice.app.ui.components.BadgeType
 import com.fairprice.app.ui.theme.SteadyPulseEasing
+import com.fairprice.app.utils.SessionManager
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import java.text.NumberFormat
+import java.util.Locale
 
 /**
  * Admin Dashboard — Command center for district/block officers.
  *
- * Shows key metrics (response rate, discrepancies), action buttons
- * for creating polls and zone analysis, and recent poll list.
+ * Shows real-time metrics from the analytics API, action buttons
+ * for creating polls and zone analysis, and recent poll list
+ * fetched from the backend.
  */
-
-private data class RecentPoll(
-    val commodity: String,
-    val targetLevel: String,
-    val targetName: String,
-    val date: String,
-    val responses: Int,
-    val totalBeneficiaries: Int,
-    val discrepancies: Int,
-)
-
-private val mockRecentPolls = listOf(
-    RecentPoll("Wheat", "Block", "Sadar", "12 Apr 2026", 342, 500, 18),
-    RecentPoll("Rice", "District", "Lucknow", "10 Apr 2026", 1240, 2000, 45),
-    RecentPoll("Sugar", "Panchayat", "Rampur", "08 Apr 2026", 87, 120, 3),
-)
 
 @Composable
 fun AdminDashboardScreen(
@@ -82,7 +81,46 @@ fun AdminDashboardScreen(
     onZoneAnalysis: () -> Unit,
 ) {
     var isVisible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { isVisible = true }
+    var isLoading by remember { mutableStateOf(true) }
+    var summary by remember { mutableStateOf<AnalyticsSummaryResponse?>(null) }
+    var recentPolls by remember { mutableStateOf<List<CustomPoll>>(emptyList()) }
+
+    val context = LocalContext.current
+    val session = remember { SessionManager.getInstance(context) }
+    val officerName = session.getOfficerName().ifEmpty { "Officer" }
+    val designation = session.getOfficerDesignation().ifEmpty { "Admin" }
+    val districtName = session.getOfficerDistrictName()
+
+    // Fetch real data from backend
+    LaunchedEffect(Unit) {
+        isVisible = true
+        try {
+            coroutineScope {
+                val summaryDeferred = async { ApiRepository.getAnalyticsSummary() }
+                val pollsDeferred = async { ApiRepository.getPollAnalytics() }
+
+                val summaryResult = summaryDeferred.await()
+                val pollsResult = pollsDeferred.await()
+
+                if (summaryResult is NetworkResult.Success) {
+                    summary = summaryResult.data
+                }
+                if (pollsResult is NetworkResult.Success) {
+                    recentPolls = pollsResult.data.polls.take(5) // Show latest 5
+                }
+            }
+        } catch (_: Exception) {
+            // Graceful degradation — show zeros
+        } finally {
+            isLoading = false
+        }
+    }
+
+    val fmt = remember { NumberFormat.getNumberInstance(Locale("en", "IN")) }
+    val totalResponses = summary?.totalResponses ?: 0
+    val totalZones = summary?.totalZones ?: 0
+    val redZones = summary?.redZones ?: 0
+    val avgPositive = summary?.avgPositivePct ?: 0.0
 
     LazyColumn(
         modifier = Modifier
@@ -109,14 +147,14 @@ fun AdminDashboardScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = "Admin Dashboard",
+                        text = "Welcome, $officerName",
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
 
                     Text(
-                        text = "District Magistrate • Lucknow",
+                        text = if (districtName.isNotEmpty()) "$designation • $districtName" else designation,
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -124,53 +162,65 @@ fun AdminDashboardScreen(
             }
         }
 
-        // Stats Grid
+        // Stats Grid — REAL DATA
         item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                StatCard(
-                    icon = Icons.Rounded.HowToVote,
-                    label = "Total Responses",
-                    value = "1,669",
-                    modifier = Modifier.weight(1f),
-                    trend = "↑ 12%",
-                )
-                StatCard(
-                    icon = Icons.Rounded.TrendingUp,
-                    label = "Response Rate",
-                    value = "68%",
-                    modifier = Modifier.weight(1f),
-                    subtitle = "Last 30 days",
-                    trend = "↑ 5%",
-                )
+            if (isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxWidth().height(100.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator(strokeWidth = 2.dp)
+                }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    StatCard(
+                        icon = Icons.Rounded.HowToVote,
+                        label = "Total Responses",
+                        value = fmt.format(totalResponses),
+                        modifier = Modifier.weight(1f),
+                        subtitle = "All polls combined",
+                    )
+                    StatCard(
+                        icon = Icons.Rounded.TrendingUp,
+                        label = "Positive Rate",
+                        value = "${avgPositive}%",
+                        modifier = Modifier.weight(1f),
+                        subtitle = "Avg across zones",
+                        trend = if (avgPositive >= 70) "✓ Healthy" else "",
+                    )
+                }
             }
         }
 
         item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                StatCard(
-                    icon = Icons.Rounded.Warning,
-                    label = "Discrepancies",
-                    value = "66",
-                    modifier = Modifier.weight(1f),
-                    subtitle = "Needs attention",
-                    trend = "↓ 8%",
-                    trendColor = MaterialTheme.colorScheme.primary,
-                    iconTint = MaterialTheme.colorScheme.tertiary,
-                    iconBackground = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.15f),
-                )
-                StatCard(
-                    icon = Icons.Rounded.People,
-                    label = "Beneficiaries",
-                    value = "2,620",
-                    modifier = Modifier.weight(1f),
-                    subtitle = "Active NFSA",
-                )
+            if (!isLoading) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    StatCard(
+                        icon = Icons.Rounded.Warning,
+                        label = "Red Zones",
+                        value = "$redZones",
+                        modifier = Modifier.weight(1f),
+                        subtitle = "Below 40% positive",
+                        trend = if (redZones > 0) "⚠ Action needed" else "✓ None",
+                        trendColor = if (redZones > 0) MaterialTheme.colorScheme.error
+                            else MaterialTheme.colorScheme.primary,
+                        iconTint = MaterialTheme.colorScheme.tertiary,
+                        iconBackground = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.15f),
+                    )
+                    StatCard(
+                        icon = Icons.Rounded.Analytics,
+                        label = "Total Zones",
+                        value = "$totalZones",
+                        modifier = Modifier.weight(1f),
+                        subtitle = "Monitored areas",
+                    )
+                }
             }
         }
 
@@ -203,7 +253,7 @@ fun AdminDashboardScreen(
             )
         }
 
-        // Recent Polls
+        // Recent Polls — REAL DATA from backend
         item {
             Text(
                 text = "Recent Polls",
@@ -213,54 +263,94 @@ fun AdminDashboardScreen(
             )
         }
 
-        items(mockRecentPolls) { poll ->
-            FairPriceCard {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth(),
+        if (isLoading) {
+            item {
+                Box(
+                    modifier = Modifier.fillMaxWidth().height(80.dp),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                            .background(
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
-                            ),
-                        contentAlignment = Alignment.Center,
-                    ) {
+                    CircularProgressIndicator(strokeWidth = 2.dp)
+                }
+            }
+        } else if (recentPolls.isEmpty()) {
+            item {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(32.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
-                            imageVector = Icons.Rounded.Grain,
-                            contentDescription = poll.commodity,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp),
+                            imageVector = Icons.Rounded.Poll,
+                            contentDescription = null,
+                            modifier = Modifier.size(48.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = "No polls created yet",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            textAlign = TextAlign.Center,
+                        )
+                        Text(
+                            text = "Create a poll to start collecting responses",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                            textAlign = TextAlign.Center,
                         )
                     }
+                }
+            }
+        } else {
+            items(recentPolls) { poll ->
+                FairPriceCard {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
+                                ),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Grain,
+                                contentDescription = poll.title,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp),
+                            )
+                        }
 
-                    Spacer(modifier = Modifier.width(16.dp))
+                        Spacer(modifier = Modifier.width(16.dp))
 
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = poll.commodity,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                        Text(
-                            text = "${poll.targetLevel}: ${poll.targetName} • ${poll.date}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "${poll.responses}/${poll.totalBeneficiaries} responses • ${poll.discrepancies} flagged",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = poll.title,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                            Text(
+                                text = "${poll.targetLevel}: ${poll.targetCode} • ${poll.createdAt.take(10)}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "${poll.totalResponses} responses • ${poll.options.size} options",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            )
+                        }
+
+                        StatusBadge(
+                            text = if (poll.isActive) "Active" else "Closed",
+                            type = if (poll.isActive) BadgeType.SUCCESS else BadgeType.INFO,
                         )
                     }
-
-                    StatusBadge(
-                        text = if (poll.discrepancies > 10) "Alert" else "Normal",
-                        type = if (poll.discrepancies > 10) BadgeType.WARNING else BadgeType.SUCCESS,
-                    )
                 }
             }
         }

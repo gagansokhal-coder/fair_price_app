@@ -82,8 +82,8 @@ fun NavGraph(
 
         composable(Screen.CitizenLogin.route) {
             CitizenLoginScreen(
-                onNavigateToVerification = { phone ->
-                    navController.navigate(Screen.Verification.createRoute(phone))
+                onNavigateToVerification = { phone, rationCardNo ->
+                    navController.navigate(Screen.Verification.createRoute(phone, rationCardNo))
                 },
                 onBack = { navController.popBackStack() },
             )
@@ -102,11 +102,16 @@ fun NavGraph(
 
         composable(
             route = Screen.Verification.route,
-            arguments = listOf(navArgument("phone") { type = NavType.StringType })
+            arguments = listOf(
+                navArgument("phone") { type = NavType.StringType },
+                navArgument("rationCardNo") { type = NavType.StringType },
+            )
         ) { backStackEntry ->
             val phone = backStackEntry.arguments?.getString("phone") ?: ""
+            val rationCardNo = backStackEntry.arguments?.getString("rationCardNo") ?: ""
             VerificationScreen(
                 phone = phone,
+                rationCardNo = rationCardNo,
                 onVerificationSuccess = { userId ->
                     // After OTP → go to mandatory ProfileSetup
                     // userId is returned from the verification API

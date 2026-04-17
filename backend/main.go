@@ -73,6 +73,7 @@ func main() {
 		{
 			auth.POST("/login", authHandler.Login)
 			auth.POST("/verify-otp", authHandler.VerifyOtp)
+			auth.POST("/officer-login", authHandler.OfficerLogin)
 			auth.POST("/register-profile", handlers.SupabaseAuthMiddleware(jwtSecret), authHandler.RegisterProfile)
 		}
 

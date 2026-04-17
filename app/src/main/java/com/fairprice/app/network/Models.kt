@@ -51,6 +51,7 @@ data class LoginResponse(
 data class VerifyOtpRequest(
     @SerializedName("phone_no") val phoneNo: String,
     @SerializedName("otp_code") val otpCode: String,
+    @SerializedName("ration_card_no") val rationCardNo: String = "",
 )
 
 data class VerifyOtpResponse(
@@ -277,5 +278,23 @@ data class UpdateOfficerResponse(
 
 data class ErrorResponse(
     @SerializedName("error") val error: String,
+    @SerializedName("message") val message: String,
+)
+
+// ─── Officer Login ─────────────────────────────────────────────
+
+data class OfficerLoginRequest(
+    @SerializedName("phone_no") val phoneNo: String,
+    @SerializedName("password") val password: String,
+)
+
+data class OfficerLoginResponse(
+    @SerializedName("success") val success: Boolean,
+    @SerializedName("access_token") val accessToken: String,
+    @SerializedName("officer_id") val officerId: String,
+    @SerializedName("name") val name: String,
+    @SerializedName("role") val role: String,
+    @SerializedName("designation") val designation: String,
+    @SerializedName("district_name") val districtName: String?,
     @SerializedName("message") val message: String,
 )

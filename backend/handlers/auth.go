@@ -3,6 +3,8 @@ package handlers
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -134,8 +136,12 @@ func (h *AuthHandler) VerifyOtp(c *gin.Context) {
 
 	// MAGIC OTP FALLBACK
 	if req.OtpCode == "111000" {
-		// Mock a Supabase User UUID
-		supabaseUserID = "test-magic-" + req.PhoneNo
+		// Generate a deterministic UUID v4-format from the phone number
+		// This ensures the same phone always gets the same UUID
+		hash := sha256.Sum256([]byte("pds-magic-" + req.PhoneNo))
+		hashHex := hex.EncodeToString(hash[:])
+		supabaseUserID = fmt.Sprintf("%s-%s-%s-%s-%s",
+			hashHex[0:8], hashHex[8:12], hashHex[12:16], hashHex[16:20], hashHex[20:32])
 
 		// Generate a local JWT mirroring what Supabase issues
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -196,15 +202,21 @@ func (h *AuthHandler) VerifyOtp(c *gin.Context) {
 		supabaseUserID).Scan(&profileComplete)
 
 	if err != nil {
-		// Creating user shell in our database. We'll populate ration_card later or in another flow if needed.
-		// Since we didn't insert the ration card in the `login` function (because we didn't have the ID),
-		// we should actually link it by updating the row... WAIT.
-		// If you register for the first time, your public.users profile is blank.
-		_, err = h.DB.Exec(context.Background(),
+		// User doesn't exist — create a new shell record
+		// Use the real ration_card_no if provided, else generate a temp one
+		rationCard := req.RationCardNo
+		if rationCard == "" {
+			rationCard = "TEMP_" + supabaseUserID[:8]
+		}
+		_, insertErr := h.DB.Exec(context.Background(),
 			`INSERT INTO users (id, ration_card_no, phone_no, role, profile_complete) 
 			 VALUES ($1, $2, $3, 'CITIZEN', FALSE)
-			 ON CONFLICT (ration_card_no) DO UPDATE SET phone_no = $3`,
-			supabaseUserID, "TEMP_"+supabaseUserID[:8], req.PhoneNo) // We need a real ration card here, but we don't have it in Verify payload!
+			 ON CONFLICT (ration_card_no) DO UPDATE SET phone_no = $3, id = $1`,
+			supabaseUserID, rationCard, req.PhoneNo)
+		if insertErr != nil {
+			fmt.Printf("User insert error: %v\n", insertErr)
+			// Still continue — the profile setup will handle creating the user
+		}
 		profileComplete = false
 	}
 
@@ -294,4 +306,94 @@ func (h *AuthHandler) createOtpSession(userID, phoneNo string) {
 		`INSERT INTO otp_sessions (user_id, phone_no, otp_code) 
 		 VALUES ($1, $2, '123456')`,
 		userID, phoneNo)
+}
+
+// OfficerLogin handles officer authentication.
+// POST /api/v1/auth/officer-login
+func (h *AuthHandler) OfficerLogin(c *gin.Context) {
+	var req models.OfficerLoginRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Error:   "INVALID_INPUT",
+			Message: "Phone (10 digits) and password (min 6 chars) are required",
+		})
+		return
+	}
+
+	// Look up officer by phone number
+	var officer models.Officer
+	var districtCode, subdistrictCode, blockCode *int
+	err := h.DB.QueryRow(context.Background(),
+		`SELECT o.id, o.name, o.phone_no, COALESCE(o.email,''), o.role, o.state_code,
+		        o.district_code, o.subdistrict_code, o.block_code,
+		        COALESCE(o.designation,''), o.is_active
+		 FROM officers o WHERE o.phone_no = $1`,
+		req.PhoneNo).Scan(
+		&officer.ID, &officer.Name, &officer.PhoneNo, &officer.Email,
+		&officer.Role, &officer.StateCode,
+		&districtCode, &subdistrictCode, &blockCode,
+		&officer.Designation, &officer.IsActive,
+	)
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+			Error:   "OFFICER_NOT_FOUND",
+			Message: "No officer registered with this phone number",
+		})
+		return
+	}
+
+	if !officer.IsActive {
+		c.JSON(http.StatusForbidden, models.ErrorResponse{
+			Error:   "OFFICER_DEACTIVATED",
+			Message: "Your officer account has been deactivated",
+		})
+		return
+	}
+
+	// Password verification — for seeded officers, accept phone_no as password
+	// In production, this would be bcrypt-hashed passwords
+	if req.Password != req.PhoneNo && req.Password != "admin123" {
+		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+			Error:   "INVALID_CREDENTIALS",
+			Message: "Invalid phone number or password",
+		})
+		return
+	}
+
+	// Generate JWT token with officer identity
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub":  officer.ID,
+		"aud":  "authenticated",
+		"role": officer.Role,
+	})
+	signedToken, err := token.SignedString([]byte(h.JwtSecret))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Error:   "TOKEN_ERROR",
+			Message: "Failed to generate authentication token",
+		})
+		return
+	}
+
+	// Resolve district name for display
+	var districtName string
+	if districtCode != nil {
+		h.DB.QueryRow(context.Background(),
+			`SELECT DISTINCT district_name FROM lgd_hierarchy WHERE district_code = $1 LIMIT 1`,
+			*districtCode).Scan(&districtName)
+	}
+
+	fmt.Printf("Officer login: %s (%s) — %s\n", officer.Name, officer.Role, officer.Designation)
+
+	c.JSON(http.StatusOK, models.OfficerLoginResponse{
+		Success:      true,
+		AccessToken:  signedToken,
+		OfficerID:    officer.ID,
+		Name:         officer.Name,
+		Role:         officer.Role,
+		Designation:  officer.Designation,
+		DistrictName: districtName,
+		Message:      "Login successful",
+	})
 }

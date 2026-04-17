@@ -22,6 +22,7 @@ import androidx.compose.material.icons.rounded.Campaign
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -44,60 +45,12 @@ import com.fairprice.app.ui.components.FairPriceCard
 import com.fairprice.app.ui.theme.FairPriceColors
 
 /**
- * Notifications Screen — Shared between Citizen and Admin roles.
+ * Notifications Screen — Push notification history.
  *
- * Shows push notification history (FCM alerts) with contextual
- * icons and timestamps.
+ * Currently shows an empty state since FCM push notifications
+ * require server-side infrastructure. When FCM is integrated,
+ * notification history will be stored locally and displayed here.
  */
-
-private data class NotificationItem(
-    val title: String,
-    val description: String,
-    val time: String,
-    val type: NotificationType,
-    val isRead: Boolean = false,
-)
-
-private enum class NotificationType {
-    POLL, SUCCESS, WARNING, INFO
-}
-
-private val mockNotifications = listOf(
-    NotificationItem(
-        title = "New Poll: Wheat Distribution",
-        description = "Stock dispatched to your FPS. Open app to verify receipt.",
-        time = "2 hours ago",
-        type = NotificationType.POLL,
-    ),
-    NotificationItem(
-        title = "Response Recorded",
-        description = "Your verification for Rice (3 kg) has been successfully submitted.",
-        time = "1 day ago",
-        type = NotificationType.SUCCESS,
-        isRead = true,
-    ),
-    NotificationItem(
-        title = "Discrepancy Alert",
-        description = "Your report for Sugar non-receipt has been flagged for investigation.",
-        time = "3 days ago",
-        type = NotificationType.WARNING,
-        isRead = true,
-    ),
-    NotificationItem(
-        title = "System Update",
-        description = "Ration Prahari v1.0.1 is now available. Update for improved performance.",
-        time = "5 days ago",
-        type = NotificationType.INFO,
-        isRead = true,
-    ),
-    NotificationItem(
-        title = "New Poll: Rice Distribution",
-        description = "Monthly rice allocation dispatched. Please verify within 48 hours.",
-        time = "1 week ago",
-        type = NotificationType.POLL,
-        isRead = true,
-    ),
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -137,132 +90,34 @@ fun NotificationsScreen(
             ),
         )
 
-        if (mockNotifications.isEmpty()) {
-            // Empty state
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(32.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        imageVector = Icons.Rounded.Notifications,
-                        contentDescription = "No notifications",
-                        modifier = Modifier.size(64.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "No notifications",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                        textAlign = TextAlign.Center,
-                    )
-                    Text(
-                        text = "You'll receive alerts when new polls are created",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
-                        textAlign = TextAlign.Center,
-                    )
-                }
-            }
-        } else {
-            LazyColumn(
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                items(mockNotifications) { notification ->
-                    NotificationCard(notification)
-                }
-
-                item { Spacer(modifier = Modifier.height(16.dp)) }
-            }
-        }
-    }
-}
-
-@Composable
-private fun NotificationCard(notification: NotificationItem) {
-    val (icon, iconTint, iconBg) = when (notification.type) {
-        NotificationType.POLL -> Triple(
-            Icons.Rounded.Campaign,
-            MaterialTheme.colorScheme.primary,
-            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
-        )
-        NotificationType.SUCCESS -> Triple(
-            Icons.Rounded.CheckCircle,
-            MaterialTheme.colorScheme.primary,
-            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
-        )
-        NotificationType.WARNING -> Triple(
-            Icons.Rounded.Warning,
-            MaterialTheme.colorScheme.tertiary,
-            MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f),
-        )
-        NotificationType.INFO -> Triple(
-            Icons.Rounded.Info,
-            MaterialTheme.colorScheme.secondary,
-            MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.2f),
-        )
-    }
-
-    FairPriceCard(
-        containerColor = if (!notification.isRead) {
-            MaterialTheme.colorScheme.surfaceContainerLowest
-        } else {
-            MaterialTheme.colorScheme.surfaceContainerLow
-        }
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.Top,
+        // Empty state — no persisted notifications yet
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp),
+            contentAlignment = Alignment.Center,
         ) {
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(iconBg),
-                contentAlignment = Alignment.Center,
-            ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(
-                    imageVector = icon,
-                    contentDescription = notification.title,
-                    tint = iconTint,
-                    modifier = Modifier.size(22.dp),
+                    imageVector = Icons.Rounded.NotificationsActive,
+                    contentDescription = "No notifications",
+                    modifier = Modifier.size(72.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
                 )
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
+                Spacer(modifier = Modifier.height(20.dp))
                 Text(
-                    text = notification.title,
+                    text = "No notifications yet",
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = if (!notification.isRead) FontWeight.Bold else FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = notification.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = notification.time,
-                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    textAlign = TextAlign.Center,
                 )
-            }
-
-            // Unread indicator
-            if (!notification.isRead) {
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "You'll receive push alerts here when new polls\nare created for your jurisdiction",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                    textAlign = TextAlign.Center,
                 )
             }
         }

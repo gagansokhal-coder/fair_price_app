@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Grain
 import androidx.compose.material.icons.rounded.History
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,6 +29,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,39 +41,39 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.fairprice.app.network.ApiRepository
+import com.fairprice.app.network.MyPollResponse
+import com.fairprice.app.network.NetworkResult
 import com.fairprice.app.ui.components.FairPriceCard
 import com.fairprice.app.ui.components.StatusBadge
 import com.fairprice.app.ui.components.BadgeType
 
 /**
- * History Screen — Past poll responses.
+ * History Screen — Past poll responses fetched from the backend.
  *
- * Lists previous poll submissions with commodity, date,
- * and verification status (Verified / Discrepancy).
+ * Lists previous poll submissions with poll title, selected option,
+ * date, and active/closed status — all from real API data.
  */
-
-private data class HistoryItem(
-    val commodity: String,
-    val fpsName: String,
-    val date: String,
-    val received: Boolean,
-    val status: String, // "VERIFIED" or "DISCREPANCY"
-)
-
-private val mockHistory = listOf(
-    HistoryItem("Wheat (5 kg)", "Rampur FPS #127", "08 Apr 2026", true, "VERIFIED"),
-    HistoryItem("Rice (3 kg)", "Rampur FPS #127", "02 Apr 2026", true, "VERIFIED"),
-    HistoryItem("Sugar (1 kg)", "Rampur FPS #127", "25 Mar 2026", false, "DISCREPANCY"),
-    HistoryItem("Kerosene (2 L)", "Rampur FPS #127", "18 Mar 2026", true, "VERIFIED"),
-    HistoryItem("Wheat (5 kg)", "Rampur FPS #127", "10 Mar 2026", true, "VERIFIED"),
-    HistoryItem("Rice (3 kg)", "Rampur FPS #127", "02 Mar 2026", false, "DISCREPANCY"),
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
     onBack: () -> Unit,
 ) {
+    var responses by remember { mutableStateOf<List<MyPollResponse>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+    var errorMsg by remember { mutableStateOf<String?>(null) }
+
+    // Fetch real voting history from backend
+    LaunchedEffect(Unit) {
+        when (val result = ApiRepository.getMyResponses()) {
+            is NetworkResult.Success -> responses = result.data.responses
+            is NetworkResult.Error -> errorMsg = result.message
+            else -> {}
+        }
+        isLoading = false
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -101,108 +107,161 @@ fun HistoryScreen(
             ),
         )
 
-        if (mockHistory.isEmpty()) {
-            // Empty state
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(32.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        imageVector = Icons.Rounded.History,
-                        contentDescription = "No history",
-                        modifier = Modifier.size(64.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "No responses yet",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                        textAlign = TextAlign.Center,
-                    )
-                    Text(
-                        text = "Your poll responses will appear here",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
-                        textAlign = TextAlign.Center,
-                    )
+        when {
+            isLoading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
                 }
             }
-        } else {
-            LazyColumn(
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                items(mockHistory) { item ->
-                    FairPriceCard {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(44.dp)
-                                    .clip(CircleShape)
-                                    .background(
-                                        if (item.status == "VERIFIED") {
-                                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
-                                        } else {
-                                            MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f)
-                                        }
-                                    ),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.Grain,
-                                    contentDescription = item.commodity,
-                                    tint = if (item.status == "VERIFIED") {
-                                        MaterialTheme.colorScheme.primary
-                                    } else {
-                                        MaterialTheme.colorScheme.tertiary
-                                    },
-                                    modifier = Modifier.size(22.dp),
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.width(16.dp))
-
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = item.commodity,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                )
-                                Text(
-                                    text = "${item.fpsName} • ${item.date}",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                                Text(
-                                    text = if (item.received) "Received: Yes" else "Received: No",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    fontWeight = FontWeight.Medium,
-                                    color = if (item.received) {
-                                        MaterialTheme.colorScheme.primary
-                                    } else {
-                                        MaterialTheme.colorScheme.error
-                                    },
-                                )
-                            }
-
-                            StatusBadge(
-                                text = item.status,
-                                type = if (item.status == "VERIFIED") BadgeType.SUCCESS else BadgeType.WARNING,
-                            )
-                        }
+            errorMsg != null -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Unable to load history",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.error,
+                            textAlign = TextAlign.Center,
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = errorMsg ?: "",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                        )
                     }
                 }
+            }
+            responses.isEmpty() -> {
+                // Empty state
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            imageVector = Icons.Rounded.History,
+                            contentDescription = "No history",
+                            modifier = Modifier.size(64.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "No responses yet",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            textAlign = TextAlign.Center,
+                        )
+                        Text(
+                            text = "Your poll responses will appear here after you vote",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                }
+            }
+            else -> {
+                LazyColumn(
+                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    items(responses) { item ->
+                        FairPriceCard {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(44.dp)
+                                        .clip(CircleShape)
+                                        .background(
+                                            if (item.pollActive) {
+                                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
+                                            } else {
+                                                MaterialTheme.colorScheme.surfaceContainerHighest
+                                            }
+                                        ),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Grain,
+                                        contentDescription = item.pollTitle,
+                                        tint = if (item.pollActive) {
+                                            MaterialTheme.colorScheme.primary
+                                        } else {
+                                            MaterialTheme.colorScheme.onSurfaceVariant
+                                        },
+                                        modifier = Modifier.size(22.dp),
+                                    )
+                                }
 
-                item { Spacer(modifier = Modifier.height(16.dp)) }
+                                Spacer(modifier = Modifier.width(16.dp))
+
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = item.pollTitle,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                    )
+                                    Text(
+                                        text = "Your vote: ${item.selectedOptionText}",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        fontWeight = FontWeight.Medium,
+                                        color = MaterialTheme.colorScheme.primary,
+                                    )
+                                    Text(
+                                        text = formatTimestamp(item.submittedAt),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+
+                                StatusBadge(
+                                    text = if (item.pollActive) "Active" else "Closed",
+                                    type = if (item.pollActive) BadgeType.SUCCESS else BadgeType.INFO,
+                                )
+                            }
+                        }
+                    }
+
+                    item { Spacer(modifier = Modifier.height(16.dp)) }
+                }
             }
         }
+    }
+}
+
+/**
+ * Formats a Postgres timestamp string to a user-friendly display format.
+ * Input: "2026-04-12 14:30:00+05:30"  →  Output: "12 Apr 2026"
+ */
+private fun formatTimestamp(raw: String): String {
+    return try {
+        // Take the date part before space or T
+        val datePart = raw.substringBefore(" ").substringBefore("T")
+        val parts = datePart.split("-")
+        if (parts.size == 3) {
+            val months = arrayOf(
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+            )
+            val month = parts[1].toIntOrNull() ?: return raw
+            "${parts[2]} ${months[month - 1]} ${parts[0]}"
+        } else raw
+    } catch (_: Exception) {
+        raw
     }
 }

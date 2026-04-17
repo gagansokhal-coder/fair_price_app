@@ -28,8 +28,9 @@ type LoginResponse struct {
 
 // VerifyOtpRequest — OTP verification.
 type VerifyOtpRequest struct {
-	PhoneNo string `json:"phone_no" binding:"required,len=10"`
-	OtpCode string `json:"otp_code" binding:"required,len=6"`
+	PhoneNo      string `json:"phone_no" binding:"required,len=10"`
+	OtpCode      string `json:"otp_code" binding:"required,len=6"`
+	RationCardNo string `json:"ration_card_no"` // Passed from login screen
 }
 
 // VerifyOtpResponse after OTP verification.
@@ -318,6 +319,24 @@ type OfficerResponse struct {
 	Success bool    `json:"success"`
 	Officer Officer `json:"officer"`
 	Message string  `json:"message"`
+}
+
+// OfficerLoginRequest — Officer authenticates with phone + password.
+type OfficerLoginRequest struct {
+	PhoneNo  string `json:"phone_no" binding:"required,len=10"`
+	Password string `json:"password" binding:"required,min=6"`
+}
+
+// OfficerLoginResponse — Returns JWT + officer details.
+type OfficerLoginResponse struct {
+	Success      bool   `json:"success"`
+	AccessToken  string `json:"access_token"`
+	OfficerID    string `json:"officer_id"`
+	Name         string `json:"name"`
+	Role         string `json:"role"`
+	Designation  string `json:"designation"`
+	DistrictName string `json:"district_name,omitempty"`
+	Message      string `json:"message"`
 }
 
 // LgdBlock represents a block from the convenience view.

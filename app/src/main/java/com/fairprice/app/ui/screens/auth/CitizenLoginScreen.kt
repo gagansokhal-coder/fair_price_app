@@ -58,7 +58,7 @@ import com.fairprice.app.utils.DeviceUtils
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CitizenLoginScreen(
-    onNavigateToVerification: (String) -> Unit,
+    onNavigateToVerification: (String, String) -> Unit,
     onBack: () -> Unit,
 ) {
     var rationCardNo by remember { mutableStateOf("") }
@@ -237,7 +237,7 @@ fun CitizenLoginScreen(
                                     )
                                 )
                                 when (result) {
-                                    is NetworkResult.Success -> onNavigateToVerification(phoneNumber)
+                                    is NetworkResult.Success -> onNavigateToVerification(phoneNumber, rationCardNo)
                                     is NetworkResult.Error -> rationCardError = result.message
                                     else -> {}
                                 }

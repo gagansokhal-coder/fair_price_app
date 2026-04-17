@@ -19,6 +19,9 @@ interface ApiService {
     @POST("api/v1/auth/verify-otp")
     suspend fun verifyOtp(@Body request: VerifyOtpRequest): Response<VerifyOtpResponse>
 
+    @POST("api/v1/auth/officer-login")
+    suspend fun officerLogin(@Body request: OfficerLoginRequest): Response<OfficerLoginResponse>
+
     @POST("api/v1/auth/register-profile")
     suspend fun registerProfile(@Body request: RegisterProfileRequest): Response<RegisterProfileResponse>
 

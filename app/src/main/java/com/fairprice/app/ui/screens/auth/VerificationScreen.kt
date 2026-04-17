@@ -70,6 +70,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun VerificationScreen(
     phone: String,
+    rationCardNo: String = "",
     onVerificationSuccess: (String) -> Unit,
     onBack: () -> Unit,
 ) {
@@ -100,7 +101,7 @@ fun VerificationScreen(
         if (otpValue.length == 6 && !isVerifying) {
             isVerifying = true
             errorMessage = null
-            val result = ApiRepository.verifyOtp(VerifyOtpRequest(phone, otpValue))
+            val result = ApiRepository.verifyOtp(VerifyOtpRequest(phone, otpValue, rationCardNo))
             when (result) {
                 is NetworkResult.Success -> {
                     val body = result.data
