@@ -1,0 +1,137 @@
+##############################################################################
+#  PDS Fair Price Backend — CI/CD Pipeline
+#  Triggers on push to 'main' (backend/** changes only)
+#  Builds Go binary → Copies to EC2 via SCP → Restarts systemd service
+##############################################################################
+
+name: 🚀 Deploy Go Backend to EC2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy.yml'
+
+  # Allow manual trigger from GitHub UI
+  workflow_dispatch:
+
+env:
+  GO_VERSION: '1.21'
+  BINARY_NAME: 'pds-backend'
+  DEPLOY_DIR: '/opt/pds-backend'
+
+jobs:
+  # ─────────────────────────────────────────────
+  # Job 1: Build & Test
+  # ─────────────────────────────────────────────
+  build-and-test:
+    name: 🔨 Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐹 Set up Go ${{ env.GO_VERSION }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: backend/go.sum
+
+      - name: 📦 Download dependencies
+        working-directory: ./backend
+        run: go mod download
+
+      - name: 🔍 Vet (static analysis)
+        working-directory: ./backend
+        run: go vet ./...
+
+      - name: 🧪 Run tests
+        working-directory: ./backend
+        run: go test -v -race -count=1 ./...
+
+      - name: 🏗️ Build Linux binary
+        working-directory: ./backend
+        env:
+          CGO_ENABLED: 0
+          GOOS: linux
+          GOARCH: amd64
+        run: |
+          go build -ldflags="-s -w -X main.version=${{ github.sha }}" \
+            -o ${{ env.BINARY_NAME }} .
+          chmod +x ${{ env.BINARY_NAME }}
+
+      - name: 📤 Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-binary
+          path: backend/${{ env.BINARY_NAME }}
+          retention-days: 3
+
+  # ─────────────────────────────────────────────
+  # Job 2: Deploy to EC2
+  # ─────────────────────────────────────────────
+  deploy:
+    name: 🚀 Deploy to EC2
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📥 Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-binary
+          path: ./artifact
+
+      - name: 🔑 Configure SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          # Add EC2 host to known_hosts to avoid interactive prompt
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: 📦 Copy binary to EC2
+        run: |
+          scp -i ~/.ssh/deploy_key \
+            ./artifact/${{ env.BINARY_NAME }} \
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/tmp/${{ env.BINARY_NAME }}
+
+      - name: 📦 Copy deployment script to EC2
+        run: |
+          scp -i ~/.ssh/deploy_key \
+            ./scripts/deploy.sh \
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/tmp/deploy.sh
+
+      - name: 🚀 Execute deployment on EC2
+        run: |
+          ssh -i ~/.ssh/deploy_key \
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
+            "chmod +x /tmp/deploy.sh && sudo /tmp/deploy.sh"
+
+      - name: ✅ Health check
+        run: |
+          echo "⏳ Waiting 10s for service to start..."
+          sleep 10
+
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            --max-time 15 \
+            http://${{ secrets.EC2_HOST }}:8080/health || echo "000")
+
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "✅ Health check passed! (HTTP $HTTP_STATUS)"
+          else
+            echo "❌ Health check failed! (HTTP $HTTP_STATUS)"
+            echo "⚠️  Service may still be starting. Check EC2 logs."
+            exit 1
+          fi
+
+      - name: 🧹 Cleanup SSH key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
