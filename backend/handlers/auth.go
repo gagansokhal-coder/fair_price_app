@@ -206,12 +206,12 @@ func (h *AuthHandler) VerifyOtp(c *gin.Context) {
 		// Use the real ration_card_no if provided, else generate a temp one
 		rationCard := req.RationCardNo
 		if rationCard == "" {
-			rationCard = "TEMP_" + supabaseUserID[:8]
+			rationCard = "TMP_" + supabaseUserID[:8] // 12 chars fits VARCHAR(12)
 		}
 		_, insertErr := h.DB.Exec(context.Background(),
 			`INSERT INTO users (id, ration_card_no, phone_no, role, profile_complete) 
-			 VALUES ($1, $2, $3, 'CITIZEN', FALSE)
-			 ON CONFLICT (ration_card_no) DO UPDATE SET phone_no = $3, id = $1`,
+			 VALUES ($1::uuid, $2, $3, 'CITIZEN', FALSE)
+			 ON CONFLICT (ration_card_no) DO UPDATE SET phone_no = $3, id = $1::uuid`,
 			supabaseUserID, rationCard, req.PhoneNo)
 		if insertErr != nil {
 			fmt.Printf("User insert error: %v\n", insertErr)
@@ -254,7 +254,7 @@ func (h *AuthHandler) RegisterProfile(c *gin.Context) {
 	// Check if hardware_uuid is already bound to another user
 	var existingUserID string
 	err := h.DB.QueryRow(context.Background(),
-		`SELECT id FROM users WHERE hardware_uuid = $1 AND id != $2`,
+		`SELECT id FROM users WHERE hardware_uuid = $1 AND id != $2::uuid`,
 		req.HardwareUUID, req.UserID).Scan(&existingUserID)
 
 	if err == nil {
@@ -280,7 +280,7 @@ func (h *AuthHandler) RegisterProfile(c *gin.Context) {
 			gps_lng = $8, 
 			profile_complete = TRUE, 
 			updated_at = NOW() 
-		 WHERE id = $9`,
+		 WHERE id = $9::uuid`,
 		req.FullName, req.Address,
 		req.DistrictCode, req.SubdistrictCode, req.VillageCode,
 		req.HardwareUUID, req.GpsLat, req.GpsLng, req.UserID)
