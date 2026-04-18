@@ -30,6 +30,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -465,7 +467,7 @@ private fun LgdDropdown(
     isLoading: Boolean = false,
     enabled: Boolean = true,
 ) {
-    androidx.compose.material3.ExposedDropdownMenuBox(
+    ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { if (enabled) onExpandedChange(it) },
         modifier = Modifier.fillMaxWidth()
@@ -530,16 +532,24 @@ private fun LgdDropdown(
             onDismissRequest = { onExpandedChange(false) },
             modifier = Modifier.background(MaterialTheme.colorScheme.surfaceContainer)
         ) {
-            items.forEach { item ->
+            if (items.isEmpty() && !isLoading) {
                 DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = item.name,
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    },
-                    onClick = { onItemSelected(item) },
+                    text = { Text("No $label found", style = MaterialTheme.typography.bodyMedium) },
+                    onClick = { },
+                    enabled = false
                 )
+            } else {
+                items.forEach { item ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = item.name,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        },
+                        onClick = { onItemSelected(item) },
+                    )
+                }
             }
         }
     }
