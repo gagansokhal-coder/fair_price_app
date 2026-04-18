@@ -453,6 +453,7 @@ fun ProfileSetupScreen(
 /**
  * Reusable LGD hierarchy dropdown composable.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LgdDropdown(
     label: String,
@@ -464,16 +465,21 @@ private fun LgdDropdown(
     isLoading: Boolean = false,
     enabled: Boolean = true,
 ) {
-    Box(modifier = Modifier.fillMaxWidth()) {
+    androidx.compose.material3.ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { if (enabled) onExpandedChange(it) },
+        modifier = Modifier.fillMaxWidth()
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .menuAnchor()
                 .clip(ShapeTokens.InputField)
                 .background(
                     if (enabled) MaterialTheme.colorScheme.surfaceContainerHighest
                     else MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.4f)
                 )
-                .clickable(enabled = enabled) { onExpandedChange(true) }
+                .clickable(enabled = enabled) { onExpandedChange(!expanded) }
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -519,12 +525,10 @@ private fun LgdDropdown(
             }
         }
 
-        DropdownMenu(
+        ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { onExpandedChange(false) },
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .background(MaterialTheme.colorScheme.surfaceContainer),
+            modifier = Modifier.background(MaterialTheme.colorScheme.surfaceContainer)
         ) {
             items.forEach { item ->
                 DropdownMenuItem(
