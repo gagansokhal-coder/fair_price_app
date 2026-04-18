@@ -5,7 +5,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,13 +26,12 @@ import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PhoneAndroid
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -114,6 +112,8 @@ fun ProfileSetupScreen(
     var isLoadingDistricts by remember { mutableStateOf(true) }
     var isLoadingSubdistricts by remember { mutableStateOf(false) }
     var isLoadingVillages by remember { mutableStateOf(false) }
+    var districtLoadError by remember { mutableStateOf<String?>(null) }
+    var retryDistrictsTrigger by remember { mutableStateOf(0) }
 
     LaunchedEffect(Unit) { isVisible = true }
 
@@ -137,11 +137,16 @@ fun ProfileSetupScreen(
         }
     }
 
-    // Fetch districts on launch
-    LaunchedEffect(Unit) {
+    // Fetch districts on launch (with retry support)
+    LaunchedEffect(retryDistrictsTrigger) {
+        isLoadingDistricts = true
+        districtLoadError = null
         when (val result = ApiRepository.getDistricts()) {
-            is NetworkResult.Success -> districts = result.data.districts
-            is NetworkResult.Error -> errorMessage = result.message
+            is NetworkResult.Success -> {
+                districts = result.data.districts ?: emptyList()
+                if (districts.isEmpty()) districtLoadError = "No districts found. Check backend data."
+            }
+            is NetworkResult.Error -> districtLoadError = "Failed to load districts. Tap retry."
             else -> {}
         }
         isLoadingDistricts = false
@@ -179,7 +184,7 @@ fun ProfileSetupScreen(
 
     val isFormValid = fullName.isNotBlank() && address.isNotBlank() &&
             selectedDistrict != null && selectedSubdistrict != null &&
-            selectedVillage != null && gpsLat != 0.0
+            selectedVillage != null
 
     Column(
         modifier = Modifier
@@ -342,6 +347,34 @@ fun ProfileSetupScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // District load error with retry
+                districtLoadError?.let { errMsg ->
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(ShapeTokens.Card)
+                            .background(MaterialTheme.colorScheme.errorContainer)
+                            .padding(horizontal = 12.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = errMsg,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            modifier = Modifier.weight(1f),
+                        )
+                        TextButton(onClick = { retryDistrictsTrigger++ }) {
+                            Text(
+                                "Retry",
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.labelMedium,
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
                 // District Dropdown
                 LgdDropdown(
                     label = "District",
@@ -466,7 +499,7 @@ private fun LgdDropdown(
     isLoading: Boolean = false,
     enabled: Boolean = true,
 ) {
-    ExposedDropdownMenuBox(
+    androidx.compose.material3.ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { if (enabled) onExpandedChange(it) },
         modifier = Modifier.fillMaxWidth()
@@ -530,24 +563,16 @@ private fun LgdDropdown(
             onDismissRequest = { onExpandedChange(false) },
             modifier = Modifier.background(MaterialTheme.colorScheme.surfaceContainer)
         ) {
-            if (items.isEmpty() && !isLoading) {
+            items.forEach { item ->
                 DropdownMenuItem(
-                    text = { Text("No $label found", style = MaterialTheme.typography.bodyMedium) },
-                    onClick = { },
-                    enabled = false
+                    text = {
+                        Text(
+                            text = item.name,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    },
+                    onClick = { onItemSelected(item) },
                 )
-            } else {
-                items.forEach { item ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = item.name,
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                        },
-                        onClick = { onItemSelected(item) },
-                    )
-                }
             }
         }
     }

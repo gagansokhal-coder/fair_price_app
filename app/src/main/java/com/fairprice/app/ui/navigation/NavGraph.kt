@@ -112,11 +112,17 @@ fun NavGraph(
             VerificationScreen(
                 phone = phone,
                 rationCardNo = rationCardNo,
-                onVerificationSuccess = { userId ->
-                    // After OTP → go to mandatory ProfileSetup
-                    // userId is returned from the verification API
-                    navController.navigate(Screen.ProfileSetup.createRoute(userId)) {
-                        popUpTo(Screen.CitizenLogin.route) { inclusive = true }
+                onVerificationSuccess = { userId, profileRequired ->
+                    if (profileRequired) {
+                        // New user — complete profile first
+                        navController.navigate(Screen.ProfileSetup.createRoute(userId)) {
+                            popUpTo(Screen.CitizenLogin.route) { inclusive = true }
+                        }
+                    } else {
+                        // Returning user — profile already complete, go home
+                        navController.navigate(Screen.CitizenHome.route) {
+                            popUpTo(Screen.CitizenLogin.route) { inclusive = true }
+                        }
                     }
                 },
                 onBack = { navController.popBackStack() },

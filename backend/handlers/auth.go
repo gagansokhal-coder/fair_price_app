@@ -240,16 +240,12 @@ func (h *AuthHandler) RegisterProfile(c *gin.Context) {
 		return
 	}
 
-	// GPS VERIFICATION: Reject if no valid coordinates provided
-	if req.GpsLat == 0.0 && req.GpsLng == 0.0 {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "GPS_REQUIRED",
-			Message: "Valid GPS coordinates are required for profile registration. Please enable location services.",
-		})
-		return
+	// GPS — optional. Log if present, continue either way.
+	if req.GpsLat != 0.0 || req.GpsLng != 0.0 {
+		fmt.Printf("Profile GPS: user=%s lat=%.6f lng=%.6f\n", req.UserID, req.GpsLat, req.GpsLng)
+	} else {
+		fmt.Printf("Profile GPS: user=%s — no GPS provided (allowed)\n", req.UserID)
 	}
-
-	fmt.Printf("Profile GPS: user=%s lat=%.6f lng=%.6f\n", req.UserID, req.GpsLat, req.GpsLng)
 
 	// Check if hardware_uuid is already bound to another user
 	var existingUserID string

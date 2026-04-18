@@ -71,7 +71,7 @@ import kotlinx.coroutines.delay
 fun VerificationScreen(
     phone: String,
     rationCardNo: String = "",
-    onVerificationSuccess: (String) -> Unit,
+    onVerificationSuccess: (userId: String, profileRequired: Boolean) -> Unit,
     onBack: () -> Unit,
 ) {
     var otpValue by remember { mutableStateOf("") }
@@ -111,7 +111,7 @@ fun VerificationScreen(
                             accessToken = body.accessToken,
                             userId = body.userId
                         )
-                        onVerificationSuccess(body.userId)
+                        onVerificationSuccess(body.userId, body.profileRequired)
                     } else {
                         errorMessage = "Invalid OTP or expired."
                         otpValue = ""

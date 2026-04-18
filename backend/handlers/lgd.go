@@ -36,7 +36,7 @@ func (h *LgdHandler) GetDistricts(c *gin.Context) {
 	}
 	defer rows.Close()
 
-	var items []models.LgdItem
+	items := []models.LgdItem{}
 	for rows.Next() {
 		var item models.LgdItem
 		if err := rows.Scan(&item.Code, &item.Name); err != nil {
@@ -74,7 +74,7 @@ func (h *LgdHandler) GetSubdistricts(c *gin.Context) {
 	}
 	defer rows.Close()
 
-	var items []models.LgdItem
+	items := []models.LgdItem{}
 	for rows.Next() {
 		var item models.LgdItem
 		if err := rows.Scan(&item.Code, &item.Name); err != nil {
@@ -112,7 +112,7 @@ func (h *LgdHandler) GetVillages(c *gin.Context) {
 	}
 	defer rows.Close()
 
-	var items []models.LgdItem
+	items := []models.LgdItem{}
 	for rows.Next() {
 		var item models.LgdItem
 		if err := rows.Scan(&item.Code, &item.Name); err != nil {
