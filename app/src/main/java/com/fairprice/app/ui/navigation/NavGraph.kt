@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -17,18 +18,22 @@ import com.fairprice.app.ui.screens.admin.*
 import com.fairprice.app.ui.theme.ENTER_DURATION
 import com.fairprice.app.ui.theme.EXIT_DURATION
 import com.fairprice.app.ui.theme.SteadyPulseEasing
+import com.fairprice.app.utils.SessionManager
 
 /**
  * PDS Fair Price App — Navigation Graph
  *
  * Full navigation with "Steady Pulse" transitions (300ms cubic-bezier).
  * Flow: Splash → RoleSelection → Login → Verification → ProfileSetup → Main
+ *       Splash → (auto-login) → CitizenHome / AdminDashboard
  */
 @Composable
 fun NavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
+
     NavHost(
         navController = navController,
         startDestination = Screen.Splash.route,
@@ -69,7 +74,17 @@ fun NavGraph(
                     navController.navigate(Screen.RoleSelection.route) {
                         popUpTo(Screen.Splash.route) { inclusive = true }
                     }
-                }
+                },
+                onNavigateToCitizenHome = {
+                    navController.navigate(Screen.CitizenHome.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                },
+                onNavigateToAdminDashboard = {
+                    navController.navigate(Screen.AdminDashboard.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                },
             )
         }
 
@@ -203,6 +218,8 @@ fun NavGraph(
         composable(Screen.Profile.route) {
             ProfileScreen(
                 onLogout = {
+                    // Clear session before navigating to role selection
+                    SessionManager.getInstance(context).clearSession()
                     navController.navigate(Screen.RoleSelection.route) {
                         popUpTo(0) { inclusive = true }
                     }

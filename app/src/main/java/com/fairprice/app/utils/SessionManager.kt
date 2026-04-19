@@ -18,6 +18,11 @@ class SessionManager(context: Context) {
         private const val KEY_IS_OFFICER = "is_officer"
         private const val KEY_CITIZEN_NAME = "citizen_name"
         private const val KEY_CITIZEN_RATION_CARD = "citizen_ration_card"
+        private const val KEY_CITIZEN_PHONE = "citizen_phone"
+        private const val KEY_CITIZEN_ADDRESS = "citizen_address"
+        private const val KEY_CITIZEN_DISTRICT = "citizen_district"
+        private const val KEY_CITIZEN_SUBDISTRICT = "citizen_subdistrict"
+        private const val KEY_CITIZEN_VILLAGE = "citizen_village"
 
         @Volatile
         private var INSTANCE: SessionManager? = null
@@ -60,11 +65,37 @@ class SessionManager(context: Context) {
     }
 
     /** Save citizen profile details after registration */
-    fun saveCitizenProfile(name: String, rationCardNo: String = "") {
+    fun saveCitizenProfile(
+        name: String,
+        rationCardNo: String = "",
+        phone: String = "",
+        address: String = "",
+        districtName: String = "",
+        subdistrictName: String = "",
+        villageName: String = "",
+    ) {
         prefs.edit()
             .putString(KEY_CITIZEN_NAME, name)
             .putString(KEY_CITIZEN_RATION_CARD, rationCardNo)
+            .putString(KEY_CITIZEN_PHONE, phone)
+            .putString(KEY_CITIZEN_ADDRESS, address)
+            .putString(KEY_CITIZEN_DISTRICT, districtName)
+            .putString(KEY_CITIZEN_SUBDISTRICT, subdistrictName)
+            .putString(KEY_CITIZEN_VILLAGE, villageName)
             .apply()
+    }
+
+    /** Update only the editable citizen profile fields (name and address) */
+    fun updateCitizenEditableFields(name: String, address: String) {
+        prefs.edit()
+            .putString(KEY_CITIZEN_NAME, name)
+            .putString(KEY_CITIZEN_ADDRESS, address)
+            .apply()
+    }
+
+    /** Check if a valid session exists (user has not logged out) */
+    fun hasSession(): Boolean {
+        return !getAccessToken().isNullOrEmpty()
     }
 
     fun getAccessToken(): String? = prefs.getString(KEY_ACCESS_TOKEN, null)
@@ -76,6 +107,11 @@ class SessionManager(context: Context) {
     fun getOfficerDistrictName(): String = prefs.getString(KEY_OFFICER_DISTRICT, "") ?: ""
     fun getCitizenName(): String = prefs.getString(KEY_CITIZEN_NAME, "") ?: ""
     fun getCitizenRationCard(): String = prefs.getString(KEY_CITIZEN_RATION_CARD, "") ?: ""
+    fun getCitizenPhone(): String = prefs.getString(KEY_CITIZEN_PHONE, "") ?: ""
+    fun getCitizenAddress(): String = prefs.getString(KEY_CITIZEN_ADDRESS, "") ?: ""
+    fun getCitizenDistrict(): String = prefs.getString(KEY_CITIZEN_DISTRICT, "") ?: ""
+    fun getCitizenSubdistrict(): String = prefs.getString(KEY_CITIZEN_SUBDISTRICT, "") ?: ""
+    fun getCitizenVillage(): String = prefs.getString(KEY_CITIZEN_VILLAGE, "") ?: ""
 
     fun clearSession() {
         prefs.edit().clear().apply()

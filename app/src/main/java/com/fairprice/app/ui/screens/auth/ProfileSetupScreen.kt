@@ -462,9 +462,17 @@ fun ProfileSetupScreen(
                             when (result) {
                                 is NetworkResult.Success -> {
                                     if (result.data.success) {
-                                        // Save citizen name to session for dashboard greeting
+                                        // Save full citizen profile to session
                                         val session = com.fairprice.app.utils.SessionManager.getInstance(context)
-                                        session.saveCitizenProfile(fullName)
+                                        session.saveCitizenProfile(
+                                            name = fullName,
+                                            rationCardNo = session.getCitizenRationCard(),
+                                            phone = session.getCitizenPhone(),
+                                            address = address,
+                                            districtName = selectedDistrict?.name ?: "",
+                                            subdistrictName = selectedSubdistrict?.name ?: "",
+                                            villageName = selectedVillage?.name ?: "",
+                                        )
                                         onProfileComplete()
                                     }
                                     else errorMessage = result.data.message

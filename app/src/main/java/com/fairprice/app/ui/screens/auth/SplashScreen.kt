@@ -26,25 +26,32 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.fairprice.app.ui.components.VerificationPulse
 import com.fairprice.app.ui.theme.FairPriceColors
 import com.fairprice.app.ui.theme.SPLASH_DURATION
 import com.fairprice.app.ui.theme.SteadyPulseEasing
+import com.fairprice.app.utils.SessionManager
 import kotlinx.coroutines.delay
 
 /**
  * Splash Screen — "The Dignified Anchor" entrance.
  *
- * Animated branding with verification pulse ring,
- * auto-navigates to RoleSelection after SPLASH_DURATION.
+ * Animated branding with verification pulse ring.
+ * Checks for existing session:
+ *   - If session exists → auto-navigate to CitizenHome or AdminDashboard
+ *   - If no session → navigate to RoleSelection
  */
 @Composable
 fun SplashScreen(
     onNavigateToRoleSelection: () -> Unit,
+    onNavigateToCitizenHome: (() -> Unit)? = null,
+    onNavigateToAdminDashboard: (() -> Unit)? = null,
 ) {
     var isVisible by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     val titleAlpha by animateFloatAsState(
         targetValue = if (isVisible) 1f else 0f,
@@ -61,7 +68,19 @@ fun SplashScreen(
     LaunchedEffect(Unit) {
         isVisible = true
         delay(SPLASH_DURATION.toLong())
-        onNavigateToRoleSelection()
+
+        val session = SessionManager.getInstance(context)
+        if (session.hasSession()) {
+            // Persistent session exists — navigate directly to the correct dashboard
+            if (session.isOfficer()) {
+                onNavigateToAdminDashboard?.invoke() ?: onNavigateToRoleSelection()
+            } else {
+                onNavigateToCitizenHome?.invoke() ?: onNavigateToRoleSelection()
+            }
+        } else {
+            // No session — fresh start
+            onNavigateToRoleSelection()
+        }
     }
 
     Box(

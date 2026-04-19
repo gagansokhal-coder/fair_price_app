@@ -6,8 +6,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.fairprice.app.ui.components.GlassBottomBar
@@ -15,10 +16,15 @@ import com.fairprice.app.ui.components.citizenNavItems
 import com.fairprice.app.ui.components.adminNavItems
 import com.fairprice.app.ui.navigation.NavGraph
 import com.fairprice.app.ui.navigation.Screen
+import com.fairprice.app.utils.SessionManager
 
 /**
  * Root composable for the Fair Price app.
  * Manages the NavHost and conditionally shows the bottom navigation bar.
+ *
+ * Uses SessionManager to determine the correct bottom bar (admin vs citizen)
+ * instead of route-based detection, which was incorrectly redirecting
+ * officers to the citizen profile view.
  */
 
 // Routes where the bottom nav should be visible
@@ -49,9 +55,13 @@ fun FairPriceApp() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val context = LocalContext.current
+    val session = remember { SessionManager.getInstance(context) }
 
     val showBottomBar = currentRoute in citizenMainRoutes || currentRoute in adminMainRoutes
-    val isAdmin = currentRoute in adminMainRoutes && currentRoute !in citizenMainRoutes
+    // Use SessionManager role instead of route-based detection to fix
+    // the bug where officer profile was redirecting to citizen view
+    val isAdmin = session.isOfficer()
 
     Scaffold(
         bottomBar = {

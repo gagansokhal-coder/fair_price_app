@@ -74,7 +74,7 @@ fun GlassBottomBar(
         modifier = modifier
             .fillMaxWidth()
             .clip(ShapeTokens.BottomSheet)
-            .background(FairPriceColors.GlassBackground)
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.80f))
             .navigationBarsPadding()
     ) {
         Row(

@@ -107,9 +107,16 @@ fun VerificationScreen(
                     val body = result.data
                     if (body.verified) {
                         // Save JWT securely
-                        SessionManager.getInstance(context).saveAuthData(
+                        val session = SessionManager.getInstance(context)
+                        session.saveAuthData(
                             accessToken = body.accessToken,
                             userId = body.userId
+                        )
+                        // Persist citizen identity for profile display
+                        session.saveCitizenProfile(
+                            name = session.getCitizenName(), // Preserve existing name if set
+                            rationCardNo = rationCardNo,
+                            phone = phone,
                         )
                         onVerificationSuccess(body.userId, body.profileRequired)
                     } else {
