@@ -37,6 +37,7 @@ data class BlocksResponse(
 data class LoginRequest(
     @SerializedName("ration_card_no") val rationCardNo: String,
     @SerializedName("phone_no") val phoneNo: String,
+    @SerializedName("hardware_uuid") val hardwareUuid: String = "",
     @SerializedName("gps_lat") val gpsLat: Double = 0.0,
     @SerializedName("gps_lng") val gpsLng: Double = 0.0,
 )
@@ -60,6 +61,12 @@ data class VerifyOtpResponse(
     @SerializedName("access_token") val accessToken: String,
     @SerializedName("profile_required") val profileRequired: Boolean,
     @SerializedName("message") val message: String,
+    // Citizen profile fields for returning users
+    @SerializedName("full_name") val fullName: String = "",
+    @SerializedName("address") val address: String = "",
+    @SerializedName("district_name") val districtName: String = "",
+    @SerializedName("subdistrict_name") val subdistrictName: String = "",
+    @SerializedName("village_name") val villageName: String = "",
 )
 
 data class RegisterProfileRequest(

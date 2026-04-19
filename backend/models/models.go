@@ -10,10 +10,11 @@ type LgdItem struct {
 
 // ─── Auth Request/Response ──────────────────────────────────
 
-// LoginRequest — Citizen login with ration card + phone + GPS.
+// LoginRequest — Citizen login with ration card + phone + GPS + device.
 type LoginRequest struct {
 	RationCardNo string  `json:"ration_card_no" binding:"required,len=12"`
 	PhoneNo      string  `json:"phone_no" binding:"required,len=10"`
+	HardwareUUID string  `json:"hardware_uuid"` // Device binding check
 	GpsLat       float64 `json:"gps_lat"`
 	GpsLng       float64 `json:"gps_lng"`
 }
@@ -34,12 +35,20 @@ type VerifyOtpRequest struct {
 }
 
 // VerifyOtpResponse after OTP verification.
+// Includes citizen profile data for returning users so the app
+// can populate SessionManager without needing a separate GET /profile call.
 type VerifyOtpResponse struct {
 	Verified        bool   `json:"verified"`
 	UserID          string `json:"user_id"`
 	AccessToken     string `json:"access_token"`
 	ProfileRequired bool   `json:"profile_required"`
 	Message         string `json:"message"`
+	// Citizen profile fields (populated for returning users only)
+	FullName        string `json:"full_name,omitempty"`
+	Address         string `json:"address,omitempty"`
+	DistrictName    string `json:"district_name,omitempty"`
+	SubdistrictName string `json:"subdistrict_name,omitempty"`
+	VillageName     string `json:"village_name,omitempty"`
 }
 
 // RegisterProfileRequest — Mandatory profile setup after login.

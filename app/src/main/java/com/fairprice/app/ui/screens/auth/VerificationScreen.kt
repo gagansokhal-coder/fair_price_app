@@ -113,10 +113,15 @@ fun VerificationScreen(
                             userId = body.userId
                         )
                         // Persist citizen identity for profile display
+                        // For returning users, the backend returns full profile data
                         session.saveCitizenProfile(
-                            name = session.getCitizenName(), // Preserve existing name if set
+                            name = body.fullName.ifEmpty { session.getCitizenName() },
                             rationCardNo = rationCardNo,
                             phone = phone,
+                            address = body.address.ifEmpty { session.getCitizenAddress() },
+                            districtName = body.districtName.ifEmpty { session.getCitizenDistrict() },
+                            subdistrictName = body.subdistrictName.ifEmpty { session.getCitizenSubdistrict() },
+                            villageName = body.villageName.ifEmpty { session.getCitizenVillage() },
                         )
                         onVerificationSuccess(body.userId, body.profileRequired)
                     } else {

@@ -36,6 +36,11 @@ func NewAuthHandler(db *pgxpool.Pool, supabaseURL, supabaseKey, jwtSecret string
 
 // Login handles citizen login with ration card + phone.
 // POST /api/v1/auth/login
+//
+// Enforcement rules:
+//  1. If ration card exists → phone must match the registered phone
+//  2. If ration card exists AND has a device bound → hardware_uuid must match
+//  3. If new user → allow through (OTP will handle identity verification)
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req models.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -52,21 +57,14 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	// Check if user already exists
 	var userID string
 	var profileComplete bool
+	var storedPhone string
+	var storedHardwareUUID *string
 	err := h.DB.QueryRow(context.Background(),
-		`SELECT id, profile_complete FROM users WHERE ration_card_no = $1`,
-		req.RationCardNo).Scan(&userID, &profileComplete)
+		`SELECT id, phone_no, hardware_uuid, profile_complete FROM users WHERE ration_card_no = $1`,
+		req.RationCardNo).Scan(&userID, &storedPhone, &storedHardwareUUID, &profileComplete)
 
-	if err != nil {
-		// User doesn't exist — create a new one in our public.users table
-		// Wait, we shouldn't insert here because Supabase Auth handles the user identity.
-		// For now, we allow the OTP to be sent to this phone number.
-		// When they verify OTP, we'll get their Supabase Auth User ID, which we will THEN use to create the public.users record.
-	} else {
-		// User exists — verify phone matches the one registered
-		var storedPhone string
-		h.DB.QueryRow(context.Background(),
-			`SELECT phone_no FROM users WHERE id = $1`, userID).Scan(&storedPhone)
-
+	if err == nil {
+		// ── User exists: Enforce phone match ──────────────────
 		if storedPhone != req.PhoneNo && storedPhone != "" {
 			c.JSON(http.StatusUnauthorized, models.ErrorResponse{
 				Error:   "PHONE_MISMATCH",
@@ -74,7 +72,20 @@ func (h *AuthHandler) Login(c *gin.Context) {
 			})
 			return
 		}
+
+		// ── User exists: Enforce device binding ──────────────
+		// If the user has completed profile (device was bound), deny login from a different device
+		if storedHardwareUUID != nil && *storedHardwareUUID != "" && req.HardwareUUID != "" {
+			if *storedHardwareUUID != req.HardwareUUID {
+				c.JSON(http.StatusForbidden, models.ErrorResponse{
+					Error:   "DEVICE_BINDING_VIOLATION",
+					Message: "This ration card is already registered on another device. One device per citizen is enforced for security.",
+				})
+				return
+			}
+		}
 	}
+	// If err != nil → user doesn't exist, which is fine — they'll be created on OTP verify
 
 	// ─── Call Supabase Auth to send OTP ───
 	otpPayload := map[string]string{"phone": phoneWithExt}
@@ -119,6 +130,10 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 // VerifyOtp handles OTP verification against Supabase Auth.
 // POST /api/v1/auth/verify-otp
+//
+// For returning users (profile_complete = true), this now returns the full
+// citizen profile data so the app can populate SessionManager immediately
+// without a separate API call.
 func (h *AuthHandler) VerifyOtp(c *gin.Context) {
 	var req models.VerifyOtpRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -197,9 +212,12 @@ func (h *AuthHandler) VerifyOtp(c *gin.Context) {
 
 	// Now check if this user exists in our custom users table
 	var profileComplete bool
+	var fullName, address *string
+	var districtCode, subdistrictCode, villageCode *int
 	err := h.DB.QueryRow(context.Background(),
-		`SELECT profile_complete FROM users WHERE id = $1`,
-		supabaseUserID).Scan(&profileComplete)
+		`SELECT profile_complete, full_name, address, district_code, subdistrict_code, village_code 
+		 FROM users WHERE id = $1`,
+		supabaseUserID).Scan(&profileComplete, &fullName, &address, &districtCode, &subdistrictCode, &villageCode)
 
 	if err != nil {
 		// User doesn't exist — create a new shell record
@@ -220,13 +238,43 @@ func (h *AuthHandler) VerifyOtp(c *gin.Context) {
 		profileComplete = false
 	}
 
-	c.JSON(http.StatusOK, models.VerifyOtpResponse{
+	// Build response — include profile data for returning users
+	response := models.VerifyOtpResponse{
 		Verified:        true,
 		UserID:          supabaseUserID,
 		AccessToken:     accessToken,
 		ProfileRequired: !profileComplete,
 		Message:         "OTP verified successfully",
-	})
+	}
+
+	// For returning users, resolve LGD names and include profile data
+	if profileComplete {
+		if fullName != nil {
+			response.FullName = *fullName
+		}
+		if address != nil {
+			response.Address = *address
+		}
+		// Resolve LGD hierarchy names from codes
+		if districtCode != nil {
+			h.DB.QueryRow(context.Background(),
+				`SELECT DISTINCT district_name FROM lgd_hierarchy WHERE district_code = $1 LIMIT 1`,
+				*districtCode).Scan(&response.DistrictName)
+		}
+		if subdistrictCode != nil {
+			h.DB.QueryRow(context.Background(),
+				`SELECT DISTINCT subdistrict_name FROM lgd_hierarchy WHERE subdistrict_code = $1 LIMIT 1`,
+				*subdistrictCode).Scan(&response.SubdistrictName)
+		}
+		if villageCode != nil {
+			h.DB.QueryRow(context.Background(),
+				`SELECT DISTINCT village_name FROM lgd_hierarchy WHERE village_code = $1 LIMIT 1`,
+				*villageCode).Scan(&response.VillageName)
+		}
+		fmt.Printf("Returning user login: %s (profile complete)\n", response.FullName)
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 // RegisterProfile handles citizen profile completion.

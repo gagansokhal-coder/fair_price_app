@@ -228,10 +228,12 @@ fun CitizenLoginScreen(
                         if (!hasError) {
                             isLoading = true
                             coroutineScope.launch {
+                                val hardwareUuid = DeviceUtils.getHardwareUuid(context)
                                 val result = ApiRepository.login(
                                     LoginRequest(
                                         rationCardNo = rationCardNo,
                                         phoneNo = phoneNumber,
+                                        hardwareUuid = hardwareUuid,
                                         gpsLat = gpsLat,
                                         gpsLng = gpsLng,
                                     )
