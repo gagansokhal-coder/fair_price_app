@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
+	"os" // Last manual sync: 2026-04-19 (Pooler fix applied)
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
