@@ -84,8 +84,22 @@ func (h *AuthHandler) Login(c *gin.Context) {
 				return
 			}
 		}
+	} else {
+		// ── New user: Enforce ONE phone → ONE ration card ─────
+		// Check if this phone number is already registered with a DIFFERENT ration card
+		var existingRationCard string
+		phoneErr := h.DB.QueryRow(context.Background(),
+			`SELECT ration_card_no FROM users WHERE phone_no = $1 AND ration_card_no != $2 LIMIT 1`,
+			req.PhoneNo, req.RationCardNo).Scan(&existingRationCard)
+		if phoneErr == nil {
+			// Phone is already linked to another ration card
+			c.JSON(http.StatusConflict, models.ErrorResponse{
+				Error:   "PHONE_ALREADY_LINKED",
+				Message: "This phone number is already registered with a different ration card. One phone number per ration card is enforced.",
+			})
+			return
+		}
 	}
-	// If err != nil → user doesn't exist, which is fine — they'll be created on OTP verify
 
 	// ─── Call Supabase Auth to send OTP ───
 	otpPayload := map[string]string{"phone": phoneWithExt}
@@ -221,6 +235,20 @@ func (h *AuthHandler) VerifyOtp(c *gin.Context) {
 
 	if err != nil {
 		// User doesn't exist — create a new shell record
+		// ── Enforce ONE phone → ONE ration card ─────────────
+		var existingRationCard string
+		phoneCheckErr := h.DB.QueryRow(context.Background(),
+			`SELECT ration_card_no FROM users WHERE phone_no = $1 AND ration_card_no != $2 LIMIT 1`,
+			req.PhoneNo, req.RationCardNo).Scan(&existingRationCard)
+		if phoneCheckErr == nil {
+			// Phone is already linked to another ration card
+			c.JSON(http.StatusConflict, models.ErrorResponse{
+				Error:   "PHONE_ALREADY_LINKED",
+				Message: "Incorrect details. This phone number is already registered with a different ration card.",
+			})
+			return
+		}
+
 		// Use the real ration_card_no if provided, else generate a temp one
 		rationCard := req.RationCardNo
 		if rationCard == "" {

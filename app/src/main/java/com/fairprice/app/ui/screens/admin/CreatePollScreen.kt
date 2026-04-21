@@ -26,6 +26,7 @@ import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -53,6 +54,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.fairprice.app.network.ApiRepository
+import com.fairprice.app.network.LgdItem
 import com.fairprice.app.network.NetworkResult
 import com.fairprice.app.network.CreatePollRequest
 import com.fairprice.app.ui.components.GradientButton
@@ -61,12 +63,12 @@ import com.fairprice.app.ui.theme.SteadyPulseEasing
 import kotlinx.coroutines.launch
 
 /**
- * Create Poll Screen — Dynamic custom poll creation.
+ * Create Poll Screen — Dynamic custom poll creation with cascading LGD dropdowns.
  *
  * Officers define:
  *  1. Title & description
  *  2. Target level (District/Subdivision/Block/Village)
- *  3. Target code (LGD code within their jurisdiction)
+ *  3. Target area selected via cascading dropdowns (fetched from LGD hierarchy)
  *  4. 2-5 dynamic poll options (e.g. "Yes"/"No", or multi-choice)
  *
  * Jurisdiction is enforced server-side by the RBAC middleware.
@@ -80,7 +82,6 @@ fun CreatePollScreen(
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var targetLevel by remember { mutableStateOf("") }
-    var targetCode by remember { mutableStateOf("") }
     val options = remember { mutableStateListOf("", "") } // Min 2 options
     var levelExpanded by remember { mutableStateOf(false) }
     var isVisible by remember { mutableStateOf(false) }
@@ -88,14 +89,98 @@ fun CreatePollScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var successMessage by remember { mutableStateOf<String?>(null) }
 
+    // ── Cascading LGD Dropdown State ──────────────────────
+    var districts by remember { mutableStateOf<List<LgdItem>>(emptyList()) }
+    var subdistricts by remember { mutableStateOf<List<LgdItem>>(emptyList()) }
+    var blocks by remember { mutableStateOf<List<LgdItem>>(emptyList()) }
+    var villages by remember { mutableStateOf<List<LgdItem>>(emptyList()) }
+
+    var selectedDistrict by remember { mutableStateOf<LgdItem?>(null) }
+    var selectedSubdistrict by remember { mutableStateOf<LgdItem?>(null) }
+    var selectedBlock by remember { mutableStateOf<LgdItem?>(null) }
+    var selectedVillage by remember { mutableStateOf<LgdItem?>(null) }
+
+    var districtExpanded by remember { mutableStateOf(false) }
+    var subdistrictExpanded by remember { mutableStateOf(false) }
+    var blockExpanded by remember { mutableStateOf(false) }
+    var villageExpanded by remember { mutableStateOf(false) }
+
+    var lgdLoading by remember { mutableStateOf(false) }
+
     val scope = rememberCoroutineScope()
     val targetLevels = listOf("DISTRICT", "SUBDIVISION", "BLOCK", "VILLAGE")
 
-    LaunchedEffect(Unit) { isVisible = true }
+    // Derive the final target code based on selected level
+    val resolvedTargetCode: Int? = when (targetLevel) {
+        "DISTRICT" -> selectedDistrict?.code
+        "SUBDIVISION" -> selectedSubdistrict?.code
+        "BLOCK" -> selectedBlock?.code
+        "VILLAGE" -> selectedVillage?.code
+        else -> null
+    }
+
+    // Derive display name for summary
+    val resolvedTargetName: String = when (targetLevel) {
+        "DISTRICT" -> selectedDistrict?.name ?: ""
+        "SUBDIVISION" -> selectedSubdistrict?.name ?: ""
+        "BLOCK" -> selectedBlock?.name ?: ""
+        "VILLAGE" -> selectedVillage?.name ?: ""
+        else -> ""
+    }
+
+    // ── Load Districts on Mount ─────────────────────────
+    LaunchedEffect(Unit) {
+        isVisible = true
+        scope.launch {
+            when (val result = ApiRepository.getDistricts()) {
+                is NetworkResult.Success -> {
+                    districts = result.data.districts
+                }
+                else -> { /* Silently handle — officer can still type manually */ }
+            }
+        }
+    }
+
+    // ── Load Subdistricts when District changes ─────────
+    LaunchedEffect(selectedDistrict) {
+        selectedDistrict?.let { district ->
+            lgdLoading = true
+            subdistricts = emptyList()
+            blocks = emptyList()
+            villages = emptyList()
+            selectedSubdistrict = null
+            selectedBlock = null
+            selectedVillage = null
+            when (val result = ApiRepository.getSubdistricts(district.code)) {
+                is NetworkResult.Success -> {
+                    subdistricts = result.data.subdistricts
+                }
+                else -> {}
+            }
+            lgdLoading = false
+        }
+    }
+
+    // ── Load Villages when Subdistrict changes ──────────
+    LaunchedEffect(selectedSubdistrict) {
+        selectedSubdistrict?.let { sub ->
+            lgdLoading = true
+            villages = emptyList()
+            selectedBlock = null
+            selectedVillage = null
+            when (val result = ApiRepository.getVillages(sub.code)) {
+                is NetworkResult.Success -> {
+                    villages = result.data.villages
+                }
+                else -> {}
+            }
+            lgdLoading = false
+        }
+    }
 
     val isFormValid = title.isNotBlank() &&
             targetLevel.isNotBlank() &&
-            targetCode.isNotBlank() &&
+            resolvedTargetCode != null &&
             options.size >= 2 &&
             options.all { it.isNotBlank() }
 
@@ -146,7 +231,7 @@ fun CreatePollScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Create a custom poll with dynamic options. Citizens in the target area will see the poll in their app.",
+                    text = "Create a custom poll with dynamic options. Select the target area from the dropdown lists below.",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -199,7 +284,9 @@ fun CreatePollScreen(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { levelExpanded = true },
+                            .clickable {
+                                levelExpanded = true
+                            },
                     )
 
                     DropdownMenu(
@@ -218,6 +305,11 @@ fun CreatePollScreen(
                                 onClick = {
                                     targetLevel = level
                                     levelExpanded = false
+                                    // Reset downstream selections when level changes
+                                    selectedDistrict = null
+                                    selectedSubdistrict = null
+                                    selectedBlock = null
+                                    selectedVillage = null
                                 },
                             )
                         }
@@ -226,19 +318,89 @@ fun CreatePollScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // ─── Target Code ─────────────────────────────
-                SectionLabel("LGD Target Code *")
-                SoftTrayInput(
-                    value = targetCode,
-                    onValueChange = { targetCode = it; errorMessage = null },
-                    label = if (targetLevel.isNotBlank())
-                        "${targetLevel.lowercase().replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }} Code"
-                    else "Target Code",
-                    placeholder = "Enter the LGD code for the target area",
-                    keyboardType = KeyboardType.Number,
-                    imeAction = ImeAction.Next,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                // ─── Cascading LGD Area Selectors ────────────
+                if (targetLevel.isNotBlank()) {
+                    SectionLabel("Select Target Area *")
+
+                    if (lgdLoading) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(vertical = 8.dp),
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                strokeWidth = 2.dp,
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Loading area data…",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+
+                    // ── District Dropdown (always shown when level is selected) ──
+                    LgdDropdown(
+                        label = "District",
+                        items = districts,
+                        selectedItem = selectedDistrict,
+                        expanded = districtExpanded,
+                        onExpandedChange = { districtExpanded = it },
+                        onItemSelected = { item ->
+                            selectedDistrict = item
+                            selectedSubdistrict = null
+                            selectedBlock = null
+                            selectedVillage = null
+                            districtExpanded = false
+                        },
+                    )
+
+                    // ── Subdivision Dropdown (shown for SUBDIVISION, BLOCK, VILLAGE) ──
+                    if (targetLevel in listOf("SUBDIVISION", "BLOCK", "VILLAGE") && selectedDistrict != null) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        LgdDropdown(
+                            label = "Subdivision",
+                            items = subdistricts,
+                            selectedItem = selectedSubdistrict,
+                            expanded = subdistrictExpanded,
+                            onExpandedChange = { subdistrictExpanded = it },
+                            onItemSelected = { item ->
+                                selectedSubdistrict = item
+                                selectedBlock = null
+                                selectedVillage = null
+                                subdistrictExpanded = false
+                            },
+                        )
+                    }
+
+                    // ── Village Dropdown (shown for BLOCK, VILLAGE) ──
+                    if (targetLevel in listOf("BLOCK", "VILLAGE") && selectedSubdistrict != null) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        LgdDropdown(
+                            label = "Village / Area",
+                            items = villages,
+                            selectedItem = selectedVillage,
+                            expanded = villageExpanded,
+                            onExpandedChange = { villageExpanded = it },
+                            onItemSelected = { item ->
+                                selectedVillage = item
+                                villageExpanded = false
+                            },
+                        )
+                    }
+
+                    // Show resolved target code
+                    resolvedTargetCode?.let { code ->
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "✓ Target: $resolvedTargetName (LGD Code: $code)",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(28.dp))
 
@@ -352,10 +514,8 @@ fun CreatePollScreen(
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = "\"$title\" will be sent to all citizens in ${
-                                    targetLevel.lowercase().replaceFirstChar {
-                                        if (it.isLowerCase()) it.titlecase() else it.toString()
-                                    }
-                                } with LGD code $targetCode.",
+                                    resolvedTargetName.ifEmpty { targetLevel.lowercase() }
+                                } (${targetLevel}, LGD: ${resolvedTargetCode ?: "?"}).",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f),
                             )
@@ -406,7 +566,7 @@ fun CreatePollScreen(
                                         title = title.trim(),
                                         description = description.trim().ifBlank { null },
                                         targetLevel = targetLevel,
-                                        targetCode = targetCode.toIntOrNull() ?: 0,
+                                        targetCode = resolvedTargetCode ?: 0,
                                         options = options.filter { it.isNotBlank() }.map { it.trim() },
                                     )
                                 )
@@ -442,6 +602,70 @@ fun CreatePollScreen(
                 )
 
                 Spacer(modifier = Modifier.height(48.dp))
+            }
+        }
+    }
+}
+
+/**
+ * Reusable LGD dropdown composable for selecting hierarchy items.
+ */
+@Composable
+private fun LgdDropdown(
+    label: String,
+    items: List<LgdItem>,
+    selectedItem: LgdItem?,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    onItemSelected: (LgdItem) -> Unit,
+) {
+    Column {
+        SoftTrayInput(
+            value = selectedItem?.let { "${it.name} (${it.code})" } ?: "",
+            onValueChange = { },
+            label = label,
+            placeholder = "Select $label",
+            enabled = false,
+            trailingIcon = {
+                Icon(
+                    imageVector = Icons.Rounded.ArrowDropDown,
+                    contentDescription = "Dropdown",
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(enabled = items.isNotEmpty()) { onExpandedChange(true) },
+        )
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { onExpandedChange(false) },
+        ) {
+            if (items.isEmpty()) {
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = "No data available",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        )
+                    },
+                    onClick = { onExpandedChange(false) },
+                )
+            } else {
+                items.forEach { item ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = "${item.name} (${item.code})",
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                        },
+                        onClick = { onItemSelected(item) },
+                    )
+                }
             }
         }
     }

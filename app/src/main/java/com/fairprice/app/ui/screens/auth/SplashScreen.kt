@@ -49,6 +49,7 @@ fun SplashScreen(
     onNavigateToRoleSelection: () -> Unit,
     onNavigateToCitizenHome: (() -> Unit)? = null,
     onNavigateToAdminDashboard: (() -> Unit)? = null,
+    onNavigateToProfileSetup: ((userId: String) -> Unit)? = null,
 ) {
     var isVisible by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -75,7 +76,14 @@ fun SplashScreen(
             if (session.isOfficer()) {
                 onNavigateToAdminDashboard?.invoke() ?: onNavigateToRoleSelection()
             } else {
-                onNavigateToCitizenHome?.invoke() ?: onNavigateToRoleSelection()
+                // ── Profile Gate: Citizen must complete profile before entering app ──
+                val userId = session.getUserId() ?: ""
+                if (!session.isProfileComplete() && userId.isNotEmpty()) {
+                    // Profile NOT complete — redirect to profile setup
+                    onNavigateToProfileSetup?.invoke(userId) ?: onNavigateToRoleSelection()
+                } else {
+                    onNavigateToCitizenHome?.invoke() ?: onNavigateToRoleSelection()
+                }
             }
         } else {
             // No session — fresh start

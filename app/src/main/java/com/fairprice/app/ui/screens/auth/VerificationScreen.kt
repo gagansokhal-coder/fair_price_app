@@ -123,6 +123,11 @@ fun VerificationScreen(
                             subdistrictName = body.subdistrictName.ifEmpty { session.getCitizenSubdistrict() },
                             villageName = body.villageName.ifEmpty { session.getCitizenVillage() },
                         )
+                        // For returning users, profile is already complete
+                        // For new users, profile gate will redirect them
+                        if (!body.profileRequired) {
+                            session.setProfileComplete(true)
+                        }
                         onVerificationSuccess(body.userId, body.profileRequired)
                     } else {
                         errorMessage = "Invalid OTP or expired."

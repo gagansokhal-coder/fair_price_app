@@ -23,6 +23,7 @@ class SessionManager(context: Context) {
         private const val KEY_CITIZEN_DISTRICT = "citizen_district"
         private const val KEY_CITIZEN_SUBDISTRICT = "citizen_subdistrict"
         private const val KEY_CITIZEN_VILLAGE = "citizen_village"
+        private const val KEY_PROFILE_COMPLETE = "profile_complete"
 
         @Volatile
         private var INSTANCE: SessionManager? = null
@@ -82,6 +83,7 @@ class SessionManager(context: Context) {
             .putString(KEY_CITIZEN_DISTRICT, districtName)
             .putString(KEY_CITIZEN_SUBDISTRICT, subdistrictName)
             .putString(KEY_CITIZEN_VILLAGE, villageName)
+            .putBoolean(KEY_PROFILE_COMPLETE, true)
             .apply()
     }
 
@@ -112,6 +114,14 @@ class SessionManager(context: Context) {
     fun getCitizenDistrict(): String = prefs.getString(KEY_CITIZEN_DISTRICT, "") ?: ""
     fun getCitizenSubdistrict(): String = prefs.getString(KEY_CITIZEN_SUBDISTRICT, "") ?: ""
     fun getCitizenVillage(): String = prefs.getString(KEY_CITIZEN_VILLAGE, "") ?: ""
+
+    /** Check if citizen profile is complete (used for profile gate on auto-login) */
+    fun isProfileComplete(): Boolean = prefs.getBoolean(KEY_PROFILE_COMPLETE, false)
+
+    /** Mark profile as complete */
+    fun setProfileComplete(complete: Boolean) {
+        prefs.edit().putBoolean(KEY_PROFILE_COMPLETE, complete).apply()
+    }
 
     fun clearSession() {
         prefs.edit().clear().apply()

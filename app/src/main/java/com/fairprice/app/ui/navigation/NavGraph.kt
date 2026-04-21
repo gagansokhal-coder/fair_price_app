@@ -85,6 +85,11 @@ fun NavGraph(
                         popUpTo(Screen.Splash.route) { inclusive = true }
                     }
                 },
+                onNavigateToProfileSetup = { userId ->
+                    navController.navigate(Screen.ProfileSetup.createRoute(userId)) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                },
             )
         }
 

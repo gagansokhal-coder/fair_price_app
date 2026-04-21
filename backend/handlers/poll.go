@@ -30,6 +30,17 @@ func NewPollHandler(db *pgxpool.Pool) *PollHandler {
 // POST /api/v1/admin/create-poll
 // ═══════════════════════════════════════════════════════════════
 func (h *PollHandler) CreatePoll(c *gin.Context) {
+	// Recover from any panics (nil type assertions in jurisdiction validation)
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("[PANIC] CreatePoll recovered: %v\n", r)
+			c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+				Error:   "INTERNAL_ERROR",
+				Message: "An unexpected server error occurred. Please try again.",
+			})
+		}
+	}()
+
 	var req models.CreatePollRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{
@@ -65,11 +76,14 @@ func (h *PollHandler) CreatePoll(c *gin.Context) {
 	officerRole, _ := c.Get("officerRole")
 	role := fmt.Sprintf("%v", officerRole)
 	officerID, _ := c.Get("officerID")
+	officerIDStr := fmt.Sprintf("%v", officerID)
+
+	fmt.Printf("[DEBUG] CreatePoll: officer=%s role=%s target=%s:%d\n", officerIDStr, role, req.TargetLevel, req.TargetCode)
 
 	if !h.validatePollJurisdiction(c, role, req.TargetLevel, req.TargetCode) {
 		c.JSON(http.StatusForbidden, models.ErrorResponse{
 			Error:   "JURISDICTION_VIOLATION",
-			Message: "You cannot create polls outside your assigned jurisdiction",
+			Message: fmt.Sprintf("You (%s) cannot create polls targeting %s:%d — it is outside your assigned jurisdiction", role, req.TargetLevel, req.TargetCode),
 		})
 		return
 	}
@@ -97,20 +111,21 @@ func (h *PollHandler) CreatePoll(c *gin.Context) {
 	var pollID string
 	err = h.DB.QueryRow(context.Background(),
 		`INSERT INTO custom_polls (title, description, created_by, target_level, target_code, options)
-		 VALUES ($1, $2, $3, $4, $5, $6)
+		 VALUES ($1, $2, $3::uuid, $4, $5, $6)
 		 RETURNING poll_id`,
-		req.Title, req.Description, fmt.Sprintf("%v", officerID),
+		req.Title, req.Description, officerIDStr,
 		req.TargetLevel, req.TargetCode, optionsJSON).Scan(&pollID)
 
 	if err != nil {
-		fmt.Printf("Poll creation error: %v\n", err)
+		fmt.Printf("[ERROR] Poll creation DB error: officer=%s target=%s:%d err=%v\n", officerIDStr, req.TargetLevel, req.TargetCode, err)
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Error:   "DB_ERROR",
-			Message: "Failed to create poll",
+			Message: "Failed to create poll. Please verify your inputs and try again.",
 		})
 		return
 	}
 
+	fmt.Printf("[INFO] Poll created: id=%s title='%s' target=%s:%d by=%s\n", pollID, req.Title, req.TargetLevel, req.TargetCode, officerIDStr)
 	c.JSON(http.StatusCreated, models.CreatePollResponse{
 		Success: true,
 		PollID:  pollID,
@@ -134,27 +149,45 @@ func (h *PollHandler) validatePollJurisdiction(c *gin.Context, role, targetLevel
 	case models.RoleAdminDistrict:
 		callerDistrict, exists := c.Get("officerDistrictCode")
 		if !exists {
+			fmt.Printf("[WARN] validatePollJurisdiction: officerDistrictCode not set for ADMIN_DISTRICT\n")
 			return false
 		}
-		// Check target is within caller's district
-		return h.isCodeInDistrict(targetLevel, targetCode, callerDistrict.(int))
+		districtCode, ok := callerDistrict.(int)
+		if !ok {
+			fmt.Printf("[WARN] validatePollJurisdiction: officerDistrictCode is not int: %T\n", callerDistrict)
+			return false
+		}
+		return h.isCodeInDistrict(targetLevel, targetCode, districtCode)
 
 	case models.RoleAdminSubdivision:
 		callerDistrict, d := c.Get("officerDistrictCode")
 		callerSubdistrict, s := c.Get("officerSubdistrictCode")
 		if !d || !s {
+			fmt.Printf("[WARN] validatePollJurisdiction: missing codes for ADMIN_SUBDIVISION (district=%v, subdistrict=%v)\n", d, s)
 			return false
 		}
-		return h.isCodeInSubdivision(targetLevel, targetCode, callerDistrict.(int), callerSubdistrict.(int))
+		dCode, ok1 := callerDistrict.(int)
+		sCode, ok2 := callerSubdistrict.(int)
+		if !ok1 || !ok2 {
+			fmt.Printf("[WARN] validatePollJurisdiction: type mismatch for ADMIN_SUBDIVISION codes\n")
+			return false
+		}
+		return h.isCodeInSubdivision(targetLevel, targetCode, dCode, sCode)
 
 	case models.RoleAdminBlock:
 		callerBlock, exists := c.Get("officerBlockCode")
 		if !exists {
+			fmt.Printf("[WARN] validatePollJurisdiction: officerBlockCode not set for ADMIN_BLOCK\n")
+			return false
+		}
+		blockCode, ok := callerBlock.(int)
+		if !ok {
+			fmt.Printf("[WARN] validatePollJurisdiction: officerBlockCode is not int: %T\n", callerBlock)
 			return false
 		}
 		// BDOs can only target villages within their block
 		if targetLevel == "VILLAGE" {
-			return h.isVillageInBlock(targetCode, callerBlock.(int))
+			return h.isVillageInBlock(targetCode, blockCode)
 		}
 		// BDOs cannot create district/subdivision/block-level polls
 		return false
