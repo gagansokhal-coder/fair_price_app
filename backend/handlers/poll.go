@@ -114,7 +114,7 @@ func (h *PollHandler) CreatePoll(c *gin.Context) {
 		 VALUES ($1, $2, $3::uuid, $4, $5, $6)
 		 RETURNING poll_id`,
 		req.Title, req.Description, officerIDStr,
-		req.TargetLevel, req.TargetCode, optionsJSON).Scan(&pollID)
+		req.TargetLevel, req.TargetCode, string(optionsJSON)).Scan(&pollID)
 
 	if err != nil {
 		fmt.Printf("[ERROR] Poll creation DB error: officer=%s target=%s:%d err=%v\n", officerIDStr, req.TargetLevel, req.TargetCode, err)

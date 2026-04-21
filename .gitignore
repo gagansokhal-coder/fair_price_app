@@ -47,3 +47,4 @@ captures/
 # Environment and test binaries
 .env
 test_build
+*.exe
