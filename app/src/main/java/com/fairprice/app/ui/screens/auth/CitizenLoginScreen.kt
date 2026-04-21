@@ -1,5 +1,6 @@
 package com.fairprice.app.ui.screens.auth
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -37,9 +38,8 @@ import com.fairprice.app.network.LoginRequest
 import com.fairprice.app.network.ApiRepository
 import com.fairprice.app.network.NetworkResult
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -48,6 +48,8 @@ import com.fairprice.app.ui.components.GradientButton
 import com.fairprice.app.ui.components.SoftTrayInput
 import com.fairprice.app.ui.theme.SteadyPulseEasing
 import com.fairprice.app.utils.DeviceUtils
+
+private const val TAG = "CitizenLoginScreen"
 
 /**
  * Citizen Login Screen — Ration Card + Phone authentication.
@@ -68,16 +70,16 @@ fun CitizenLoginScreen(
     var isLoading by remember { mutableStateOf(false) }
     var isVisible by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val context = LocalContext.current
 
-    // GPS state for login verification
+    // GPS state for login verification — optional, never blocks login
     var gpsLat by remember { androidx.compose.runtime.mutableDoubleStateOf(0.0) }
     var gpsLng by remember { androidx.compose.runtime.mutableDoubleStateOf(0.0) }
     var gpsStatus by remember { mutableStateOf("Acquiring GPS…") }
 
     LaunchedEffect(Unit) { isVisible = true }
 
-    // Fetch GPS coordinates on screen launch
+    // Fetch GPS coordinates on screen launch — fully guarded
     LaunchedEffect(Unit) {
         try {
             val location = DeviceUtils.getCurrentLocation(context)
@@ -92,8 +94,12 @@ fun CitizenLoginScreen(
             } else {
                 gpsStatus = "⚠️ GPS unavailable"
             }
-        } catch (_: Exception) {
+        } catch (e: SecurityException) {
+            Log.w(TAG, "GPS permission not granted", e)
             gpsStatus = "⚠️ GPS permission required"
+        } catch (e: Exception) {
+            Log.w(TAG, "GPS fetch failed", e)
+            gpsStatus = "⚠️ GPS unavailable"
         }
     }
 
@@ -228,22 +234,43 @@ fun CitizenLoginScreen(
                         if (!hasError) {
                             isLoading = true
                             coroutineScope.launch {
-                                val hardwareUuid = DeviceUtils.getHardwareUuid(context)
-                                val result = ApiRepository.login(
-                                    LoginRequest(
-                                        rationCardNo = rationCardNo,
-                                        phoneNo = phoneNumber,
-                                        hardwareUuid = hardwareUuid,
-                                        gpsLat = gpsLat,
-                                        gpsLng = gpsLng,
+                                try {
+                                    val hardwareUuid = try {
+                                        DeviceUtils.getHardwareUuid(context)
+                                    } catch (e: Exception) {
+                                        Log.w(TAG, "Failed to get hardware UUID", e)
+                                        "unknown-device"
+                                    }
+
+                                    val result = ApiRepository.login(
+                                        LoginRequest(
+                                            rationCardNo = rationCardNo,
+                                            phoneNo = phoneNumber,
+                                            hardwareUuid = hardwareUuid,
+                                            gpsLat = gpsLat,
+                                            gpsLng = gpsLng,
+                                        )
                                     )
-                                )
-                                when (result) {
-                                    is NetworkResult.Success -> onNavigateToVerification(phoneNumber, rationCardNo)
-                                    is NetworkResult.Error -> rationCardError = result.message
-                                    else -> {}
+                                    when (result) {
+                                        is NetworkResult.Success -> {
+                                            try {
+                                                onNavigateToVerification(phoneNumber, rationCardNo)
+                                            } catch (e: Exception) {
+                                                Log.e(TAG, "Navigation to verification failed", e)
+                                                rationCardError = "Navigation error. Please try again."
+                                            }
+                                        }
+                                        is NetworkResult.Error -> {
+                                            rationCardError = result.message
+                                        }
+                                        else -> {}
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e(TAG, "Login request failed", e)
+                                    rationCardError = "Something went wrong. Please try again."
+                                } finally {
+                                    isLoading = false
                                 }
-                                isLoading = false
                             }
                         }
                     },

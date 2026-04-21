@@ -33,8 +33,11 @@ import com.fairprice.app.ui.components.VerificationPulse
 import com.fairprice.app.ui.theme.FairPriceColors
 import com.fairprice.app.ui.theme.SPLASH_DURATION
 import com.fairprice.app.ui.theme.SteadyPulseEasing
+import android.util.Log
 import com.fairprice.app.utils.SessionManager
 import kotlinx.coroutines.delay
+
+private const val TAG = "SplashScreen"
 
 /**
  * Splash Screen — "The Dignified Anchor" entrance.
@@ -43,6 +46,11 @@ import kotlinx.coroutines.delay
  * Checks for existing session:
  *   - If session exists → auto-navigate to CitizenHome or AdminDashboard
  *   - If no session → navigate to RoleSelection
+ *
+ * CRASH FIX (v2):
+ * - Wrapped entire session check in try-catch to survive corrupted session data
+ * - If userId is empty/null with incomplete profile, clears session to prevent
+ *   infinite "app won't open" loop
  */
 @Composable
 fun SplashScreen(
@@ -70,23 +78,41 @@ fun SplashScreen(
         isVisible = true
         delay(SPLASH_DURATION.toLong())
 
-        val session = SessionManager.getInstance(context)
-        if (session.hasSession()) {
-            // Persistent session exists — navigate directly to the correct dashboard
-            if (session.isOfficer()) {
-                onNavigateToAdminDashboard?.invoke() ?: onNavigateToRoleSelection()
-            } else {
-                // ── Profile Gate: Citizen must complete profile before entering app ──
-                val userId = session.getUserId() ?: ""
-                if (!session.isProfileComplete() && userId.isNotEmpty()) {
-                    // Profile NOT complete — redirect to profile setup
-                    onNavigateToProfileSetup?.invoke(userId) ?: onNavigateToRoleSelection()
+        try {
+            val session = SessionManager.getInstance(context)
+            if (session.hasSession()) {
+                Log.d(TAG, "Session found: isOfficer=${session.isOfficer()}, profileComplete=${session.isProfileComplete()}, userId=${session.getUserId()?.take(8)}")
+                // Persistent session exists — navigate directly to the correct dashboard
+                if (session.isOfficer()) {
+                    onNavigateToAdminDashboard?.invoke() ?: onNavigateToRoleSelection()
                 } else {
-                    onNavigateToCitizenHome?.invoke() ?: onNavigateToRoleSelection()
+                    // ── Profile Gate: Citizen must complete profile before entering app ──
+                    val userId = session.getUserId()
+                    if (userId.isNullOrBlank()) {
+                        // Corrupted session — no userId saved. Clear and restart.
+                        Log.w(TAG, "Corrupted session: hasSession=true but userId is null/blank. Clearing session.")
+                        session.clearSession()
+                        onNavigateToRoleSelection()
+                    } else if (!session.isProfileComplete()) {
+                        // Profile NOT complete — redirect to profile setup
+                        Log.d(TAG, "Profile incomplete, redirecting to setup for userId=$userId")
+                        onNavigateToProfileSetup?.invoke(userId) ?: onNavigateToRoleSelection()
+                    } else {
+                        Log.d(TAG, "Profile complete, navigating to citizen home")
+                        onNavigateToCitizenHome?.invoke() ?: onNavigateToRoleSelection()
+                    }
                 }
+            } else {
+                // No session — fresh start
+                Log.d(TAG, "No session found, navigating to role selection")
+                onNavigateToRoleSelection()
             }
-        } else {
-            // No session — fresh start
+        } catch (e: Exception) {
+            // If anything goes wrong reading session, clear it and start fresh
+            Log.e(TAG, "Session check crashed, clearing session", e)
+            try {
+                SessionManager.getInstance(context).clearSession()
+            } catch (_: Exception) { }
             onNavigateToRoleSelection()
         }
     }

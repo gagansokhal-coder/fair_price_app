@@ -1,5 +1,6 @@
 package com.fairprice.app.ui.screens.auth
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -37,6 +38,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,7 +57,11 @@ import com.fairprice.app.network.NetworkResult
 import com.fairprice.app.network.VerifyOtpRequest
 import com.fairprice.app.utils.SessionManager
 import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
+private const val TAG = "VerificationScreen"
 
 /**
  * OTP Verification Screen — 6-digit code entry.
@@ -65,6 +71,13 @@ import kotlinx.coroutines.delay
  * - Auto-submit when 6th digit is entered
  * - 30s countdown timer for resend
  * - VerificationPulse during verification
+ *
+ * CRASH FIX (v2):
+ * - Moved network call from LaunchedEffect to rememberCoroutineScope to survive recomposition
+ * - Added try/catch around ALL session saves and navigation
+ * - saveCitizenProfile is only called for returning users (profileRequired=false)
+ *   to prevent premature profile_complete=true for new users
+ * - Null/empty guards on body.userId before navigation
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,6 +94,7 @@ fun VerificationScreen(
     var isVisible by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) { isVisible = true }
 
@@ -96,51 +110,109 @@ fun VerificationScreen(
         }
     }
 
-    // Auto-submit when OTP is 6 digits
-    LaunchedEffect(otpValue) {
-        if (otpValue.length == 6 && !isVerifying) {
-            isVerifying = true
-            errorMessage = null
-            val result = ApiRepository.verifyOtp(VerifyOtpRequest(phone, otpValue, rationCardNo))
-            when (result) {
-                is NetworkResult.Success -> {
-                    val body = result.data
-                    if (body.verified) {
-                        // Save JWT securely
-                        val session = SessionManager.getInstance(context)
-                        session.saveAuthData(
-                            accessToken = body.accessToken,
-                            userId = body.userId
-                        )
-                        // Persist citizen identity for profile display
-                        // For returning users, the backend returns full profile data
-                        session.saveCitizenProfile(
-                            name = body.fullName.ifEmpty { session.getCitizenName() },
-                            rationCardNo = rationCardNo,
-                            phone = phone,
-                            address = body.address.ifEmpty { session.getCitizenAddress() },
-                            districtName = body.districtName.ifEmpty { session.getCitizenDistrict() },
-                            subdistrictName = body.subdistrictName.ifEmpty { session.getCitizenSubdistrict() },
-                            villageName = body.villageName.ifEmpty { session.getCitizenVillage() },
-                        )
-                        // For returning users, profile is already complete
-                        // For new users, profile gate will redirect them
-                        if (!body.profileRequired) {
-                            session.setProfileComplete(true)
+    /**
+     * Verifies OTP via backend and handles session + navigation.
+     * Called from onValueChange (via coroutineScope) — NOT from LaunchedEffect.
+     *
+     * This avoids the crash where LaunchedEffect's coroutine gets cancelled
+     * mid-navigation when the composable is disposed by the NavHost.
+     */
+    fun verifyOtp(otp: String) {
+        if (isVerifying) return
+        isVerifying = true
+        errorMessage = null
+
+        scope.launch {
+            try {
+                Log.d(TAG, "Starting OTP verification for phone=$phone")
+                val result = ApiRepository.verifyOtp(
+                    VerifyOtpRequest(phone, otp, rationCardNo)
+                )
+                when (result) {
+                    is NetworkResult.Success -> {
+                        val body = result.data
+                        Log.d(TAG, "OTP result: verified=${body.verified}, userId=${body.userId}, profileRequired=${body.profileRequired}")
+
+                        if (body.verified && body.userId.isNotBlank()) {
+                            try {
+                                // Save JWT + userId to session
+                                val session = SessionManager.getInstance(context)
+                                session.saveAuthData(
+                                    accessToken = body.accessToken.ifEmpty { "local-token" },
+                                    userId = body.userId
+                                )
+
+                                // Only save citizen profile for RETURNING users
+                                // For new users (profileRequired=true), skip this —
+                                // saveCitizenProfile internally sets profile_complete=true
+                                // which would skip ProfileSetup on next launch
+                                if (!body.profileRequired) {
+                                    session.saveCitizenProfile(
+                                        name = body.fullName.ifEmpty { "" },
+                                        rationCardNo = rationCardNo,
+                                        phone = phone,
+                                        address = body.address.ifEmpty { "" },
+                                        districtName = body.districtName.ifEmpty { "" },
+                                        subdistrictName = body.subdistrictName.ifEmpty { "" },
+                                        villageName = body.villageName.ifEmpty { "" },
+                                    )
+                                    session.setProfileComplete(true)
+                                } else {
+                                    // New user: save only basic identity, NOT profile
+                                    session.saveCitizenProfile(
+                                        name = "",
+                                        rationCardNo = rationCardNo,
+                                        phone = phone,
+                                    )
+                                    // Explicitly mark profile as incomplete
+                                    session.setProfileComplete(false)
+                                }
+
+                                Log.d(TAG, "Session saved, navigating. profileRequired=${body.profileRequired}")
+                            } catch (e: Exception) {
+                                Log.e(TAG, "Session save failed", e)
+                                // Don't block navigation — session save failure is non-fatal
+                            }
+
+                            // Navigate — this must be the LAST action
+                            try {
+                                onVerificationSuccess(body.userId, body.profileRequired)
+                            } catch (e: CancellationException) {
+                                // Expected when navigation disposes this composable
+                                Log.d(TAG, "Navigation cancelled (expected)")
+                            } catch (e: Exception) {
+                                Log.e(TAG, "Navigation failed", e)
+                                errorMessage = "Verification succeeded but navigation failed. Please restart the app."
+                                isVerifying = false
+                            }
+                        } else if (body.verified && body.userId.isBlank()) {
+                            Log.e(TAG, "Server returned verified=true but empty userId")
+                            errorMessage = "Server error: missing user ID. Please try again."
+                            otpValue = ""
+                            isVerifying = false
+                        } else {
+                            errorMessage = "Invalid OTP or expired."
+                            otpValue = ""
+                            isVerifying = false
                         }
-                        onVerificationSuccess(body.userId, body.profileRequired)
-                    } else {
-                        errorMessage = "Invalid OTP or expired."
+                    }
+                    is NetworkResult.Error -> {
+                        Log.w(TAG, "OTP verification error: ${result.message}")
+                        errorMessage = result.message
                         otpValue = ""
                         isVerifying = false
                     }
+                    else -> {
+                        isVerifying = false
+                    }
                 }
-                is NetworkResult.Error -> {
-                    errorMessage = result.message
-                    otpValue = ""
-                    isVerifying = false
-                }
-                else -> {}
+            } catch (e: CancellationException) {
+                Log.d(TAG, "Coroutine cancelled (expected during navigation)")
+            } catch (e: Exception) {
+                Log.e(TAG, "Unexpected error during OTP verification", e)
+                errorMessage = "Something went wrong. Please try again."
+                otpValue = ""
+                isVerifying = false
             }
         }
     }
@@ -235,6 +307,10 @@ fun VerificationScreen(
                         onValueChange = { newValue ->
                             if (newValue.length <= 6 && newValue.all { it.isDigit() }) {
                                 otpValue = newValue
+                                // Auto-submit on 6th digit — using scope (not LaunchedEffect)
+                                if (newValue.length == 6) {
+                                    verifyOtp(newValue)
+                                }
                             }
                         },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),

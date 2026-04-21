@@ -1,6 +1,6 @@
 module pds-backend
 
-go 1.21.1
+go 1.25.0
 
 require (
 	github.com/gin-contrib/cors v1.7.3
@@ -47,6 +47,7 @@ require (
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/time v0.15.0 // indirect
 	google.golang.org/protobuf v1.36.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
