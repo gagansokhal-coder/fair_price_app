@@ -471,10 +471,18 @@ func (h *PollHandler) SubmitPoll(c *gin.Context) {
 			`SELECT fps_id FROM users WHERE id = $1`, userIDStr).Scan(&fpsID)
 
 		if fpsID != nil {
-			h.DB.QueryRow(context.Background(),
+			err := h.DB.QueryRow(context.Background(),
 				`SELECT ST_DistanceSphere(ST_MakePoint($1, $2), location)
 				 FROM fair_price_shops WHERE fps_id = $3`,
 				req.GpsLng, req.GpsLat, *fpsID).Scan(&distanceMeters)
+
+			if err == nil && distanceMeters > 100 {
+				c.JSON(http.StatusForbidden, models.ErrorResponse{
+					Error:   "GEO_FENCE_VIOLATION",
+					Message: "You must be physically present at the Fair Price Shop.",
+				})
+				return
+			}
 		}
 	}
 
