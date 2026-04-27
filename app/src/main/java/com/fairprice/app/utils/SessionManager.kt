@@ -24,6 +24,7 @@ class SessionManager(context: Context) {
         private const val KEY_CITIZEN_SUBDISTRICT = "citizen_subdistrict"
         private const val KEY_CITIZEN_VILLAGE = "citizen_village"
         private const val KEY_PROFILE_COMPLETE = "profile_complete"
+        private const val KEY_LANGUAGE = "app_language"
 
         @Volatile
         private var INSTANCE: SessionManager? = null
@@ -124,6 +125,16 @@ class SessionManager(context: Context) {
     }
 
     fun clearSession() {
+        val lang = getLanguage() // preserve language across logouts
         prefs.edit().clear().apply()
+        if (lang != "en") saveLanguage(lang)
     }
+
+    /** Save the selected app language */
+    fun saveLanguage(languageCode: String) {
+        prefs.edit().putString(KEY_LANGUAGE, languageCode).apply()
+    }
+
+    /** Get the saved app language (defaults to English) */
+    fun getLanguage(): String = prefs.getString(KEY_LANGUAGE, "en") ?: "en"
 }

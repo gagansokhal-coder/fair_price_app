@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "FairPrice"
+rootProject.name = "lok_diksha"
 include(":app")

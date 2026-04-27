@@ -1,6 +1,9 @@
 <resources>
-    <string name="app_name">Ration Prahari</string>
+    <string name="app_name">Lok Diksha</string>
     <string name="app_tagline">Protecting Your Entitlements</string>
+    <string name="pds_subtitle">Public Distribution System</string>
+    <string name="govt_initiative">Government of India Initiative</string>
+    <string name="govt_pds_footer">Government of India • PDS Monitoring</string>
 
     <!-- Auth -->
     <string name="welcome_back">Welcome Back</string>
@@ -8,7 +11,9 @@
     <string name="citizen">Citizen</string>
     <string name="officer">Officer</string>
     <string name="citizen_desc">NFSA Beneficiary</string>
+    <string name="citizen_role_description">Verify your ration deliveries,\nparticipate in polls, and report issues.</string>
     <string name="officer_desc">District / Block Admin</string>
+    <string name="officer_role_description">Create polls, monitor responses,\nand analyze zone-level data.</string>
     <string name="ration_card_no">Ration Card Number</string>
     <string name="phone_number">Phone Number</string>
     <string name="enter_otp">Enter OTP</string>
@@ -18,18 +23,93 @@
     <string name="password">Password</string>
     <string name="select_designation">Select Designation</string>
 
+    <!-- Citizen Login -->
+    <string name="citizen_login_title">Citizen Login</string>
+    <string name="enter_ration_card">Enter your 12-digit ration card number</string>
+    <string name="enter_phone_number">Enter your mobile number</string>
+    <string name="enter_phone_hint">10-digit mobile number</string>
+    <string name="ration_card_hint">12-digit ration card number</string>
+    <string name="get_otp">Get OTP</string>
+    <string name="ration_card_error">Please enter a valid 12-digit ration card number</string>
+    <string name="phone_error">Please enter a valid 10-digit phone number</string>
+    <string name="sending_otp">Sending OTP…</string>
+    <string name="identity_verification">Identity Verification</string>
+    <string name="verify_identity_desc">Verify your identity to access PDS services.</string>
+
+    <!-- Officer Login -->
+    <string name="officer_login_title">Officer Login</string>
+    <string name="officer_login_subtitle">District and block administrators</string>
+    <string name="enter_officer_id">Enter your officer ID</string>
+    <string name="enter_password">Enter your password</string>
+    <string name="signing_in">Signing In…</string>
+    <string name="sign_in">Sign In</string>
+    <string name="officer_id_error">Please enter a valid Officer ID</string>
+    <string name="password_error">Please enter your password</string>
+    <string name="designation_error">Please select your designation</string>
+    <string name="dm">District Magistrate (DM)</string>
+    <string name="sdo">Sub-Divisional Officer (SDO)</string>
+    <string name="bdo">Block Development Officer (BDO)</string>
+
+    <!-- Verification / OTP -->
+    <string name="verification_title">Verification</string>
+    <string name="enter_otp_sent">Enter the 6-digit OTP sent to your phone</string>
+    <string name="otp_sent_to">OTP sent to +91 %1$s</string>
+    <string name="resend_otp">Resend OTP</string>
+    <string name="resend_in">Resend in %1$ds</string>
+    <string name="verifying">Verifying…</string>
+    <string name="verify_otp">Verify OTP</string>
+    <string name="otp_length_error">Please enter the complete 6-digit OTP</string>
+    <string name="otp_expired">OTP has expired. Please request a new one.</string>
+
+    <!-- Profile Setup -->
+    <string name="profile_setup_title">Complete Your Profile</string>
+    <string name="profile_setup_subtitle">Set up your profile to start using the app</string>
+    <string name="full_name">Full Name</string>
+    <string name="enter_full_name">Enter your full name</string>
+    <string name="address">Address</string>
+    <string name="enter_address">Enter your address</string>
+    <string name="select_district">Select District</string>
+    <string name="select_subdistrict">Select Sub-District</string>
+    <string name="select_village">Select Village</string>
+    <string name="gps_verification">GPS Verification</string>
+    <string name="gps_required">GPS verification is required</string>
+    <string name="gps_acquiring">Acquiring GPS…</string>
+    <string name="gps_verified">✅ GPS Verified: %1$s, %2$s</string>
+    <string name="gps_mock_detected">⚠️ Mock location detected!</string>
+    <string name="gps_unavailable">⚠️ GPS unavailable</string>
+    <string name="gps_permission_required">⚠️ GPS permission required</string>
+    <string name="verify_gps">Verify GPS</string>
+    <string name="reverify_gps">Re-verify</string>
+    <string name="gps_verification_required_msg">GPS verification is required when updating your address.</string>
+    <string name="complete_registration">Complete Registration</string>
+    <string name="registering">Registering…</string>
+    <string name="name_error">Please enter your name</string>
+
     <!-- Dashboard -->
     <string name="home">Home</string>
     <string name="history">History</string>
     <string name="profile">Profile</string>
     <string name="notifications">Notifications</string>
+    <string name="alerts">Alerts</string>
     <string name="active_polls">Active Polls</string>
     <string name="your_fps">Your Fair Price Shop</string>
     <string name="quick_actions">Quick Actions</string>
-    <string name="file_complaint">File a Complaint</string>
+    <string name="file_complaint">File Complaint</string>
     <string name="give_feedback">Give Feedback</string>
+    <string name="good_morning">Good Morning</string>
+    <string name="good_afternoon">Good Afternoon</string>
+    <string name="good_evening">Good Evening</string>
+    <string name="polls_responded">Polls Responded</string>
+    <string name="total_votes_cast">Total votes cast</string>
+    <string name="pending">Pending</string>
+    <string name="active_polls_label">Active polls</string>
+    <string name="no_active_polls">No active polls right now</string>
+    <string name="check_back_polls">Check back when new polls are created for your area</string>
+    <string name="active">Active</string>
+    <string name="options_format">%1$d options • %2$s</string>
+    <string name="dashboard">Dashboard</string>
 
-    <!-- Poll -->
+    <!-- Poll Voting -->
     <string name="verify_ration">Verify Ration Receipt</string>
     <string name="did_you_receive">Did you receive your ration?</string>
     <string name="yes_received">Yes, I Received</string>
@@ -38,15 +118,167 @@
     <string name="response_recorded">Response Recorded!</string>
     <string name="geofence_warning">You must be at your Fair Price Shop</string>
     <string name="location_verified">Location Verified</string>
+    <string name="location_checking">Checking location…</string>
+    <string name="location_not_verified">Location not verified</string>
+    <string name="submitting">Submitting…</string>
+    <string name="select_option">Please select an option</string>
+    <string name="poll_question">Poll Question</string>
+    <string name="vote_on_poll">Vote on Poll</string>
+    <string name="your_location">Your Location</string>
+    <string name="geofence_violation">You must be physically present at the Fair Price Shop.</string>
+
+    <!-- History -->
+    <string name="response_history">Response History</string>
+    <string name="no_responses_yet">No responses yet</string>
+    <string name="no_responses_desc">Your poll responses will appear here</string>
+    <string name="received_label">Received</string>
+    <string name="not_received_label">Not Received</string>
+    <string name="responses_count">%1$d responses</string>
+
+    <!-- Complaint -->
+    <string name="complaint_title">File a Complaint</string>
+    <string name="complaint_type">Complaint Type</string>
+    <string name="complaint_description">Description</string>
+    <string name="complaint_desc_hint">Describe your complaint in detail…</string>
+    <string name="submit_complaint">Submit Complaint</string>
+    <string name="complaint_short_stock">Short Stock</string>
+    <string name="complaint_overcharging">Overcharging</string>
+    <string name="complaint_poor_quality">Poor Quality Grain</string>
+    <string name="complaint_shop_closed">Shop Not Open</string>
+    <string name="complaint_denied_ration">Denied Ration</string>
+    <string name="complaint_other">Other</string>
+
+    <!-- Feedback -->
+    <string name="feedback_title">Give Feedback</string>
+    <string name="rate_experience">Rate Your Experience</string>
+    <string name="feedback_comments">Additional Comments</string>
+    <string name="feedback_hint">Tell us about your experience…</string>
+    <string name="submit_feedback">Submit Feedback</string>
+    <string name="rating_very_poor">Very Poor</string>
+    <string name="rating_poor">Poor</string>
+    <string name="rating_average">Average</string>
+    <string name="rating_good">Good</string>
+    <string name="rating_excellent">Excellent</string>
+
+    <!-- Success -->
+    <string name="success_title">Success!</string>
+    <string name="response_submitted_desc">Your response has been recorded successfully.</string>
+    <string name="complaint_submitted_desc">Your complaint has been submitted successfully.</string>
+    <string name="feedback_submitted_desc">Your feedback has been submitted. Thank you!</string>
+    <string name="go_home">Go to Home</string>
+    <string name="thank_you">Thank you for your participation</string>
+
+    <!-- Profile -->
+    <string name="personal_information">Personal Information</string>
+    <string name="officer_information">Officer Information</string>
+    <string name="registered_phone">Registered Phone</string>
+    <string name="location_label">Location</string>
+    <string name="sub_district_prefix">Sub-District: %1$s</string>
+    <string name="district_prefix">District: %1$s</string>
+    <string name="nfsa_beneficiary">NFSA Beneficiary</string>
+    <string name="address_location">Address &amp; Location</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="saving">Saving…</string>
+    <string name="logout">Logout</string>
+    <string name="logout_confirm_title">Logout</string>
+    <string name="logout_confirm_message">Are you sure you want to logout? You will need to verify your identity again to access the app.</string>
+    <string name="designation_label">Designation</string>
+    <string name="role_label">Role</string>
+    <string name="district_label">District</string>
+    <string name="app_version">Lok Diksha v1.0.0</string>
+    <string name="pds_monitoring_footer">PDS Monitoring • Government of India</string>
+
+    <!-- Language -->
+    <string name="language">Language</string>
+    <string name="select_language">Select Language</string>
+    <string name="language_english">English</string>
+    <string name="language_hindi">हिन्दी</string>
+    <string name="language_punjabi">ਪੰਜਾਬੀ</string>
+    <string name="language_changed">Language changed</string>
 
     <!-- Admin -->
     <string name="create_poll">Create New Poll</string>
+    <string name="poll_analytics">Poll Analytics</string>
+    <string name="manage_officers">Manage Officers</string>
     <string name="target_level">Target Level</string>
     <string name="select_commodity">Select Commodity</string>
     <string name="zone_analysis">Zone Analysis</string>
     <string name="response_rate">Response Rate</string>
     <string name="total_responses">Total Responses</string>
     <string name="discrepancies">Discrepancies</string>
+    <string name="recent_polls">Recent Polls</string>
+    <string name="no_polls_created">No polls created yet</string>
+    <string name="create_poll_desc">Create a poll to start collecting responses</string>
+    <string name="all_polls_combined">All polls combined</string>
+    <string name="positive_rate">Positive Rate</string>
+    <string name="avg_across_zones">Avg across zones</string>
+    <string name="healthy">✓ Healthy</string>
+    <string name="red_zones">Red Zones</string>
+    <string name="below_40_positive">Below 40%% positive</string>
+    <string name="action_needed">⚠ Action needed</string>
+    <string name="none_label">✓ None</string>
+    <string name="total_zones">Total Zones</string>
+    <string name="monitored_areas">Monitored areas</string>
+    <string name="welcome_officer">Welcome, %1$s</string>
+    <string name="closed">Closed</string>
+
+    <!-- Create Poll -->
+    <string name="create_poll_title">Create Poll</string>
+    <string name="poll_title">Poll Title</string>
+    <string name="poll_title_hint">e.g. Wheat Distribution Check</string>
+    <string name="select_target_level">Select Target Level</string>
+    <string name="target_code">Target Code</string>
+    <string name="target_code_hint">e.g. D001, B123</string>
+    <string name="poll_options">Poll Options</string>
+    <string name="add_option">Add Option</string>
+    <string name="remove_option">Remove</string>
+    <string name="option_hint">Option %1$d</string>
+    <string name="creating_poll">Creating Poll…</string>
+    <string name="poll_created">Poll created successfully!</string>
+    <string name="poll_create_error">Failed to create poll</string>
+    <string name="state">State</string>
+    <string name="district">District</string>
+    <string name="block">Block</string>
+    <string name="panchayat">Panchayat</string>
+    <string name="fps">FPS</string>
+
+    <!-- Poll Analytics -->
+    <string name="analytics_title">Poll Analytics</string>
+    <string name="total_polls">Total Polls</string>
+    <string name="active_count">Active</string>
+    <string name="poll_details">Poll Details</string>
+    <string name="no_analytics_data">No analytics data available</string>
+
+    <!-- Zone Analysis -->
+    <string name="zone_analysis_title">Zone Analysis</string>
+    <string name="loading_zones">Loading zone data…</string>
+    <string name="no_zone_data">No zone data available</string>
+    <string name="positive_pct">Positive: %1$.1f%%</string>
+    <string name="negative_pct">Negative: %1$.1f%%</string>
+    <string name="total_label">Total: %1$d</string>
+    <string name="red_zone">Red Zone</string>
+    <string name="yellow_zone">Yellow Zone</string>
+    <string name="green_zone">Green Zone</string>
+
+    <!-- Notifications -->
+    <string name="notifications_title">Notifications</string>
+    <string name="no_notifications">No notifications yet</string>
+    <string name="no_notifications_desc">You will receive notifications when new polls are created.</string>
+
+    <!-- Officer List -->
+    <string name="officer_directory">Officer Directory</string>
+    <string name="add_officer">Add Officer</string>
+    <string name="no_officers">No officers found</string>
+    <string name="create_officer_title">Create Officer</string>
+    <string name="officer_name">Officer Name</string>
+    <string name="officer_name_hint">Enter officer name</string>
+    <string name="officer_id_hint">Enter officer ID</string>
+    <string name="officer_password_hint">Set initial password</string>
+    <string name="officer_district_hint">Enter district name</string>
+    <string name="creating_officer">Creating Officer…</string>
+    <string name="officer_created">Officer created successfully!</string>
+    <string name="officer_create_error">Failed to create officer</string>
 
     <!-- General -->
     <string name="submit">Submit</string>
@@ -55,4 +287,7 @@
     <string name="loading">Loading…</string>
     <string name="error_occurred">An error occurred</string>
     <string name="retry">Retry</string>
+    <string name="navigate">Navigate</string>
+    <string name="shield">Shield</string>
+    <string name="ok">OK</string>
 </resources>

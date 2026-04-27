@@ -1,5 +1,6 @@
 package com.fairprice.app
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,14 +10,21 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import com.fairprice.app.ui.theme.FairPriceTheme
+import com.fairprice.app.utils.LocaleManager
 
 import com.fairprice.app.network.RetrofitClient
 
 /**
  * Main entry point — Single Activity with Compose.
  * Edge-to-edge rendering for the premium "Dignified Anchor" design.
+ * Locale wrapping ensures all getString() calls respect user's language choice.
  */
 class MainActivity : ComponentActivity() {
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleManager.wrapContext(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         RetrofitClient.initialize(this)
