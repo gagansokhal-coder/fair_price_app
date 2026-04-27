@@ -27,7 +27,7 @@ import androidx.compose.material.icons.rounded.Grain
 import androidx.compose.material.icons.rounded.HowToVote
 import androidx.compose.material.icons.rounded.People
 import androidx.compose.material.icons.rounded.Poll
-import androidx.compose.material.icons.rounded.TrendingUp
+import androidx.compose.material.icons.automirrored.rounded.TrendingUp
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -44,8 +44,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.fairprice.app.R
 import com.fairprice.app.network.AnalyticsSummaryResponse
 import com.fairprice.app.network.ApiRepository
 import com.fairprice.app.network.CustomPoll
@@ -87,8 +89,8 @@ fun AdminDashboardScreen(
 
     val context = LocalContext.current
     val session = remember { SessionManager.getInstance(context) }
-    val officerName = session.getOfficerName().ifEmpty { "Officer" }
-    val designation = session.getOfficerDesignation().ifEmpty { "Admin" }
+    val officerName = session.getOfficerName().ifEmpty { stringResource(R.string.officer_name_placeholder) }
+    val designation = session.getOfficerDesignation().ifEmpty { stringResource(R.string.admin) }
     val districtName = session.getOfficerDistrictName()
 
     // Fetch real data from backend
@@ -147,7 +149,7 @@ fun AdminDashboardScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = "Welcome, $officerName",
+                        text = stringResource(R.string.welcome_officer_name, officerName),
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -178,18 +180,18 @@ fun AdminDashboardScreen(
                 ) {
                     StatCard(
                         icon = Icons.Rounded.HowToVote,
-                        label = "Total Responses",
+                        label = stringResource(R.string.total_responses),
                         value = fmt.format(totalResponses),
                         modifier = Modifier.weight(1f),
-                        subtitle = "All polls combined",
+                        subtitle = stringResource(R.string.all_polls_combined),
                     )
                     StatCard(
-                        icon = Icons.Rounded.TrendingUp,
-                        label = "Positive Rate",
+                        icon = Icons.AutoMirrored.Rounded.TrendingUp,
+                        label = stringResource(R.string.positive_rate),
                         value = "${avgPositive}%",
                         modifier = Modifier.weight(1f),
-                        subtitle = "Avg across zones",
-                        trend = if (avgPositive >= 70) "✓ Healthy" else "",
+                        subtitle = stringResource(R.string.avg_across_zones),
+                        trend = if (avgPositive >= 70) stringResource(R.string.healthy) else "",
                     )
                 }
             }
@@ -203,11 +205,11 @@ fun AdminDashboardScreen(
                 ) {
                     StatCard(
                         icon = Icons.Rounded.Warning,
-                        label = "Red Zones",
+                        label = stringResource(R.string.red_zones),
                         value = "$redZones",
                         modifier = Modifier.weight(1f),
-                        subtitle = "Below 40% positive",
-                        trend = if (redZones > 0) "⚠ Action needed" else "✓ None",
+                        subtitle = stringResource(R.string.below_40_positive),
+                        trend = if (redZones > 0) stringResource(R.string.action_needed) else stringResource(R.string.none_label),
                         trendColor = if (redZones > 0) MaterialTheme.colorScheme.error
                             else MaterialTheme.colorScheme.primary,
                         iconTint = MaterialTheme.colorScheme.tertiary,
@@ -215,10 +217,10 @@ fun AdminDashboardScreen(
                     )
                     StatCard(
                         icon = Icons.Rounded.Analytics,
-                        label = "Total Zones",
+                        label = stringResource(R.string.total_zones),
                         value = "$totalZones",
                         modifier = Modifier.weight(1f),
-                        subtitle = "Monitored areas",
+                        subtitle = stringResource(R.string.monitored_areas),
                     )
                 }
             }
@@ -227,28 +229,28 @@ fun AdminDashboardScreen(
         // Action Buttons
         item {
             GradientButton(
-                text = "Create New Poll",
+                text = stringResource(R.string.create_poll),
                 onClick = onCreatePoll,
             )
         }
 
         item {
             OutlinedActionButton(
-                text = "Poll Analytics",
+                text = stringResource(R.string.poll_analytics),
                 onClick = onPollAnalytics,
             )
         }
 
         item {
             OutlinedActionButton(
-                text = "Manage Officers",
+                text = stringResource(R.string.manage_officers),
                 onClick = onManageOfficers,
             )
         }
 
         item {
             OutlinedActionButton(
-                text = "Zone Analysis",
+                text = stringResource(R.string.zone_analysis),
                 onClick = onZoneAnalysis,
             )
         }
@@ -256,7 +258,7 @@ fun AdminDashboardScreen(
         // Recent Polls — REAL DATA from backend
         item {
             Text(
-                text = "Recent Polls",
+                text = stringResource(R.string.recent_polls),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -287,13 +289,13 @@ fun AdminDashboardScreen(
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = "No polls created yet",
+                            text = stringResource(R.string.no_polls_created_yet),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                             textAlign = TextAlign.Center,
                         )
                         Text(
-                            text = "Create a poll to start collecting responses",
+                            text = stringResource(R.string.recent_polls_empty_desc),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
                             textAlign = TextAlign.Center,
@@ -334,20 +336,20 @@ fun AdminDashboardScreen(
                                 fontWeight = FontWeight.SemiBold,
                             )
                             Text(
-                                text = "${poll.targetLevel}: ${poll.targetCode} • ${poll.createdAt.take(10)}",
+                                text = stringResource(R.string.poll_target_date, poll.targetLevel, poll.targetCode, poll.createdAt.take(10)),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "${poll.totalResponses} responses • ${poll.options.size} options",
+                                text = stringResource(R.string.poll_responses_options, poll.totalResponses, poll.options.size),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                             )
                         }
 
                         StatusBadge(
-                            text = if (poll.isActive) "Active" else "Closed",
+                            text = if (poll.isActive) stringResource(R.string.active) else stringResource(R.string.closed),
                             type = if (poll.isActive) BadgeType.SUCCESS else BadgeType.INFO,
                         )
                     }

@@ -19,6 +19,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Badge
+import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.GpsFixed
 import androidx.compose.material.icons.rounded.Home
@@ -26,6 +27,7 @@ import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material.icons.rounded.Shield
+import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material.icons.rounded.Work
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -49,10 +51,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.fairprice.app.R
 import com.fairprice.app.ui.components.FairPriceCard
 import com.fairprice.app.ui.components.GradientButton
 import com.fairprice.app.ui.components.InfoSlab
@@ -105,14 +109,14 @@ fun ProfileScreen(
             onDismissRequest = { showLogoutDialog = false },
             title = {
                 Text(
-                    text = "Logout",
+                    text = stringResource(R.string.logout_confirm_title),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                 )
             },
             text = {
                 Text(
-                    text = "Are you sure you want to logout? You will need to verify your identity again to access the app.",
+                    text = stringResource(R.string.logout_confirm_message),
                     style = MaterialTheme.typography.bodyLarge,
                 )
             },
@@ -124,7 +128,7 @@ fun ProfileScreen(
                     }
                 ) {
                     Text(
-                        text = "Logout",
+                        text = stringResource(R.string.logout),
                         color = MaterialTheme.colorScheme.error,
                         fontWeight = FontWeight.SemiBold,
                     )
@@ -133,7 +137,7 @@ fun ProfileScreen(
             dismissButton = {
                 TextButton(onClick = { showLogoutDialog = false }) {
                     Text(
-                        text = "Cancel",
+                        text = stringResource(R.string.cancel),
                         fontWeight = FontWeight.Medium,
                     )
                 }
@@ -156,7 +160,7 @@ fun ProfileScreen(
         TopAppBar(
             title = {
                 Text(
-                    text = "Profile",
+                    text = stringResource(R.string.profile),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -165,7 +169,7 @@ fun ProfileScreen(
                 IconButton(onClick = onBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Back",
+                        contentDescription = stringResource(R.string.back),
                     )
                 }
             },
@@ -181,7 +185,7 @@ fun ProfileScreen(
                     }) {
                         Icon(
                             imageVector = Icons.Rounded.Edit,
-                            contentDescription = "Edit Profile",
+                            contentDescription = stringResource(R.string.edit_profile),
                             tint = MaterialTheme.colorScheme.primary,
                         )
                     }
@@ -220,25 +224,27 @@ fun ProfileScreen(
                         isSaving = isSaving,
                         onVerifyGps = {
                             scope.launch {
-                                gpsStatus = "Acquiring GPS…"
+                                gpsStatus = context.getString(R.string.gps_acquiring)
                                 try {
                                     val location = DeviceUtils.getCurrentLocation(context)
                                     if (location != null) {
                                         if (DeviceUtils.isMockLocation(location)) {
-                                            gpsStatus = "⚠️ Mock location detected!"
+                                            gpsStatus = context.getString(R.string.gps_mock_detected)
                                             gpsVerified = false
                                         } else {
-                                            gpsStatus = "✅ GPS Verified: ${
-                                                String.format("%.4f", location.latitude)
-                                            }, ${String.format("%.4f", location.longitude)}"
+                                            gpsStatus = context.getString(
+                                                R.string.gps_verified,
+                                                String.format("%.4f", location.latitude),
+                                                String.format("%.4f", location.longitude)
+                                            )
                                             gpsVerified = true
                                         }
                                     } else {
-                                        gpsStatus = "⚠️ GPS unavailable"
+                                        gpsStatus = context.getString(R.string.gps_unavailable)
                                         gpsVerified = false
                                     }
                                 } catch (_: Exception) {
-                                    gpsStatus = "⚠️ GPS permission required"
+                                    gpsStatus = context.getString(R.string.gps_permission_required)
                                     gpsVerified = false
                                 }
                             }
@@ -263,17 +269,97 @@ fun ProfileScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
+                // ─── Language Selector ────────────────────────────
+                Text(
+                    text = stringResource(R.string.language_settings),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = stringResource(R.string.language_settings_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                val currentLang = com.fairprice.app.utils.LocaleManager.getLanguage(context)
+                val languages = com.fairprice.app.utils.LocaleManager.getSupportedLanguages()
+
+                languages.forEach { (code, displayName) ->
+                    val isSelected = code == currentLang
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                            .clip(ShapeTokens.Card)
+                            .background(
+                                if (isSelected) MaterialTheme.colorScheme.primaryContainer
+                                else MaterialTheme.colorScheme.surfaceContainerHighest
+                            )
+                            .then(
+                                if (!isSelected) Modifier.then(
+                                    Modifier.clip(ShapeTokens.Card)
+                                ) else Modifier
+                            )
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Translate,
+                            contentDescription = displayName,
+                            modifier = Modifier.size(20.dp),
+                            tint = if (isSelected) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = displayName,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                            color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
+                            else MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f),
+                        )
+                        if (isSelected) {
+                            Icon(
+                                imageVector = Icons.Rounded.CheckCircle,
+                                contentDescription = stringResource(R.string.selected),
+                                modifier = Modifier.size(20.dp),
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                        } else {
+                            TextButton(onClick = {
+                                com.fairprice.app.utils.LocaleManager.setLocale(context, code)
+                                (context as? android.app.Activity)?.recreate()
+                            }) {
+                                Text(
+                                    text = stringResource(R.string.select),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
                 // App Info
                 FairPriceCard(
                     containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
                 ) {
                     Text(
-                        text = "Ration Prahari v1.0.0",
+                        text = stringResource(R.string.app_version),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                     )
                     Text(
-                        text = "PDS Monitoring • Government of India",
+                        text = stringResource(R.string.pds_monitoring_footer),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
                     )
@@ -283,7 +369,7 @@ fun ProfileScreen(
 
                 // Logout Button
                 OutlinedActionButton(
-                    text = "Logout",
+                    text = stringResource(R.string.logout),
                     onClick = { showLogoutDialog = true },
                 )
 
@@ -297,7 +383,7 @@ fun ProfileScreen(
 @Composable
 private fun OfficerProfileContent(session: SessionManager) {
     Text(
-        text = "Officer Information",
+        text = stringResource(R.string.officer_information),
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.SemiBold,
         color = MaterialTheme.colorScheme.onSurface,
@@ -307,15 +393,15 @@ private fun OfficerProfileContent(session: SessionManager) {
 
     InfoSlab(
         icon = Icons.Rounded.Person,
-        title = "Full Name",
-        value = session.getOfficerName().ifEmpty { "Officer" },
+        title = stringResource(R.string.full_name),
+        value = session.getOfficerName().ifEmpty { stringResource(R.string.officer) },
     )
 
     Spacer(modifier = Modifier.height(12.dp))
 
     InfoSlab(
         icon = Icons.Rounded.Shield,
-        title = "Role",
+        title = stringResource(R.string.role_label),
         value = session.getOfficerRole().ifEmpty { "—" },
         subtitle = session.getOfficerDesignation().ifEmpty { null },
     )
@@ -324,7 +410,7 @@ private fun OfficerProfileContent(session: SessionManager) {
 
     InfoSlab(
         icon = Icons.Rounded.Work,
-        title = "Designation",
+        title = stringResource(R.string.designation_label),
         value = session.getOfficerDesignation().ifEmpty { "—" },
     )
 
@@ -332,7 +418,7 @@ private fun OfficerProfileContent(session: SessionManager) {
 
     InfoSlab(
         icon = Icons.Rounded.LocationOn,
-        title = "District",
+        title = stringResource(R.string.district_label),
         value = session.getOfficerDistrictName().ifEmpty { "—" },
     )
 }
@@ -342,7 +428,7 @@ private fun OfficerProfileContent(session: SessionManager) {
 private fun CitizenProfileContent(session: SessionManager) {
     // Personal Information
     Text(
-        text = "Personal Information",
+        text = stringResource(R.string.personal_information),
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.SemiBold,
         color = MaterialTheme.colorScheme.onSurface,
@@ -352,17 +438,17 @@ private fun CitizenProfileContent(session: SessionManager) {
 
     InfoSlab(
         icon = Icons.Rounded.Person,
-        title = "Full Name",
-        value = session.getCitizenName().ifEmpty { "Citizen" },
+        title = stringResource(R.string.full_name),
+        value = session.getCitizenName().ifEmpty { stringResource(R.string.citizen) },
     )
 
     Spacer(modifier = Modifier.height(12.dp))
 
     InfoSlab(
         icon = Icons.Rounded.Badge,
-        title = "Ration Card Number",
+        title = stringResource(R.string.ration_card_no),
         value = session.getCitizenRationCard().ifEmpty { "—" },
-        subtitle = "NFSA Beneficiary",
+        subtitle = stringResource(R.string.nfsa_beneficiary),
     )
 
     Spacer(modifier = Modifier.height(12.dp))
@@ -370,7 +456,7 @@ private fun CitizenProfileContent(session: SessionManager) {
     val phone = session.getCitizenPhone()
     InfoSlab(
         icon = Icons.Rounded.Phone,
-        title = "Registered Phone",
+        title = stringResource(R.string.registered_phone),
         value = if (phone.length >= 10) "+91 ${phone.substring(0, 5)} ${phone.substring(5)}"
         else phone.ifEmpty { "—" },
     )
@@ -379,7 +465,7 @@ private fun CitizenProfileContent(session: SessionManager) {
 
     // Address & Location
     Text(
-        text = "Address & Location",
+        text = stringResource(R.string.address_location),
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.SemiBold,
         color = MaterialTheme.colorScheme.onSurface,
@@ -391,7 +477,7 @@ private fun CitizenProfileContent(session: SessionManager) {
     if (address.isNotEmpty()) {
         InfoSlab(
             icon = Icons.Rounded.Home,
-            title = "Address",
+            title = stringResource(R.string.address),
             value = address,
         )
         Spacer(modifier = Modifier.height(12.dp))
@@ -404,13 +490,13 @@ private fun CitizenProfileContent(session: SessionManager) {
     if (district.isNotEmpty() || village.isNotEmpty()) {
         InfoSlab(
             icon = Icons.Rounded.LocationOn,
-            title = "Location",
+            title = stringResource(R.string.location_label),
             value = village.ifEmpty { "—" },
             subtitle = buildString {
-                if (subdistrict.isNotEmpty()) append("Sub-District: $subdistrict")
+                if (subdistrict.isNotEmpty()) append("${stringResource(R.string.sub_district_prefix, subdistrict)}")
                 if (district.isNotEmpty()) {
                     if (isNotEmpty()) append(" • ")
-                    append("District: $district")
+                    append(stringResource(R.string.district_prefix, district))
                 }
             }.ifEmpty { null },
         )
@@ -432,7 +518,7 @@ private fun CitizenEditContent(
     onCancel: () -> Unit,
 ) {
     Text(
-        text = "Edit Profile",
+        text = stringResource(R.string.edit_profile),
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.SemiBold,
         color = MaterialTheme.colorScheme.onSurface,
@@ -441,7 +527,7 @@ private fun CitizenEditContent(
     Spacer(modifier = Modifier.height(8.dp))
 
     Text(
-        text = "GPS verification is required when updating your address.",
+        text = stringResource(R.string.gps_verification_required_msg),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
@@ -452,14 +538,14 @@ private fun CitizenEditContent(
     SoftTrayInput(
         value = editName,
         onValueChange = onNameChange,
-        label = "Full Name",
-        placeholder = "Enter your full name",
+        label = stringResource(R.string.full_name),
+        placeholder = stringResource(R.string.enter_full_name),
         keyboardType = KeyboardType.Text,
         imeAction = ImeAction.Next,
         leadingIcon = {
             Icon(
                 imageVector = Icons.Rounded.Person,
-                contentDescription = "Name",
+                contentDescription = stringResource(R.string.name_icon),
                 modifier = Modifier.size(22.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -473,14 +559,14 @@ private fun CitizenEditContent(
     SoftTrayInput(
         value = editAddress,
         onValueChange = onAddressChange,
-        label = "Address",
-        placeholder = "Enter your address",
+        label = stringResource(R.string.address),
+        placeholder = stringResource(R.string.enter_address),
         keyboardType = KeyboardType.Text,
         imeAction = ImeAction.Done,
         leadingIcon = {
             Icon(
                 imageVector = Icons.Rounded.Home,
-                contentDescription = "Address",
+                contentDescription = stringResource(R.string.address_icon),
                 modifier = Modifier.size(22.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -501,7 +587,7 @@ private fun CitizenEditContent(
     ) {
         Icon(
             imageVector = Icons.Rounded.GpsFixed,
-            contentDescription = "GPS",
+            contentDescription = stringResource(R.string.gps_icon),
             tint = if (gpsVerified) MaterialTheme.colorScheme.primary
             else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(20.dp),
@@ -509,14 +595,14 @@ private fun CitizenEditContent(
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = if (gpsStatus.isEmpty()) "GPS verification required" else gpsStatus,
+                text = if (gpsStatus.isEmpty()) stringResource(R.string.gps_required) else gpsStatus,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         TextButton(onClick = onVerifyGps) {
             Text(
-                text = if (gpsVerified) "Re-verify" else "Verify GPS",
+                text = if (gpsVerified) stringResource(R.string.reverify_gps) else stringResource(R.string.verify_gps),
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary,
@@ -528,7 +614,7 @@ private fun CitizenEditContent(
 
     // Save Button
     GradientButton(
-        text = if (isSaving) "Saving…" else "Save Changes",
+        text = if (isSaving) stringResource(R.string.saving) else stringResource(R.string.save_changes),
         onClick = onSave,
         enabled = editName.isNotBlank() && gpsVerified && !isSaving,
     )
@@ -537,7 +623,7 @@ private fun CitizenEditContent(
 
     // Cancel Button
     OutlinedActionButton(
-        text = "Cancel",
+        text = stringResource(R.string.cancel),
         onClick = onCancel,
     )
 }

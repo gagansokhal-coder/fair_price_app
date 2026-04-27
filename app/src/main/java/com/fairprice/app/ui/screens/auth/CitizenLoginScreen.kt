@@ -40,10 +40,12 @@ import com.fairprice.app.network.NetworkResult
 import kotlinx.coroutines.launch
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.fairprice.app.R
 import com.fairprice.app.ui.components.GradientButton
 import com.fairprice.app.ui.components.SoftTrayInput
 import com.fairprice.app.ui.theme.SteadyPulseEasing
@@ -123,7 +125,7 @@ fun CitizenLoginScreen(
                 IconButton(onClick = onBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Back",
+                        contentDescription = stringResource(R.string.back),
                     )
                 }
             },
@@ -146,7 +148,7 @@ fun CitizenLoginScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Citizen Login",
+                    text = stringResource(R.string.citizen_login_title),
                     style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -155,7 +157,7 @@ fun CitizenLoginScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Enter your Ration Card number and registered mobile number to receive an OTP.",
+                    text = stringResource(R.string.enter_ration_card),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -171,8 +173,8 @@ fun CitizenLoginScreen(
                             rationCardError = null
                         }
                     },
-                    label = "Ration Card Number",
-                    placeholder = "Enter 12-digit number",
+                    label = stringResource(R.string.ration_card_no),
+                    placeholder = stringResource(R.string.ration_card_hint),
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Next,
                     isError = rationCardError != null,
@@ -180,7 +182,7 @@ fun CitizenLoginScreen(
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Rounded.Badge,
-                            contentDescription = "Ration Card",
+                            contentDescription = stringResource(R.string.ration_card_no),
                             modifier = Modifier.size(22.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -199,8 +201,8 @@ fun CitizenLoginScreen(
                             phoneError = null
                         }
                     },
-                    label = "Phone Number",
-                    placeholder = "Enter 10-digit mobile number",
+                    label = stringResource(R.string.phone_number),
+                    placeholder = stringResource(R.string.enter_phone_hint),
                     keyboardType = KeyboardType.Phone,
                     imeAction = ImeAction.Done,
                     isError = phoneError != null,
@@ -208,7 +210,7 @@ fun CitizenLoginScreen(
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Rounded.Phone,
-                            contentDescription = "Phone",
+                            contentDescription = stringResource(R.string.phone_number),
                             modifier = Modifier.size(22.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -220,15 +222,15 @@ fun CitizenLoginScreen(
 
                 // Login Button
                 GradientButton(
-                    text = if (isLoading) "Requesting..." else "Get OTP",
+                    text = if (isLoading) stringResource(R.string.sending_otp) else stringResource(R.string.get_otp),
                     onClick = {
                         var hasError = false
                         if (rationCardNo.length != 12) {
-                            rationCardError = "Ration card must be 12 digits"
+                            rationCardError = context.getString(R.string.ration_card_error)
                             hasError = true
                         }
                         if (phoneNumber.length != 10) {
-                            phoneError = "Phone number must be 10 digits"
+                            phoneError = context.getString(R.string.phone_error)
                             hasError = true
                         }
                         if (!hasError) {

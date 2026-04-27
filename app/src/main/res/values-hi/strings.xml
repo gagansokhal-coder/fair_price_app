@@ -170,6 +170,9 @@
     <string name="language_hindi">हिन्दी</string>
     <string name="language_punjabi">ਪੰਜਾਬੀ</string>
     <string name="language_changed">भाषा बदल दी गई</string>
+    <string name="language_settings">भाषा सेटिंग्स</string>
+    <string name="language_settings_desc">एप्लिकेशन इंटरफ़ेस के लिए अपनी पसंदीदा भाषा चुनें।</string>
+    <string name="select">चुनें</string>
     <string name="create_poll">नया पोल बनाएं</string>
     <string name="poll_analytics">पोल विश्लेषण</string>
     <string name="manage_officers">अधिकारी प्रबंधन</string>
@@ -250,4 +253,51 @@
     <string name="navigate">नेविगेट</string>
     <string name="shield">ढाल</string>
     <string name="ok">ठीक है</string>
+
+
+    <!-- Citizen Screen Extras -->
+    <string name="poll_not_found">पोल नहीं मिला</string>
+    <string name="select_your_response">अपनी प्रतिक्रिया चुनें</string>
+    <string name="verifying_location">आपका स्थान सत्यापित हो रहा है…</string>
+    <string name="mock_location_detected">नकली स्थान पकड़ा गया</string>
+    <string name="mock_location_blocked">⛔ नकली स्थान पकड़ा गया — सबमिशन अवरुद्ध</string>
+    <string name="gps_enable_location">⚠️ GPS उपलब्ध नहीं — स्थान सेवाएं सक्षम करें</string>
+    <string name="location_permission_required">⚠️ स्थान अनुमति आवश्यक है</string>
+    <string name="location_unavailable">स्थान अनुपलब्ध</string>
+    <string name="submit_vote">वोट सबमिट करें</string>
+    <string name="already_voted">पहले ही वोट दिया</string>
+    <string name="already_voted_msg">आपने इस पोल पर पहले ही वोट दिया है।</string>
+    <string name="your_vote_format">आपका वोट: %1$s</string>
+    <string name="unable_to_load_history">इतिहास लोड करने में असमर्थ</string>
+    <string name="responses_appear_after_vote">वोट देने के बाद आपकी पोल प्रतिक्रियाएं यहां दिखाई देंगी</string>
+    <string name="no_history">कोई इतिहास नहीं</string>
+    <string name="characters_count">%1$d अक्षर</string>
+    <string name="complaint_review_notice">आपकी शिकायत की जिला प्रशासन द्वारा 48 घंटों के भीतर समीक्षा की जाएगी।</string>
+    <string name="select_complaint_type">शिकायत का प्रकार चुनें</string>
+    <string name="complaint_desc_detail_hint">समस्या का विस्तार से वर्णन करें (न्यूनतम 10 अक्षर)</string>
+    <string name="fair_price_shop">उचित मूल्य की दुकान</string>
+    <string name="how_was_visit">रामपुर FPS #127 की\nआपकी अंतिम यात्रा कैसी रही?</string>
+    <string name="comment_optional">टिप्पणी (वैकल्पिक)</string>
+    <string name="share_feedback_hint">अतिरिक्त प्रतिक्रिया साझा करें…</string>
+    <string name="back_to_home">होम पर वापस जाएं</string>
+    <string name="response_submitted_success">आपकी सत्यापन प्रतिक्रिया\nसफलतापूर्वक सबमिट की गई है।</string>
+    <string name="district_notified">जिला प्रशासन को\nआपकी प्रतिक्रिया की सूचना दी जाएगी।</string>
+    <string name="mock_blocked_notice">⛔ नकली स्थान प्रदाता पकड़े जाने के कारण वोटिंग अवरुद्ध है। किसी भी GPS स्पूफिंग ऐप को बंद करें और पुनः प्रयास करें।</string>
+    <string name="rate_limit_error">⏳ बहुत अधिक प्रयास। पुनः प्रयास से पहले 60 सेकंड प्रतीक्षा करें।</string>
+    <string name="area_mismatch_error">🚫 यह पोल आपके क्षेत्र के लिए लक्षित नहीं है।</string>
+    <string name="poll_expired_error">⏰ यह पोल समाप्त हो गया है।</string>
+    <string name="poll_closed_error">यह पोल अब सक्रिय नहीं है।</string>
+    <string name="complaint_ration_not_received">राशन नहीं मिला</string>
+    <string name="complaint_short_quantity">कम मात्रा में वितरण</string>
+    <string name="complaint_dealer_misbehavior">डीलर का दुर्व्यवहार</string>
+    <string name="complaint_shop_not_open">दुकान समय पर नहीं खुली</string>
+    <string name="selected">चयनित</string>
+    <string name="not_selected">अचयनित</string>
+    <string name="name_icon">नाम</string>
+    <string name="address_icon">पता</string>
+    <string name="gps_icon">GPS</string>
+    <string name="dropdown_icon">ड्रॉपडाउन</string>
+    <string name="fps_icon">एफपीएस</string>
+    <string name="success_icon">सफल</string>
+    <string name="star_rating">स्टार %1$d</string>
 </resources>

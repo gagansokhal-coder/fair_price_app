@@ -52,7 +52,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.fairprice.app.R
 import com.fairprice.app.network.ApiRepository
 import com.fairprice.app.network.LgdItem
 import com.fairprice.app.network.NetworkResult
@@ -199,7 +201,7 @@ fun CreatePollScreen(
         TopAppBar(
             title = {
                 Text(
-                    text = "Create Custom Poll",
+                    text = stringResource(R.string.create_custom_poll),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -208,7 +210,7 @@ fun CreatePollScreen(
                 IconButton(onClick = onBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Back",
+                        contentDescription = stringResource(R.string.back),
                     )
                 }
             },
@@ -231,7 +233,7 @@ fun CreatePollScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Create a custom poll with dynamic options. Select the target area from the dropdown lists below.",
+                    text = stringResource(R.string.create_poll_instruction),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -239,12 +241,12 @@ fun CreatePollScreen(
                 Spacer(modifier = Modifier.height(28.dp))
 
                 // ─── Poll Title ──────────────────────────────
-                SectionLabel("Poll Title *")
+                SectionLabel(stringResource(R.string.poll_title_asterisk))
                 SoftTrayInput(
                     value = title,
                     onValueChange = { title = it; errorMessage = null },
-                    label = "Title",
-                    placeholder = "e.g. Did you receive your wheat ration this month?",
+                    label = stringResource(R.string.title_label),
+                    placeholder = stringResource(R.string.poll_title_hint),
                     imeAction = ImeAction.Next,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -252,12 +254,12 @@ fun CreatePollScreen(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 // ─── Description ──────────────────────────────
-                SectionLabel("Description (optional)")
+                SectionLabel(stringResource(R.string.description_optional))
                 SoftTrayInput(
                     value = description,
                     onValueChange = { description = it },
-                    label = "Description",
-                    placeholder = "Provide additional context for citizens",
+                    label = stringResource(R.string.description_label),
+                    placeholder = stringResource(R.string.poll_desc_hint),
                     imeAction = ImeAction.Next,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -265,19 +267,19 @@ fun CreatePollScreen(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 // ─── Target Level Dropdown ───────────────────
-                SectionLabel("Target Level *")
+                SectionLabel(stringResource(R.string.target_level_asterisk))
                 Column {
                     SoftTrayInput(
                         value = targetLevel.lowercase()
                             .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
                         onValueChange = { },
-                        label = "Select Level",
-                        placeholder = "District / Subdivision / Block / Village",
+                        label = stringResource(R.string.select_level),
+                        placeholder = stringResource(R.string.level_options),
                         enabled = false,
                         trailingIcon = {
                             Icon(
                                 imageVector = Icons.Rounded.ArrowDropDown,
-                                contentDescription = "Dropdown",
+                                contentDescription = stringResource(R.string.dropdown_icon),
                                 modifier = Modifier.size(24.dp),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -320,7 +322,7 @@ fun CreatePollScreen(
 
                 // ─── Cascading LGD Area Selectors ────────────
                 if (targetLevel.isNotBlank()) {
-                    SectionLabel("Select Target Area *")
+                    SectionLabel(stringResource(R.string.select_target_area))
 
                     if (lgdLoading) {
                         Row(
@@ -333,7 +335,7 @@ fun CreatePollScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Loading area data…",
+                                text = stringResource(R.string.loading_area_data),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -342,7 +344,7 @@ fun CreatePollScreen(
 
                     // ── District Dropdown (always shown when level is selected) ──
                     LgdDropdown(
-                        label = "District",
+                        label = stringResource(R.string.district),
                         items = districts,
                         selectedItem = selectedDistrict,
                         expanded = districtExpanded,
@@ -360,7 +362,7 @@ fun CreatePollScreen(
                     if (targetLevel in listOf("SUBDIVISION", "BLOCK", "VILLAGE") && selectedDistrict != null) {
                         Spacer(modifier = Modifier.height(12.dp))
                         LgdDropdown(
-                            label = "Subdivision",
+                            label = stringResource(R.string.subdivision),
                             items = subdistricts,
                             selectedItem = selectedSubdistrict,
                             expanded = subdistrictExpanded,
@@ -378,7 +380,7 @@ fun CreatePollScreen(
                     if (targetLevel in listOf("BLOCK", "VILLAGE") && selectedSubdistrict != null) {
                         Spacer(modifier = Modifier.height(12.dp))
                         LgdDropdown(
-                            label = "Village / Area",
+                            label = stringResource(R.string.village_area),
                             items = villages,
                             selectedItem = selectedVillage,
                             expanded = villageExpanded,
@@ -394,7 +396,7 @@ fun CreatePollScreen(
                     resolvedTargetCode?.let { code ->
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "✓ Target: $resolvedTargetName (LGD Code: $code)",
+                            text = stringResource(R.string.target_resolved_format, resolvedTargetName, code),
                             style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.primary,
@@ -405,10 +407,10 @@ fun CreatePollScreen(
                 Spacer(modifier = Modifier.height(28.dp))
 
                 // ─── Dynamic Options Builder ────────────────
-                SectionLabel("Poll Options (2–5) *")
+                SectionLabel(stringResource(R.string.poll_options_header))
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Citizens will choose one of these options when voting.",
+                    text = stringResource(R.string.poll_options_desc),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                 )
@@ -449,13 +451,13 @@ fun CreatePollScreen(
                         SoftTrayInput(
                             value = option,
                             onValueChange = { options[index] = it },
-                            label = "Option ${index + 1}",
+                            label = stringResource(R.string.option_hint, index + 1),
                             placeholder = when (index) {
-                                0 -> "e.g. Yes, received full"
-                                1 -> "e.g. No, did not receive"
-                                2 -> "e.g. Received partial"
-                                3 -> "e.g. Shop was closed"
-                                else -> "e.g. Other"
+                                0 -> stringResource(R.string.option_eg_1)
+                                1 -> stringResource(R.string.option_eg_2)
+                                2 -> stringResource(R.string.option_eg_3)
+                                3 -> stringResource(R.string.option_eg_4)
+                                else -> stringResource(R.string.option_eg_other)
                             },
                             imeAction = if (index == options.lastIndex) ImeAction.Done else ImeAction.Next,
                             modifier = Modifier.weight(1f),
@@ -469,7 +471,7 @@ fun CreatePollScreen(
                             ) {
                                 Icon(
                                     imageVector = Icons.Rounded.Close,
-                                    contentDescription = "Remove option",
+                                    contentDescription = stringResource(R.string.remove_option),
                                     tint = MaterialTheme.colorScheme.error,
                                     modifier = Modifier.size(18.dp),
                                 )
@@ -485,11 +487,11 @@ fun CreatePollScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.Add,
-                            contentDescription = "Add option",
+                            contentDescription = stringResource(R.string.add_option),
                             modifier = Modifier.size(18.dp),
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Add Option")
+                        Text(stringResource(R.string.add_option))
                     }
                 }
 
@@ -506,22 +508,20 @@ fun CreatePollScreen(
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
-                                text = "Poll Summary",
+                                text = stringResource(R.string.poll_summary),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSecondaryContainer,
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "\"$title\" will be sent to all citizens in ${
-                                    resolvedTargetName.ifEmpty { targetLevel.lowercase() }
-                                } (${targetLevel}, LGD: ${resolvedTargetCode ?: "?"}).",
+                                text = stringResource(R.string.poll_summary_target, title, resolvedTargetName.ifEmpty { targetLevel.lowercase() }, targetLevel, resolvedTargetCode ?: "?"),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f),
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Options: ${options.filter { it.isNotBlank() }.joinToString(" • ")}",
+                                text = stringResource(R.string.poll_summary_options, options.filter { it.isNotBlank() }.joinToString(" • ")),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.6f),
                             )
@@ -552,7 +552,7 @@ fun CreatePollScreen(
 
                 // ─── Submit Button ──────────────────────────
                 GradientButton(
-                    text = if (isLoading) "Creating…" else "Create Poll",
+                    text = if (isLoading) stringResource(R.string.creating_poll) else stringResource(R.string.create_poll_title),
                     onClick = {
                         if (!isFormValid || isLoading) return@GradientButton
                         isLoading = true
@@ -596,7 +596,7 @@ fun CreatePollScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Polls are scoped to your jurisdiction. The backend will reject polls targeting areas outside your assigned LGD region.",
+                    text = stringResource(R.string.jurisdiction_notice),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 )
@@ -624,12 +624,12 @@ private fun LgdDropdown(
             value = selectedItem?.let { "${it.name} (${it.code})" } ?: "",
             onValueChange = { },
             label = label,
-            placeholder = "Select $label",
+            placeholder = stringResource(R.string.select_dropdown_item, label),
             enabled = false,
             trailingIcon = {
                 Icon(
                     imageVector = Icons.Rounded.ArrowDropDown,
-                    contentDescription = "Dropdown",
+                    contentDescription = stringResource(R.string.dropdown_icon),
                     modifier = Modifier.size(24.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -647,7 +647,7 @@ private fun LgdDropdown(
                 DropdownMenuItem(
                     text = {
                         Text(
-                            text = "No data available",
+                            text = stringResource(R.string.no_data_available),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                         )

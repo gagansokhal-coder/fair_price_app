@@ -37,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -44,6 +45,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.fairprice.app.R
 import com.fairprice.app.network.ApiRepository
 import com.fairprice.app.network.NetworkResult
 import com.fairprice.app.network.OfficerLoginRequest
@@ -100,7 +102,7 @@ fun OfficerLoginScreen(
                 IconButton(onClick = onBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Back",
+                        contentDescription = stringResource(R.string.back),
                     )
                 }
             },
@@ -123,7 +125,7 @@ fun OfficerLoginScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Officer Login",
+                    text = stringResource(R.string.officer_login_title),
                     style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -132,7 +134,7 @@ fun OfficerLoginScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Enter your registered phone number and password to access the admin dashboard.",
+                    text = stringResource(R.string.enter_officer_credentials),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -149,8 +151,8 @@ fun OfficerLoginScreen(
                             loginError = null
                         }
                     },
-                    label = "Phone Number",
-                    placeholder = "Enter 10-digit registered number",
+                    label = stringResource(R.string.phone_number),
+                    placeholder = stringResource(R.string.enter_phone_hint),
                     keyboardType = KeyboardType.Phone,
                     imeAction = ImeAction.Next,
                     isError = phoneError != null,
@@ -158,7 +160,7 @@ fun OfficerLoginScreen(
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Rounded.Phone,
-                            contentDescription = "Phone",
+                            contentDescription = stringResource(R.string.phone_number),
                             modifier = Modifier.size(22.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -176,8 +178,8 @@ fun OfficerLoginScreen(
                         passwordError = null
                         loginError = null
                     },
-                    label = "Password",
-                    placeholder = "Enter your password",
+                    label = stringResource(R.string.password),
+                    placeholder = stringResource(R.string.enter_password_hint),
                     keyboardType = KeyboardType.Password,
                     imeAction = ImeAction.Done,
                     isError = passwordError != null,
@@ -190,7 +192,7 @@ fun OfficerLoginScreen(
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Rounded.Lock,
-                            contentDescription = "Password",
+                            contentDescription = stringResource(R.string.password),
                             modifier = Modifier.size(22.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -203,7 +205,7 @@ fun OfficerLoginScreen(
                                 } else {
                                     Icons.Rounded.Visibility
                                 },
-                                contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                                contentDescription = if (passwordVisible) stringResource(R.string.hide_password) else stringResource(R.string.show_password),
                                 modifier = Modifier.size(22.dp),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -228,15 +230,15 @@ fun OfficerLoginScreen(
 
                 // Login Button
                 GradientButton(
-                    text = if (isLoading) "Authenticating…" else "Login",
+                    text = if (isLoading) stringResource(R.string.authenticating) else stringResource(R.string.login),
                     onClick = {
                         var hasError = false
                         if (phoneNumber.length != 10) {
-                            phoneError = "Phone number must be 10 digits"
+                            phoneError = context.getString(R.string.phone_error)
                             hasError = true
                         }
                         if (password.length < 6) {
-                            passwordError = "Password must be at least 6 characters"
+                            passwordError = context.getString(R.string.password_error)
                             hasError = true
                         }
                         if (!hasError) {
@@ -282,7 +284,7 @@ fun OfficerLoginScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
-                    text = "Use your registered officer phone number.\nYour designation and jurisdiction will be auto-detected.",
+                    text = stringResource(R.string.officer_login_note),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 )

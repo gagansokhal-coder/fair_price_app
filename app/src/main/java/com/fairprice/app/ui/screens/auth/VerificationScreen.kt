@@ -56,7 +56,9 @@ import com.fairprice.app.network.ApiRepository
 import com.fairprice.app.network.NetworkResult
 import com.fairprice.app.network.VerifyOtpRequest
 import com.fairprice.app.utils.SessionManager
+import com.fairprice.app.R
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -241,7 +243,7 @@ fun VerificationScreen(
                 IconButton(onClick = onBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Back",
+                        contentDescription = stringResource(R.string.back),
                     )
                 }
             },
@@ -265,7 +267,7 @@ fun VerificationScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Verify OTP",
+                    text = stringResource(R.string.verify_otp),
                     style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -275,7 +277,7 @@ fun VerificationScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Enter the 6-digit code sent to $maskedPhone",
+                    text = stringResource(R.string.otp_sent_to, maskedPhone),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.fillMaxWidth(),
@@ -298,7 +300,7 @@ fun VerificationScreen(
                     // Show verification pulse
                     VerificationPulse(
                         size = 80.dp,
-                        label = "Verifying…",
+                        label = stringResource(R.string.verifying),
                     )
                 } else {
                     // OTP Input — 6 individual digit boxes
@@ -376,7 +378,7 @@ fun VerificationScreen(
                             }
                         ) {
                             Text(
-                                text = "Resend OTP",
+                                text = stringResource(R.string.resend_otp),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.primary,
@@ -384,7 +386,7 @@ fun VerificationScreen(
                         }
                     } else {
                         Text(
-                            text = "Resend OTP in ${countdown}s",
+                            text = stringResource(R.string.resend_otp_in, countdown),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                         )

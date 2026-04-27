@@ -25,9 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.fairprice.app.R
 import com.fairprice.app.ui.components.OutlinedActionButton
 import com.fairprice.app.ui.theme.SteadyPulseEasing
 
@@ -87,7 +89,7 @@ fun SuccessScreen(
         ) {
             Icon(
                 imageVector = Icons.Rounded.Check,
-                contentDescription = "Success",
+                contentDescription = stringResource(R.string.success_icon),
                 tint = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.size(56.dp),
             )
@@ -96,7 +98,7 @@ fun SuccessScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         Text(
-            text = "Response Recorded!",
+            text = stringResource(R.string.response_recorded),
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
@@ -106,7 +108,7 @@ fun SuccessScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "Your verification response has been\nsubmitted successfully.",
+            text = stringResource(R.string.response_submitted_success),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -115,7 +117,7 @@ fun SuccessScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "The district administration will be notified\nof your response.",
+            text = stringResource(R.string.district_notified),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
             textAlign = TextAlign.Center,
@@ -124,7 +126,7 @@ fun SuccessScreen(
         Spacer(modifier = Modifier.height(48.dp))
 
         OutlinedActionButton(
-            text = "Back to Home",
+            text = stringResource(R.string.back_to_home),
             onClick = onBackToHome,
         )
     }

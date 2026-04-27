@@ -17,6 +17,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,10 +32,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.fairprice.app.R
 import com.fairprice.app.network.CreateOfficerRequest
 import com.fairprice.app.network.LgdItem
 import com.fairprice.app.network.ApiRepository
@@ -59,7 +62,11 @@ fun CreateOfficerScreen(
     var designation by remember { mutableStateOf("") }
 
     // Role Selection
-    val roles = listOf("ADMIN_DISTRICT" to "District Admin", "ADMIN_SUBDIVISION" to "Subdivision Admin", "ADMIN_BLOCK" to "Block Admin")
+    val roles = listOf(
+        "ADMIN_DISTRICT" to stringResource(R.string.district_admin_role),
+        "ADMIN_SUBDIVISION" to stringResource(R.string.subdivision_admin_role),
+        "ADMIN_BLOCK" to stringResource(R.string.block_admin_role)
+    )
     var expandedRole by remember { mutableStateOf(false) }
     var selectedRole by remember { mutableStateOf<Pair<String, String>?>(null) }
 
@@ -117,7 +124,7 @@ fun CreateOfficerScreen(
         TopAppBar(
             title = {
                 Text(
-                    text = "Appoint Officer",
+                    text = stringResource(R.string.appoint_officer),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -126,7 +133,7 @@ fun CreateOfficerScreen(
                 IconButton(onClick = onBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Back",
+                        contentDescription = stringResource(R.string.back),
                     )
                 }
             },
@@ -142,7 +149,7 @@ fun CreateOfficerScreen(
                 .padding(24.dp)
         ) {
             Text(
-                text = "Officer Details",
+                text = stringResource(R.string.officer_details),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
@@ -152,8 +159,8 @@ fun CreateOfficerScreen(
             SoftTrayInput(
                 value = name,
                 onValueChange = { name = it },
-                label = "Full Name",
-                placeholder = "Enter officer's full name",
+                label = stringResource(R.string.full_name),
+                placeholder = stringResource(R.string.enter_officer_full_name),
                 imeAction = ImeAction.Next,
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -161,8 +168,8 @@ fun CreateOfficerScreen(
             SoftTrayInput(
                 value = phoneNo,
                 onValueChange = { if (it.length <= 10 && it.all { char -> char.isDigit() }) phoneNo = it },
-                label = "Phone Number",
-                placeholder = "10-digit mobile number",
+                label = stringResource(R.string.phone_number),
+                placeholder = stringResource(R.string.enter_phone_hint),
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Next,
             )
@@ -171,8 +178,8 @@ fun CreateOfficerScreen(
             SoftTrayInput(
                 value = email,
                 onValueChange = { email = it },
-                label = "Email Address (Optional)",
-                placeholder = "officer@example.com",
+                label = stringResource(R.string.email_address_optional),
+                placeholder = stringResource(R.string.email_hint),
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next,
             )
@@ -181,14 +188,14 @@ fun CreateOfficerScreen(
             SoftTrayInput(
                 value = designation,
                 onValueChange = { designation = it },
-                label = "Designation / Title",
-                placeholder = "e.g., Block Development Officer",
+                label = stringResource(R.string.designation_title),
+                placeholder = stringResource(R.string.designation_example),
                 imeAction = ImeAction.Done,
             )
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
-                text = "Role & Jurisdiction",
+                text = stringResource(R.string.role_and_jurisdiction),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
@@ -203,8 +210,8 @@ fun CreateOfficerScreen(
                 SoftTrayInput(
                     value = selectedRole?.second ?: "",
                     onValueChange = {},
-                    label = "Select Role Level",
-                    modifier = Modifier.menuAnchor(),
+                    label = stringResource(R.string.select_role_level),
+                    modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable),
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedRole) },
                 )
                 ExposedDropdownMenu(
@@ -235,8 +242,8 @@ fun CreateOfficerScreen(
                         SoftTrayInput(
                             value = selectedDistrict?.name ?: "",
                             onValueChange = {},
-                            label = "Select District",
-                            modifier = Modifier.menuAnchor(),
+                            label = stringResource(R.string.select_district),
+                            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable),
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDistrict) },
                         )
                         ExposedDropdownMenu(
@@ -268,8 +275,8 @@ fun CreateOfficerScreen(
                         SoftTrayInput(
                             value = selectedSubdistrict?.name ?: "",
                             onValueChange = {},
-                            label = "Select Block / Subdivision",
-                            modifier = Modifier.menuAnchor(),
+                            label = stringResource(R.string.select_block_subdivision),
+                            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable),
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSubdistrict) },
                         )
                         ExposedDropdownMenu(
@@ -303,7 +310,7 @@ fun CreateOfficerScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             GradientButton(
-                text = if (isSubmitting) "Creating..." else "Create Officer",
+                text = if (isSubmitting) stringResource(R.string.creating_officer) else stringResource(R.string.create_officer_title),
                 enabled = isFormValid && !isSubmitting,
                 onClick = {
                     isSubmitting = true

@@ -43,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -52,6 +53,7 @@ import com.fairprice.app.ui.components.SoftTrayInput
 import com.fairprice.app.ui.theme.FairPriceColors
 import com.fairprice.app.ui.theme.SteadyPulseEasing
 import com.fairprice.app.ui.theme.steadyPulseSpec
+import com.fairprice.app.R
 
 /**
  * Feedback Screen — Star rating + optional comment.
@@ -71,7 +73,14 @@ fun FeedbackScreen(
 
     LaunchedEffect(Unit) { isVisible = true }
 
-    val ratingLabels = listOf("", "Very Poor", "Poor", "Average", "Good", "Excellent")
+    val ratingLabels = listOf(
+        "", 
+        stringResource(R.string.rating_very_poor), 
+        stringResource(R.string.rating_poor), 
+        stringResource(R.string.rating_average), 
+        stringResource(R.string.rating_good), 
+        stringResource(R.string.rating_excellent)
+    )
 
     Column(
         modifier = Modifier
@@ -88,7 +97,7 @@ fun FeedbackScreen(
         TopAppBar(
             title = {
                 Text(
-                    text = "Give Feedback",
+                    text = stringResource(R.string.feedback_title),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -97,7 +106,7 @@ fun FeedbackScreen(
                 IconButton(onClick = onBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Back",
+                        contentDescription = stringResource(R.string.back),
                     )
                 }
             },
@@ -121,7 +130,7 @@ fun FeedbackScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
-                    text = "Rate Your Experience",
+                    text = stringResource(R.string.rate_experience),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -130,7 +139,7 @@ fun FeedbackScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "How was your last visit to\nRampur FPS #127?",
+                    text = stringResource(R.string.how_was_visit),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.fillMaxWidth(),
@@ -156,7 +165,7 @@ fun FeedbackScreen(
 
                         Icon(
                             imageVector = if (i <= rating) Icons.Rounded.Star else Icons.Rounded.StarBorder,
-                            contentDescription = "Star $i",
+                            contentDescription = stringResource(R.string.star_rating, i),
                             tint = starColor,
                             modifier = Modifier
                                 .size(52.dp)
@@ -184,8 +193,8 @@ fun FeedbackScreen(
                 SoftTrayInput(
                     value = comment,
                     onValueChange = { comment = it },
-                    label = "Comment (optional)",
-                    placeholder = "Share additional feedback…",
+                    label = stringResource(R.string.comment_optional),
+                    placeholder = stringResource(R.string.share_feedback_hint),
                     keyboardType = KeyboardType.Text,
                     imeAction = ImeAction.Default,
                     singleLine = false,
@@ -198,7 +207,7 @@ fun FeedbackScreen(
                 Spacer(modifier = Modifier.height(40.dp))
 
                 GradientButton(
-                    text = "Submit Feedback",
+                    text = stringResource(R.string.submit_feedback),
                     onClick = onSubmitSuccess,
                     enabled = rating > 0,
                 )

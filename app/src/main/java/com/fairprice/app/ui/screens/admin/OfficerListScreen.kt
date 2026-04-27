@@ -41,8 +41,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.fairprice.app.R
 import com.fairprice.app.network.Officer
 import com.fairprice.app.network.ApiRepository
 import com.fairprice.app.network.NetworkResult
@@ -80,7 +82,7 @@ fun OfficerListScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Officer Directory",
+                        text = stringResource(R.string.officer_directory),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.SemiBold,
                     )
@@ -89,7 +91,7 @@ fun OfficerListScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.back),
                         )
                     }
                 },
@@ -104,7 +106,7 @@ fun OfficerListScreen(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
-                Icon(imageVector = Icons.Rounded.Add, contentDescription = "Add Officer")
+                Icon(imageVector = Icons.Rounded.Add, contentDescription = stringResource(R.string.add_officer))
             }
         }
     ) { padding ->
@@ -128,7 +130,7 @@ fun OfficerListScreen(
             } else if (officers.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = "No officers appointed within your jurisdiction.",
+                        text = stringResource(R.string.no_officers_jurisdiction),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodyLarge
                     )
@@ -163,7 +165,7 @@ fun OfficerCard(officer: Officer) {
             ) {
                 Icon(
                     imageVector = Icons.Rounded.AdminPanelSettings,
-                    contentDescription = "Avatar",
+                    contentDescription = stringResource(R.string.avatar_desc),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
                 )
@@ -188,18 +190,18 @@ fun OfficerCard(officer: Officer) {
                     officer.subdistrictName?.let { if (it.isNotBlank()) add(it) }
                     officer.districtName?.let { if (it.isNotBlank()) add(it) }
                 }
-                val locStr = if (locParts.isNotEmpty()) locParts.joinToString(", ") else "State Level"
+                val locStr = if (locParts.isNotEmpty()) locParts.joinToString(", ") else stringResource(R.string.state_level)
                 
                 Text(
-                    text = "Jurisdiction: $locStr",
+                    text = stringResource(R.string.jurisdiction_label, locStr),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary
                 )
             }
             if (!officer.isActive) {
-                StatusBadge(text = "Inactive", type = BadgeType.ERROR)
+                StatusBadge(text = stringResource(R.string.inactive), type = BadgeType.ERROR)
             } else {
-                StatusBadge(text = "Active", type = BadgeType.INFO)
+                StatusBadge(text = stringResource(R.string.active), type = BadgeType.INFO)
             }
         }
         
@@ -215,7 +217,7 @@ fun OfficerCard(officer: Officer) {
         ) {
             Icon(
                 imageVector = Icons.Rounded.Phone,
-                contentDescription = "Phone",
+                contentDescription = stringResource(R.string.phone_desc),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(16.dp)
             )

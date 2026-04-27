@@ -53,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.fairprice.app.network.ApiRepository
@@ -61,6 +62,7 @@ import com.fairprice.app.network.CustomPoll
 import com.fairprice.app.network.PollSubmitRequest
 import com.fairprice.app.ui.components.GradientButton
 import com.google.gson.Gson
+import com.fairprice.app.R
 import com.fairprice.app.ui.theme.SteadyPulseEasing
 import com.fairprice.app.utils.DeviceUtils
 import kotlinx.coroutines.launch
@@ -101,9 +103,12 @@ fun PollVotingScreen(
     // GPS coordinates
     var gpsLat by remember { mutableDoubleStateOf(0.0) }
     var gpsLng by remember { mutableDoubleStateOf(0.0) }
-    var locationText by remember { mutableStateOf("Verifying your location…") }
+    var locationText by remember { mutableStateOf("") }
 
-    LaunchedEffect(Unit) { isVisible = true }
+    LaunchedEffect(Unit) {
+        isVisible = true
+        locationText = context.getString(R.string.verifying_location)
+    }
 
     // Load poll details
     LaunchedEffect(pollId) {
@@ -129,23 +134,27 @@ fun PollVotingScreen(
                     isMockDetected = true
                     isLocationChecking = false
                     isLocationVerified = false
-                    locationText = "⛔ Mock location detected — submission blocked"
+                    locationText = context.getString(R.string.mock_location_blocked)
                 } else {
                     gpsLat = location.latitude
                     gpsLng = location.longitude
                     isLocationChecking = false
                     isLocationVerified = true
-                    locationText = "GPS: ${String.format("%.4f", gpsLat)}, ${String.format("%.4f", gpsLng)}"
+                    locationText = context.getString(
+                        R.string.gps_verified,
+                        String.format("%.4f", gpsLat),
+                        String.format("%.4f", gpsLng)
+                    )
                 }
             } else {
                 isLocationChecking = false
                 isLocationVerified = false
-                locationText = "⚠️ GPS unavailable — enable location services"
+                locationText = context.getString(R.string.gps_enable_location)
             }
         } catch (e: Exception) {
             isLocationChecking = false
             isLocationVerified = false
-            locationText = "⚠️ Location permission required"
+            locationText = context.getString(R.string.location_permission_required)
         }
     }
 
@@ -166,7 +175,7 @@ fun PollVotingScreen(
         TopAppBar(
             title = {
                 Text(
-                    text = "Vote",
+                    text = stringResource(R.string.vote_on_poll),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -175,7 +184,7 @@ fun PollVotingScreen(
                 IconButton(onClick = onBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Back",
+                        contentDescription = stringResource(R.string.back),
                     )
                 }
             },
@@ -197,7 +206,7 @@ fun PollVotingScreen(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = "Poll not found",
+                    text = stringResource(R.string.poll_not_found),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.error,
                 )
@@ -252,7 +261,7 @@ fun PollVotingScreen(
 
                     // ─── Dynamic Options ──────────────────────
                     Text(
-                        text = "Select your response",
+                        text = stringResource(R.string.select_your_response),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -297,7 +306,7 @@ fun PollVotingScreen(
                                 Icon(
                                     imageVector = if (isSelected) Icons.Rounded.CheckCircle
                                     else Icons.Rounded.RadioButtonUnchecked,
-                                    contentDescription = if (isSelected) "Selected" else "Not selected",
+                                    contentDescription = if (isSelected) stringResource(R.string.selected) else stringResource(R.string.not_selected),
                                     modifier = Modifier.size(24.dp),
                                     tint = if (isSelected) MaterialTheme.colorScheme.primary
                                     else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -357,10 +366,10 @@ fun PollVotingScreen(
 
                             Column {
                                 Text(
-                                    text = if (isLocationChecking) "Verifying location…"
-                                    else if (isMockDetected) "Mock Location Detected"
-                                    else if (isLocationVerified) "Location Verified"
-                                    else "Location Unavailable",
+                                    text = if (isLocationChecking) stringResource(R.string.location_checking)
+                                    else if (isMockDetected) stringResource(R.string.mock_location_detected)
+                                    else if (isLocationVerified) stringResource(R.string.location_verified)
+                                    else stringResource(R.string.location_unavailable),
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.SemiBold,
                                     color = MaterialTheme.colorScheme.onSurface,
@@ -407,7 +416,7 @@ fun PollVotingScreen(
                                 )
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Text(
-                                    text = "You already voted: \"${alreadyVotedText ?: "—"}\"",
+                                    text = stringResource(R.string.your_vote_format, alreadyVotedText ?: "—"),
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.SemiBold,
                                     color = MaterialTheme.colorScheme.onTertiaryContainer,
@@ -420,9 +429,9 @@ fun PollVotingScreen(
                     // ─── Submit Button ────────────────────────
                     GradientButton(
                         text = when {
-                            isSubmitting -> "Submitting…"
-                            hasAlreadyVoted -> "Already Voted"
-                            else -> "Submit Vote"
+                            isSubmitting -> stringResource(R.string.submitting)
+                            hasAlreadyVoted -> stringResource(R.string.already_voted)
+                            else -> stringResource(R.string.submit_vote)
                         },
                         onClick = {
                             if (!canSubmit || hasAlreadyVoted) return@GradientButton
@@ -456,19 +465,19 @@ fun PollVotingScreen(
                                                     .substringAfter("voted '")
                                                     .substringBefore("' on")
                                                     .ifBlank { null }
-                                                errorMessage = "You have already voted on this poll."
+                                                errorMessage = context.getString(R.string.already_voted_msg)
                                             }
                                             msg.contains("rate", ignoreCase = true) || result.code == 429 -> {
-                                                errorMessage = "⏳ Too many attempts. Wait 60 seconds before trying again."
+                                                errorMessage = context.getString(R.string.rate_limit_error)
                                             }
                                             msg.contains("target area", ignoreCase = true) -> {
-                                                errorMessage = "🚫 This poll is not targeted at your area."
+                                                errorMessage = context.getString(R.string.area_mismatch_error)
                                             }
                                             msg.contains("expired", ignoreCase = true) -> {
-                                                errorMessage = "⏰ This poll has expired."
+                                                errorMessage = context.getString(R.string.poll_expired_error)
                                             }
                                             msg.contains("closed", ignoreCase = true) || msg.contains("no longer active", ignoreCase = true) -> {
-                                                errorMessage = "This poll is no longer active."
+                                                errorMessage = context.getString(R.string.poll_closed_error)
                                             }
                                             else -> errorMessage = msg
                                         }
@@ -484,7 +493,7 @@ fun PollVotingScreen(
                     if (isMockDetected) {
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = "⛔ Voting is blocked because a mock location provider was detected. Disable any GPS spoofing apps and try again.",
+                            text = stringResource(R.string.mock_blocked_notice),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.error.copy(alpha = 0.8f),
                         )

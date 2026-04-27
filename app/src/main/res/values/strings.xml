@@ -46,6 +46,13 @@
     <string name="officer_id_error">Please enter a valid Officer ID</string>
     <string name="password_error">Please enter your password</string>
     <string name="designation_error">Please select your designation</string>
+    <string name="enter_officer_credentials">Enter your officer credentials to access the admin panel.</string>
+    <string name="enter_password_hint">Enter your password</string>
+    <string name="hide_password">Hide password</string>
+    <string name="show_password">Show password</string>
+    <string name="authenticating">Authenticating…</string>
+    <string name="officer_login_note">Use the credentials provided by your district administration.</string>
+    <string name="complete_profile">Complete Your Profile</string>
     <string name="dm">District Magistrate (DM)</string>
     <string name="sdo">Sub-Divisional Officer (SDO)</string>
     <string name="bdo">Block Development Officer (BDO)</string>
@@ -56,6 +63,7 @@
     <string name="otp_sent_to">OTP sent to +91 %1$s</string>
     <string name="resend_otp">Resend OTP</string>
     <string name="resend_in">Resend in %1$ds</string>
+    <string name="resend_otp_in">Resend OTP in %1$ds</string>
     <string name="verifying">Verifying…</string>
     <string name="verify_otp">Verify OTP</string>
     <string name="otp_length_error">Please enter the complete 6-digit OTP</string>
@@ -81,6 +89,15 @@
     <string name="verify_gps">Verify GPS</string>
     <string name="reverify_gps">Re-verify</string>
     <string name="gps_verification_required_msg">GPS verification is required when updating your address.</string>
+    <string name="fill_profile_details">Fill in your profile details to complete registration.</string>
+    <string name="gps">GPS</string>
+    <string name="device">Device</string>
+    <string name="bound">Bound</string>
+    <string name="location_hierarchy">Location Hierarchy</string>
+    <string name="select_location_hierarchy">Select your location from the hierarchy below.</string>
+    <string name="sub_district">Sub-District</string>
+    <string name="village">Village</string>
+    <string name="expand">Expand</string>
     <string name="complete_registration">Complete Registration</string>
     <string name="registering">Registering…</string>
     <string name="name_error">Please enter your name</string>
@@ -192,6 +209,9 @@
     <!-- Language -->
     <string name="language">Language</string>
     <string name="select_language">Select Language</string>
+    <string name="language_settings">Language Settings</string>
+    <string name="language_settings_desc">Choose your preferred language for the application interface.</string>
+    <string name="select">Select</string>
     <string name="language_english">English</string>
     <string name="language_hindi">हिन्दी</string>
     <string name="language_punjabi">ਪੰਜਾਬੀ</string>
@@ -290,4 +310,140 @@
     <string name="navigate">Navigate</string>
     <string name="shield">Shield</string>
     <string name="ok">OK</string>
+
+
+    <!-- Citizen Screen Extras -->
+    <string name="poll_not_found">Poll not found</string>
+    <string name="select_your_response">Select your response</string>
+    <string name="verifying_location">Verifying your location…</string>
+    <string name="mock_location_detected">Mock Location Detected</string>
+    <string name="mock_location_blocked">⛔ Mock location detected — submission blocked</string>
+    <string name="gps_enable_location">⚠️ GPS unavailable — enable location services</string>
+    <string name="location_permission_required">⚠️ Location permission required</string>
+    <string name="location_unavailable">Location Unavailable</string>
+    <string name="submit_vote">Submit Vote</string>
+    <string name="already_voted">Already Voted</string>
+    <string name="already_voted_msg">You have already voted on this poll.</string>
+    <string name="your_vote_format">Your vote: %1$s</string>
+    <string name="unable_to_load_history">Unable to load history</string>
+    <string name="responses_appear_after_vote">Your poll responses will appear here after you vote</string>
+    <string name="no_history">No history</string>
+    <string name="characters_count">%1$d characters</string>
+    <string name="complaint_review_notice">Your complaint will be reviewed by the district administration within 48 hours.</string>
+    <string name="select_complaint_type">Select complaint type</string>
+    <string name="complaint_desc_detail_hint">Describe the issue in detail (minimum 10 characters)</string>
+    <string name="fair_price_shop">Fair Price Shop</string>
+    <string name="how_was_visit">How was your last visit to\nRampur FPS #127?</string>
+    <string name="comment_optional">Comment (optional)</string>
+    <string name="share_feedback_hint">Share additional feedback…</string>
+    <string name="back_to_home">Back to Home</string>
+    <string name="response_submitted_success">Your verification response has been\nsubmitted successfully.</string>
+    <string name="district_notified">The district administration will be notified\nof your response.</string>
+    <string name="mock_blocked_notice">⛔ Voting is blocked because a mock location provider was detected. Disable any GPS spoofing apps and try again.</string>
+    <string name="rate_limit_error">⏳ Too many attempts. Wait 60 seconds before trying again.</string>
+    <string name="area_mismatch_error">🚫 This poll is not targeted at your area.</string>
+    <string name="poll_expired_error">⏰ This poll has expired.</string>
+    <string name="poll_closed_error">This poll is no longer active.</string>
+    <string name="complaint_ration_not_received">Ration not received</string>
+    <string name="complaint_short_quantity">Short quantity delivered</string>
+    <string name="complaint_dealer_misbehavior">Dealer misbehavior</string>
+    <string name="complaint_shop_not_open">Shop not open on schedule</string>
+    <string name="selected">Selected</string>
+    <string name="not_selected">Not selected</string>
+    <string name="name_icon">Name</string>
+    <string name="address_icon">Address</string>
+    <string name="gps_icon">GPS</string>
+    <string name="dropdown_icon">Dropdown</string>
+    <string name="fps_icon">FPS</string>
+    <string name="success_icon">Success</string>
+    <string name="star_rating">Star %1$d</string>
+
+    <!-- Create Poll Dynamic -->
+    <string name="create_custom_poll">Create Custom Poll</string>
+    <string name="create_poll_instruction">Create a custom poll with dynamic options. Select the target area from the dropdown lists below.</string>
+    <string name="poll_title_asterisk">Poll Title *</string>
+    <string name="title_label">Title</string>
+    <string name="description_optional">Description (optional)</string>
+    <string name="description_label">Description</string>
+    <string name="poll_desc_hint">Provide additional context for citizens</string>
+    <string name="target_level_asterisk">Target Level *</string>
+    <string name="select_level">Select Level</string>
+    <string name="level_options">District / Subdivision / Block / Village</string>
+    <string name="select_target_area">Select Target Area *</string>
+    <string name="loading_area_data">Loading area data…</string>
+    <string name="subdivision">Subdivision</string>
+    <string name="village_area">Village / Area</string>
+    <string name="target_resolved_format">✓ Target: %1$s (LGD Code: %2$d)</string>
+    <string name="poll_options_header">Poll Options (2–5) *</string>
+    <string name="poll_options_desc">Citizens will choose one of these options when voting.</string>
+    <string name="option_eg_1">e.g. Yes, received full</string>
+    <string name="option_eg_2">e.g. No, did not receive</string>
+    <string name="option_eg_3">e.g. Received partial</string>
+    <string name="option_eg_4">e.g. Shop was closed</string>
+    <string name="option_eg_other">e.g. Other</string>
+    <string name="poll_summary">Poll Summary</string>
+    <string name="poll_summary_target">\"%1$s\" will be sent to all citizens in %2$s (%3$s, LGD: %4$s).</string>
+    <string name="poll_summary_options">Options: %1$s</string>
+    <string name="jurisdiction_notice">Polls are scoped to your jurisdiction. The backend will reject polls targeting areas outside your assigned LGD region.</string>
+    
+    <string name="admin">Admin</string>
+    <string name="officer_name_placeholder">Officer</string>
+    <string name="welcome_officer_name">Welcome, %1$s</string>
+    <string name="recent_polls_empty_desc">Create a poll to start collecting responses</string>
+    <string name="no_polls_created_yet">No polls created yet</string>
+    <string name="poll_responses_options">%1$d responses • %2$d options</string>
+    <string name="poll_target_date">%1$s: %2$d • %3$s</string>
+    <!-- Poll Analytics Screen -->
+    <string name="poll_analytics_target_info">%1$s • Code: %2$s • %3$s</string>
+    <string name="votes_count">%1$d votes</string>
+    <string name="vote_count_percentage">%1$d (%2$d%%)</string>
+    <string name="close_poll">Close Poll</string>
+    <string name="close_poll_desc">Close poll</string>
+
+    <!-- Zone Analysis Screen -->
+    <string name="analytics_and_zones">Analytics &amp; Zones</string>
+    <string name="responses">Responses</string>
+    <string name="overall_positive_rate">Overall Positive Rate</string>
+    <string name="positive_label">Positive</string>
+    <string name="negative_label">Negative</string>
+    <string name="zone_distribution">Zone Distribution</string>
+    <string name="green">Green</string>
+    <string name="yellow">Yellow</string>
+    <string name="red">Red</string>
+    <string name="zone_classification">Zone Classification</string>
+    <string name="no_zone_data_detailed">No zone data available yet.\nCreate polls and collect responses to see results.</string>
+    <string name="positive_pct_short">%1$.1f%% positive</string>
+    <string name="positive_lowercase">positive</string>
+    <string name="failed_to_load_analytics">Failed to load analytics: %1$s</string>
+    <string name="percentage_one_decimal">%1$.1f%%</string>
+
+    <!-- Create Officer Screen -->
+    <string name="appoint_officer">Appoint Officer</string>
+    <string name="officer_details">Officer Details</string>
+    <string name="enter_officer_full_name">Enter officer\'s full name</string>
+    <string name="email_address_optional">Email Address (Optional)</string>
+    <string name="email_hint">officer@example.com</string>
+    <string name="designation_title">Designation / Title</string>
+    <string name="designation_example">e.g., Block Development Officer</string>
+    <string name="role_and_jurisdiction">Role &amp; Jurisdiction</string>
+    <string name="select_role_level">Select Role Level</string>
+    <string name="select_block_subdivision">Select Block / Subdivision</string>
+    <string name="district_admin_role">District Admin</string>
+    <string name="subdivision_admin_role">Subdivision Admin</string>
+    <string name="block_admin_role">Block Admin</string>
+
+    <!-- Notifications Screen -->
+    <string name="notifications_push_alerts_desc">You\'ll receive push alerts here when new polls\nare created for your jurisdiction</string>
+
+    <!-- Officer List Screen -->
+    <string name="no_officers_jurisdiction">No officers appointed within your jurisdiction.</string>
+    <string name="avatar_desc">Avatar</string>
+    <string name="jurisdiction_label">Jurisdiction: %1$s</string>
+    <string name="state_level">State Level</string>
+    <string name="inactive">Inactive</string>
+    <string name="phone_desc">Phone</string>
+
+    <!-- Common / Dynamic -->
+    <string name="select_dropdown_item">Select %1$s</string>
+    <string name="no_data_available">No data available</string>
 </resources>

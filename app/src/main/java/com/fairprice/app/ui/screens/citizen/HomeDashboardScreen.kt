@@ -47,8 +47,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.fairprice.app.R
 import com.fairprice.app.network.ApiRepository
 import com.fairprice.app.network.CustomPoll
 import com.fairprice.app.network.MyPollResponse
@@ -85,7 +87,7 @@ fun HomeDashboardScreen(
 
     val context = LocalContext.current
     val session = remember { SessionManager.getInstance(context) }
-    val citizenName = session.getCitizenName().ifEmpty { "Citizen" }
+    val citizenName = session.getCitizenName().ifEmpty { stringResource(R.string.citizen) }
 
     // Fetch real data from backend
     LaunchedEffect(Unit) {
@@ -112,12 +114,15 @@ fun HomeDashboardScreen(
         }
     }
 
+    val greetingMorning = stringResource(R.string.good_morning)
+    val greetingAfternoon = stringResource(R.string.good_afternoon)
+    val greetingEvening = stringResource(R.string.good_evening)
     val greeting = remember {
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         when {
-            hour < 12 -> "Good Morning"
-            hour < 17 -> "Good Afternoon"
-            else -> "Good Evening"
+            hour < 12 -> greetingMorning
+            hour < 17 -> greetingAfternoon
+            else -> greetingEvening
         }
     }
 
@@ -169,17 +174,17 @@ fun HomeDashboardScreen(
             ) {
                 StatCard(
                     icon = Icons.Rounded.HowToVote,
-                    label = "Polls Responded",
+                    label = stringResource(R.string.polls_responded),
                     value = if (isLoading) "…" else "${myResponses.size}",
                     modifier = Modifier.weight(1f),
-                    subtitle = "Total votes cast",
+                    subtitle = stringResource(R.string.total_votes_cast),
                 )
                 StatCard(
                     icon = Icons.Rounded.Campaign,
-                    label = "Pending",
+                    label = stringResource(R.string.pending),
                     value = if (isLoading) "…" else "${activePolls.size}",
                     modifier = Modifier.weight(1f),
-                    subtitle = "Active polls",
+                    subtitle = stringResource(R.string.active_polls_label),
                     trendColor = MaterialTheme.colorScheme.tertiary,
                 )
             }
@@ -188,7 +193,7 @@ fun HomeDashboardScreen(
         // Active Polls Section
         item {
             Text(
-                text = "Active Polls",
+                text = stringResource(R.string.active_polls),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -219,13 +224,13 @@ fun HomeDashboardScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "No active polls right now",
+                            text = stringResource(R.string.no_active_polls),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                             textAlign = TextAlign.Center,
                         )
                         Text(
-                            text = "Check back when new polls are created for your area",
+                            text = stringResource(R.string.check_back_polls),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
                             textAlign = TextAlign.Center,
@@ -269,13 +274,13 @@ fun HomeDashboardScreen(
                                 color = MaterialTheme.colorScheme.onSurface,
                             )
                             Text(
-                                text = "${poll.options.size} options • ${poll.targetLevel}",
+                                text = stringResource(R.string.options_format, poll.options.size, poll.targetLevel),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
 
-                        StatusBadge(text = "Active", type = BadgeType.SUCCESS)
+                        StatusBadge(text = stringResource(R.string.active), type = BadgeType.SUCCESS)
                     }
                 }
             }
@@ -284,7 +289,7 @@ fun HomeDashboardScreen(
         // Quick Actions
         item {
             Text(
-                text = "Quick Actions",
+                text = stringResource(R.string.quick_actions),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -298,7 +303,7 @@ fun HomeDashboardScreen(
             ) {
                 QuickActionCard(
                     icon = Icons.Rounded.ReportProblem,
-                    title = "File Complaint",
+                    title = stringResource(R.string.file_complaint),
                     onClick = onComplaintClick,
                     modifier = Modifier.weight(1f),
                     iconTint = MaterialTheme.colorScheme.tertiary,
@@ -306,7 +311,7 @@ fun HomeDashboardScreen(
                 )
                 QuickActionCard(
                     icon = Icons.Rounded.Feedback,
-                    title = "Give Feedback",
+                    title = stringResource(R.string.give_feedback),
                     onClick = onFeedbackClick,
                     modifier = Modifier.weight(1f),
                     iconTint = MaterialTheme.colorScheme.secondary,

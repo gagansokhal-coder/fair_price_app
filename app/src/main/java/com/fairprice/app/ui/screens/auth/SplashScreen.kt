@@ -27,8 +27,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.fairprice.app.R
 import com.fairprice.app.ui.components.VerificationPulse
 import com.fairprice.app.ui.theme.FairPriceColors
 import com.fairprice.app.ui.theme.SPLASH_DURATION
@@ -140,7 +142,7 @@ fun SplashScreen(
                 VerificationPulse(size = 100.dp)
                 Icon(
                     imageVector = Icons.Rounded.Shield,
-                    contentDescription = "Shield",
+                    contentDescription = stringResource(R.string.shield),
                     modifier = Modifier.size(48.dp),
                     tint = MaterialTheme.colorScheme.primary,
                 )
@@ -150,7 +152,7 @@ fun SplashScreen(
 
             // App name
             Text(
-                text = "Ration Prahari",
+                text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -161,7 +163,7 @@ fun SplashScreen(
 
             // Tagline
             Text(
-                text = "Protecting Your Entitlements",
+                text = stringResource(R.string.app_tagline),
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -171,7 +173,7 @@ fun SplashScreen(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "Public Distribution System",
+                text = stringResource(R.string.pds_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                 modifier = Modifier.alpha(taglineAlpha),
@@ -180,7 +182,7 @@ fun SplashScreen(
 
         // Bottom branding
         Text(
-            text = "Government of India Initiative",
+            text = stringResource(R.string.govt_initiative),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
             modifier = Modifier

@@ -51,7 +51,11 @@ object LocaleManager {
         } catch (_: Exception) {
             LANG_ENGLISH
         }
-        val locale = Locale(lang)
+        val locale = if (lang == LANG_PUNJABI) {
+            Locale("pa", "IN")
+        } else {
+            Locale(lang)
+        }
         Locale.setDefault(locale)
 
         val config = Configuration(context.resources.configuration)

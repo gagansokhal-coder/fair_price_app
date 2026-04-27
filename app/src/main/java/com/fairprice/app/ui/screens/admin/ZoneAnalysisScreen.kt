@@ -53,10 +53,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fairprice.app.R
 import com.fairprice.app.network.AnalyticsSummaryResponse
 import com.fairprice.app.network.ApiRepository
 import com.fairprice.app.network.NetworkResult
@@ -115,7 +117,7 @@ fun ZoneAnalysisScreen(
                 }
             }
         } catch (e: Exception) {
-            errorMsg = "Failed to load analytics: ${e.localizedMessage}"
+            errorMsg = e.localizedMessage ?: "Unknown error"
         } finally {
             isLoading = false
         }
@@ -136,7 +138,7 @@ fun ZoneAnalysisScreen(
         TopAppBar(
             title = {
                 Text(
-                    text = "Analytics & Zones",
+                    text = stringResource(R.string.analytics_and_zones),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -145,7 +147,7 @@ fun ZoneAnalysisScreen(
                 IconButton(onClick = onBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Back",
+                        contentDescription = stringResource(R.string.back),
                     )
                 }
             },
@@ -163,7 +165,7 @@ fun ZoneAnalysisScreen(
             errorMsg != null -> {
                 Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
                     Text(
-                        text = errorMsg ?: "",
+                        text = stringResource(R.string.failed_to_load_analytics, errorMsg ?: ""),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.error,
                         textAlign = TextAlign.Center,
@@ -194,17 +196,17 @@ private fun AnalyticsContent(
             ) {
                 StatCard(
                     icon = Icons.Rounded.Analytics,
-                    label = "Responses",
+                    label = stringResource(R.string.responses),
                     value = "${summary?.totalResponses ?: 0}",
                     modifier = Modifier.weight(1f),
-                    subtitle = "Total votes cast",
+                    subtitle = stringResource(R.string.total_votes_cast),
                 )
                 StatCard(
                     icon = Icons.Rounded.Warning,
-                    label = "Red Zones",
+                    label = stringResource(R.string.red_zones),
                     value = "${zones?.redZones ?: 0}",
                     modifier = Modifier.weight(1f),
-                    subtitle = "Below 40% positive",
+                    subtitle = stringResource(R.string.below_40_positive),
                     iconTint = ZoneRed,
                     iconBackground = ZoneRed.copy(alpha = 0.12f),
                 )
@@ -220,7 +222,7 @@ private fun AnalyticsContent(
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text(
-                            text = "Overall Positive Rate",
+                            text = stringResource(R.string.overall_positive_rate),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                         )
@@ -238,11 +240,11 @@ private fun AnalyticsContent(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly,
                         ) {
-                            LegendItem(color = ZoneGreen, label = "Positive", value = "${summary.avgPositivePct}%")
+                            LegendItem(color = ZoneGreen, label = stringResource(R.string.positive_label), value = "${summary.avgPositivePct}%")
                             LegendItem(
                                 color = ZoneRed,
-                                label = "Negative",
-                                value = "${(100.0 - summary.avgPositivePct).let { "%.1f".format(it) }}%"
+                                label = stringResource(R.string.negative_label),
+                                value = stringResource(R.string.percentage_one_decimal, (100.0 - summary.avgPositivePct))
                             )
                         }
                     }
@@ -256,7 +258,7 @@ private fun AnalyticsContent(
                 FairPriceCard {
                     Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                         Text(
-                            text = "Zone Distribution",
+                            text = stringResource(R.string.zone_distribution),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                         )
@@ -302,9 +304,9 @@ private fun AnalyticsContent(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly,
                         ) {
-                            ZoneCountBadge("🟢", "Green", zones.greenZones, ZoneGreen)
-                            ZoneCountBadge("🟡", "Yellow", zones.yellowZones, ZoneYellow)
-                            ZoneCountBadge("🔴", "Red", zones.redZones, ZoneRed)
+                            ZoneCountBadge("🟢", stringResource(R.string.green), zones.greenZones, ZoneGreen)
+                            ZoneCountBadge("🟡", stringResource(R.string.yellow), zones.yellowZones, ZoneYellow)
+                            ZoneCountBadge("🔴", stringResource(R.string.red), zones.redZones, ZoneRed)
                         }
                     }
                 }
@@ -314,7 +316,7 @@ private fun AnalyticsContent(
         // ─── Zone Classification List ───────────────────
         item {
             Text(
-                text = "Zone Classification",
+                text = stringResource(R.string.zone_classification),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -329,7 +331,7 @@ private fun AnalyticsContent(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "No zone data available yet.\nCreate polls and collect responses to see results.",
+                        text = stringResource(R.string.no_zone_data_detailed),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
@@ -405,13 +407,13 @@ private fun DonutChart(
         // Center label
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "%.1f%%".format(positivePct),
+                text = stringResource(R.string.percentage_one_decimal, positivePct),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = zoneColor,
             )
             Text(
-                text = "positive",
+                text = stringResource(R.string.positive_lowercase),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -564,12 +566,12 @@ private fun ZoneCard(zone: ZoneEntry) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
-                        text = "${zone.totalResponses} responses",
+                        text = stringResource(R.string.responses_count, zone.totalResponses),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
-                        text = "${zone.positivePct}% positive",
+                        text = stringResource(R.string.positive_pct_short, zone.positivePct.toFloat()),
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Medium,
                         color = zoneColor,

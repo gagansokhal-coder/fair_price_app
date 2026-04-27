@@ -28,6 +28,7 @@ import androidx.compose.material.icons.rounded.PhoneAndroid
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -47,10 +48,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.fairprice.app.R
 import com.fairprice.app.network.LgdItem
 import com.fairprice.app.network.RegisterProfileRequest
 import com.fairprice.app.network.ApiRepository
@@ -201,7 +204,7 @@ fun ProfileSetupScreen(
         TopAppBar(
             title = {
                 Text(
-                    "Complete Profile",
+                    stringResource(R.string.complete_profile),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                 )
@@ -223,7 +226,7 @@ fun ProfileSetupScreen(
                     .padding(horizontal = 24.dp),
             ) {
                 Text(
-                    text = "Please fill in your details to complete registration. This is mandatory for PDS verification.",
+                    text = stringResource(R.string.fill_profile_details),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -241,7 +244,7 @@ fun ProfileSetupScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.GpsFixed,
-                        contentDescription = "GPS",
+                        contentDescription = stringResource(R.string.gps),
                         tint = if (gpsLat != 0.0) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.error,
                         modifier = Modifier.size(20.dp),
@@ -266,20 +269,20 @@ fun ProfileSetupScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.PhoneAndroid,
-                        contentDescription = "Device",
+                        contentDescription = stringResource(R.string.device),
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp),
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = "Device: ${hardwareUuid.take(8)}…",
+                        text = "${stringResource(R.string.device)}: ${hardwareUuid.take(8)}…",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(modifier = Modifier.weight(1f))
                     Icon(
                         imageVector = Icons.Rounded.CheckCircle,
-                        contentDescription = "Bound",
+                        contentDescription = stringResource(R.string.bound),
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(16.dp),
                     )
@@ -291,14 +294,14 @@ fun ProfileSetupScreen(
                 SoftTrayInput(
                     value = fullName,
                     onValueChange = { fullName = it },
-                    label = "Full Name",
-                    placeholder = "Enter your full name",
+                    label = stringResource(R.string.full_name),
+                    placeholder = stringResource(R.string.enter_full_name),
                     keyboardType = KeyboardType.Text,
                     imeAction = ImeAction.Next,
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Rounded.Person,
-                            contentDescription = "Name",
+                            contentDescription = stringResource(R.string.full_name),
                             modifier = Modifier.size(22.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -312,14 +315,14 @@ fun ProfileSetupScreen(
                 SoftTrayInput(
                     value = address,
                     onValueChange = { address = it },
-                    label = "Address",
-                    placeholder = "Enter your full address",
+                    label = stringResource(R.string.address),
+                    placeholder = stringResource(R.string.enter_address),
                     keyboardType = KeyboardType.Text,
                     imeAction = ImeAction.Next,
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Rounded.Home,
-                            contentDescription = "Address",
+                            contentDescription = stringResource(R.string.address),
                             modifier = Modifier.size(22.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -331,7 +334,7 @@ fun ProfileSetupScreen(
 
                 // ─── LGD Hierarchy Section ──────────────────────
                 Text(
-                    text = "Location Hierarchy (Punjab)",
+                    text = stringResource(R.string.location_hierarchy),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -340,7 +343,7 @@ fun ProfileSetupScreen(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = "Select your District → Sub-District → Village",
+                    text = stringResource(R.string.select_location_hierarchy),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -364,9 +367,11 @@ fun ProfileSetupScreen(
                             color = MaterialTheme.colorScheme.onErrorContainer,
                             modifier = Modifier.weight(1f),
                         )
-                        TextButton(onClick = { retryDistrictsTrigger++ }) {
+                        TextButton(onClick = {
+                            retryDistrictsTrigger++
+                        }) {
                             Text(
-                                "Retry",
+                                stringResource(R.string.retry),
                                 color = MaterialTheme.colorScheme.error,
                                 style = MaterialTheme.typography.labelMedium,
                             )
@@ -377,7 +382,7 @@ fun ProfileSetupScreen(
 
                 // District Dropdown
                 LgdDropdown(
-                    label = "District",
+                    label = stringResource(R.string.district),
                     items = districts,
                     selectedItem = selectedDistrict,
                     expanded = districtExpanded,
@@ -393,7 +398,7 @@ fun ProfileSetupScreen(
 
                 // Sub-District Dropdown
                 LgdDropdown(
-                    label = "Sub-District (Tehsil/Block)",
+                    label = stringResource(R.string.sub_district),
                     items = subdistricts,
                     selectedItem = selectedSubdistrict,
                     expanded = subdistrictExpanded,
@@ -412,7 +417,7 @@ fun ProfileSetupScreen(
 
                 // Village Dropdown
                 LgdDropdown(
-                    label = "Village",
+                    label = stringResource(R.string.village),
                     items = villages,
                     selectedItem = selectedVillage,
                     expanded = villageExpanded,
@@ -441,7 +446,7 @@ fun ProfileSetupScreen(
 
                 // Submit Button
                 GradientButton(
-                    text = if (isSubmitting) "Registering…" else "Complete Registration",
+                    text = if (isSubmitting) stringResource(R.string.registering) else stringResource(R.string.complete_registration),
                     onClick = {
                         scope.launch {
                             isSubmitting = true
@@ -515,7 +520,7 @@ private fun LgdDropdown(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .menuAnchor()
+                .menuAnchor(MenuAnchorType.PrimaryNotEditable)
                 .clip(ShapeTokens.InputField)
                 .background(
                     if (enabled) MaterialTheme.colorScheme.surfaceContainerHighest
@@ -558,7 +563,7 @@ private fun LgdDropdown(
             } else {
                 Icon(
                     imageVector = Icons.Rounded.KeyboardArrowDown,
-                    contentDescription = "Expand",
+                    contentDescription = stringResource(R.string.expand),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(
                         alpha = if (enabled) 1f else 0.4f
                     ),

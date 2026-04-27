@@ -38,9 +38,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.fairprice.app.R
 import com.fairprice.app.network.ApiRepository
 import com.fairprice.app.network.MyPollResponse
 import com.fairprice.app.network.NetworkResult
@@ -89,7 +91,7 @@ fun HistoryScreen(
         TopAppBar(
             title = {
                 Text(
-                    text = "Response History",
+                    text = stringResource(R.string.response_history),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -98,7 +100,7 @@ fun HistoryScreen(
                 IconButton(onClick = onBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Back",
+                        contentDescription = stringResource(R.string.back),
                     )
                 }
             },
@@ -125,7 +127,7 @@ fun HistoryScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "Unable to load history",
+                            text = stringResource(R.string.unable_to_load_history),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.error,
                             textAlign = TextAlign.Center,
@@ -151,19 +153,19 @@ fun HistoryScreen(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
                             imageVector = Icons.Rounded.History,
-                            contentDescription = "No history",
+                            contentDescription = stringResource(R.string.no_history),
                             modifier = Modifier.size(64.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "No responses yet",
+                            text = stringResource(R.string.no_responses_yet),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                             textAlign = TextAlign.Center,
                         )
                         Text(
-                            text = "Your poll responses will appear here after you vote",
+                            text = stringResource(R.string.responses_appear_after_vote),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
                             textAlign = TextAlign.Center,
@@ -217,7 +219,7 @@ fun HistoryScreen(
                                         color = MaterialTheme.colorScheme.onSurface,
                                     )
                                     Text(
-                                        text = "Your vote: ${item.selectedOptionText}",
+                                        text = stringResource(R.string.your_vote_format, item.selectedOptionText),
                                         style = MaterialTheme.typography.bodySmall,
                                         fontWeight = FontWeight.Medium,
                                         color = MaterialTheme.colorScheme.primary,
@@ -230,7 +232,7 @@ fun HistoryScreen(
                                 }
 
                                 StatusBadge(
-                                    text = if (item.pollActive) "Active" else "Closed",
+                                    text = if (item.pollActive) stringResource(R.string.active) else stringResource(R.string.closed),
                                     type = if (item.pollActive) BadgeType.SUCCESS else BadgeType.INFO,
                                 )
                             }

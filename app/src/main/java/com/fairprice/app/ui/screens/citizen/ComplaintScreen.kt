@@ -36,10 +36,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.fairprice.app.R
 import com.fairprice.app.ui.components.GradientButton
 import com.fairprice.app.ui.components.SoftTrayInput
 import com.fairprice.app.ui.theme.SteadyPulseEasing
@@ -62,13 +64,13 @@ fun ComplaintScreen(
     var isVisible by remember { mutableStateOf(false) }
 
     val complaintTypes = listOf(
-        "Ration not received",
-        "Short quantity delivered",
-        "Poor quality grain",
-        "Overcharging",
-        "Shop not open on schedule",
-        "Dealer misbehavior",
-        "Other",
+        stringResource(R.string.complaint_ration_not_received),
+        stringResource(R.string.complaint_short_quantity),
+        stringResource(R.string.complaint_poor_quality),
+        stringResource(R.string.complaint_overcharging),
+        stringResource(R.string.complaint_shop_not_open),
+        stringResource(R.string.complaint_dealer_misbehavior),
+        stringResource(R.string.complaint_other),
     )
 
     LaunchedEffect(Unit) { isVisible = true }
@@ -90,7 +92,7 @@ fun ComplaintScreen(
         TopAppBar(
             title = {
                 Text(
-                    text = "File Complaint",
+                    text = stringResource(R.string.complaint_title),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -99,7 +101,7 @@ fun ComplaintScreen(
                 IconButton(onClick = onBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Back",
+                        contentDescription = stringResource(R.string.back),
                     )
                 }
             },
@@ -125,12 +127,12 @@ fun ComplaintScreen(
                 SoftTrayInput(
                     value = "Rampur FPS #127",
                     onValueChange = { },
-                    label = "Fair Price Shop",
+                    label = stringResource(R.string.fair_price_shop),
                     enabled = false,
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Rounded.Store,
-                            contentDescription = "FPS",
+                            contentDescription = stringResource(R.string.fps_icon),
                             modifier = Modifier.size(22.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -145,13 +147,13 @@ fun ComplaintScreen(
                     SoftTrayInput(
                         value = complaintType,
                         onValueChange = { },
-                        label = "Complaint Type",
-                        placeholder = "Select complaint type",
+                        label = stringResource(R.string.complaint_type),
+                        placeholder = stringResource(R.string.select_complaint_type),
                         enabled = false,
                         trailingIcon = {
                             Icon(
                                 imageVector = Icons.Rounded.ArrowDropDown,
-                                contentDescription = "Dropdown",
+                                contentDescription = stringResource(R.string.dropdown_icon),
                                 modifier = Modifier.size(24.dp),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -188,8 +190,8 @@ fun ComplaintScreen(
                 SoftTrayInput(
                     value = description,
                     onValueChange = { description = it },
-                    label = "Description",
-                    placeholder = "Describe the issue in detail (minimum 10 characters)",
+                    label = stringResource(R.string.complaint_description),
+                    placeholder = stringResource(R.string.complaint_desc_detail_hint),
                     keyboardType = KeyboardType.Text,
                     imeAction = ImeAction.Default,
                     singleLine = false,
@@ -202,7 +204,7 @@ fun ComplaintScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = "${description.length} characters",
+                    text = stringResource(R.string.characters_count, description.length),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 )
@@ -210,7 +212,7 @@ fun ComplaintScreen(
                 Spacer(modifier = Modifier.height(32.dp))
 
                 GradientButton(
-                    text = "Submit Complaint",
+                    text = stringResource(R.string.submit_complaint),
                     onClick = onSubmitSuccess,
                     enabled = isFormValid,
                 )
@@ -218,7 +220,7 @@ fun ComplaintScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Your complaint will be reviewed by the district administration within 48 hours.",
+                    text = stringResource(R.string.complaint_review_notice),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 )

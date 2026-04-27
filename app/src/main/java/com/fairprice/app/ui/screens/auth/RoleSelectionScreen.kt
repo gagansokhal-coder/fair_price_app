@@ -39,8 +39,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.fairprice.app.R
 import com.fairprice.app.ui.theme.ShapeTokens
 import com.fairprice.app.ui.theme.SteadyPulseEasing
 
@@ -86,7 +88,7 @@ fun RoleSelectionScreen(
         // Header
         Icon(
             imageVector = Icons.Rounded.Shield,
-            contentDescription = "Shield",
+            contentDescription = stringResource(R.string.shield),
             modifier = Modifier.size(56.dp),
             tint = MaterialTheme.colorScheme.primary,
         )
@@ -94,7 +96,7 @@ fun RoleSelectionScreen(
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(
-            text = "Ration Prahari",
+            text = stringResource(R.string.app_name),
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
@@ -103,7 +105,7 @@ fun RoleSelectionScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Select Your Role",
+            text = stringResource(R.string.select_role),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -113,9 +115,9 @@ fun RoleSelectionScreen(
         // Citizen Card
         RoleCard(
             icon = Icons.Rounded.People,
-            title = "Citizen",
-            subtitle = "NFSA Beneficiary",
-            description = "Verify your ration deliveries,\nparticipate in polls, and report issues.",
+            title = stringResource(R.string.citizen),
+            subtitle = stringResource(R.string.citizen_desc),
+            description = stringResource(R.string.citizen_role_description),
             onClick = onCitizenClick,
             iconBackground = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
             iconTint = MaterialTheme.colorScheme.primary,
@@ -126,9 +128,9 @@ fun RoleSelectionScreen(
         // Officer Card
         RoleCard(
             icon = Icons.Rounded.AdminPanelSettings,
-            title = "Officer",
-            subtitle = "District / Block Admin",
-            description = "Create polls, monitor responses,\nand analyze zone-level data.",
+            title = stringResource(R.string.officer),
+            subtitle = stringResource(R.string.officer_desc),
+            description = stringResource(R.string.officer_role_description),
             onClick = onOfficerClick,
             iconBackground = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f),
             iconTint = MaterialTheme.colorScheme.tertiary,
@@ -137,7 +139,7 @@ fun RoleSelectionScreen(
         Spacer(modifier = Modifier.height(48.dp))
 
         Text(
-            text = "Government of India • PDS Monitoring",
+            text = stringResource(R.string.govt_pds_footer),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
         )
@@ -202,7 +204,7 @@ private fun RoleCard(
 
                 Icon(
                     imageVector = Icons.Rounded.ChevronRight,
-                    contentDescription = "Navigate",
+                    contentDescription = stringResource(R.string.navigate),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                     modifier = Modifier.size(24.dp),
                 )

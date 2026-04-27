@@ -49,8 +49,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.fairprice.app.R
 import com.fairprice.app.network.ApiRepository
 import com.fairprice.app.network.NetworkResult
 import com.fairprice.app.network.CustomPoll
@@ -100,7 +102,7 @@ fun PollAnalyticsScreen(
         TopAppBar(
             title = {
                 Text(
-                    text = "Poll Analytics",
+                    text = stringResource(R.string.poll_analytics),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -109,7 +111,7 @@ fun PollAnalyticsScreen(
                 IconButton(onClick = onBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Back",
+                        contentDescription = stringResource(R.string.back),
                     )
                 }
             },
@@ -139,7 +141,7 @@ fun PollAnalyticsScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "No polls created yet",
+                        text = stringResource(R.string.no_polls_created_yet),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                     )
@@ -227,7 +229,7 @@ private fun PollAnalyticsCard(
                         .padding(horizontal = 10.dp, vertical = 4.dp),
                 ) {
                     Text(
-                        text = if (poll.isActive) "Active" else "Closed",
+                        text = if (poll.isActive) stringResource(R.string.active) else stringResource(R.string.closed),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = if (poll.isActive) MaterialTheme.colorScheme.onPrimaryContainer
@@ -245,7 +247,7 @@ private fun PollAnalyticsCard(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "${poll.totalResponses} votes",
+                        text = stringResource(R.string.votes_count, poll.totalResponses),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.SemiBold,
@@ -266,7 +268,7 @@ private fun PollAnalyticsCard(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "${poll.targetLevel} • Code: ${poll.targetCode} • ${poll.createdAt}",
+                text = stringResource(R.string.poll_analytics_target_info, poll.targetLevel, poll.targetCode, poll.createdAt),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
             )
@@ -304,7 +306,7 @@ private fun PollAnalyticsCard(
                             )
                         }
                         Text(
-                            text = "$count (${(fraction * 100).toInt()}%)",
+                            text = stringResource(R.string.vote_count_percentage, count, (fraction * 100).toInt()),
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -332,13 +334,13 @@ private fun PollAnalyticsCard(
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Close,
-                        contentDescription = "Close poll",
+                        contentDescription = stringResource(R.string.close_poll_desc),
                         modifier = Modifier.size(16.dp),
                         tint = MaterialTheme.colorScheme.error,
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "Close Poll",
+                        text = stringResource(R.string.close_poll),
                         color = MaterialTheme.colorScheme.error,
                     )
                 }

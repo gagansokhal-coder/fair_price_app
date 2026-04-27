@@ -38,9 +38,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.fairprice.app.R
 import com.fairprice.app.ui.components.FairPriceCard
 import com.fairprice.app.ui.theme.FairPriceColors
 
@@ -72,7 +74,7 @@ fun NotificationsScreen(
         TopAppBar(
             title = {
                 Text(
-                    text = "Notifications",
+                    text = stringResource(R.string.notifications_title),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -81,7 +83,7 @@ fun NotificationsScreen(
                 IconButton(onClick = onBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Back",
+                        contentDescription = stringResource(R.string.back),
                     )
                 }
             },
@@ -100,13 +102,13 @@ fun NotificationsScreen(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(
                     imageVector = Icons.Rounded.NotificationsActive,
-                    contentDescription = "No notifications",
+                    contentDescription = stringResource(R.string.no_notifications),
                     modifier = Modifier.size(72.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
                 )
                 Spacer(modifier = Modifier.height(20.dp))
                 Text(
-                    text = "No notifications yet",
+                    text = stringResource(R.string.no_notifications),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
@@ -114,7 +116,7 @@ fun NotificationsScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "You'll receive push alerts here when new polls\nare created for your jurisdiction",
+                    text = stringResource(R.string.notifications_push_alerts_desc),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
                     textAlign = TextAlign.Center,
