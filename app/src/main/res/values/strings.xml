@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Lok Diksha</string>
+    <string name="app_name">LokLens</string>
     <string name="app_tagline">Protecting Your Entitlements</string>
     <string name="pds_subtitle">Public Distribution System</string>
     <string name="govt_initiative">Government of India Initiative</string>
@@ -446,4 +446,8 @@
     <!-- Common / Dynamic -->
     <string name="select_dropdown_item">Select %1$s</string>
     <string name="no_data_available">No data available</string>
+    <string name="terms_and_conditions">Terms &amp; Conditions</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="about_app">About App</string>
+    <string name="terms_privacy_notice">By continuing, you agree to our %1$s and %2$s.</string>
 </resources>

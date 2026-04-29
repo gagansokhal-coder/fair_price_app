@@ -1,0 +1,14 @@
+LokLens is an enterprise-grade application designed to bring transparency and accountability to the Indian Public Distribution System (PDS). Our mission is to empower NFSA beneficiaries and assist government administrators in ensuring that every citizen receives their rightful entitlements without fail.
+
+Key Features for Citizens:
+• Secure Login: Access your profile using your Ration Card and Mobile Number.
+• Real-time Verification: Confirm if you received your ration through dynamic polls.
+• Grievance Redressal: Easily file complaints regarding short stock, overcharging, or closed shops.
+
+Key Features for Administrators:
+• Targeted Polling: Create and broadcast custom polls to specific districts, blocks, or villages.
+• Live Analytics: Track real-time responses, view discrepancy rates, and monitor distribution health across different zones.
+
+LokLens bridges the gap between the government and the citizens, ensuring a corruption-free, efficient, and transparent supply chain.
+
+DISCLAIMER: This app is not affiliated with or authorized by any government organization. It is developed for educational and demonstration purposes.

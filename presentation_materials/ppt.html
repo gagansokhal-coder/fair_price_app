@@ -1,333 +1,816 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>LOK DIKSHA - Presentation</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',sans-serif;background:#0a0a1a;color:#e0e0e0}
-.slide{width:1280px;height:720px;margin:20px auto;position:relative;overflow:hidden;border-radius:12px;page-break-after:always;box-shadow:0 8px 40px rgba(0,0,0,0.5)}
-@media print{.slide{box-shadow:none;margin:0;border-radius:0} body{background:white}}
-@page{size:landscape;margin:0}
-h1{font-family:'Poppins',sans-serif;font-weight:800}
-h2{font-family:'Poppins',sans-serif;font-weight:700}
-h3{font-family:'Poppins',sans-serif;font-weight:600}
+    <meta charset="UTF-8">
+    <title>LOK DIKSHA - Presentation</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
 
-/* Slide 1: Title */
-.s1{background:linear-gradient(135deg,#0d1b6f,#1a237e,#283593);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
-.s1 .nit-logo{width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:20px;overflow:hidden}
-.s1 .nit-logo img{width:100%;height:100%;object-fit:contain}
-.s1 .nit-name{font-size:18px;color:#ffcc02;font-weight:600;letter-spacing:2px;margin-bottom:40px}
-.s1 .app-title{font-size:64px;font-weight:900;background:linear-gradient(90deg,#FF9933,#ffcc02);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:4px}
-.s1 .hindi{font-size:28px;color:#ffcc02;margin:8px 0 20px}
-.s1 .tagline{font-size:18px;color:#9fa8da;max-width:700px;line-height:1.6}
-.s1 .team{font-size:13px;color:#7986cb;margin-top:30px;letter-spacing:1px}
-.s1 .event{position:absolute;bottom:20px;font-size:12px;color:#5c6bc0;letter-spacing:2px}
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a1a;
+            color: #e0e0e0
+        }
 
-/* Slide 2+: Common */
-.slide-dark{background:linear-gradient(160deg,#0a0f2e,#111842,#0d1b4a)}
-.slide-header{padding:40px 60px 0;display:flex;align-items:center;gap:15px}
-.slide-header .num{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:white}
-.slide-header h2{font-size:32px;letter-spacing:1px}
-.slide-body{padding:30px 60px}
-.slide-body ul{list-style:none;padding:0}
-.slide-body li{padding:10px 0 10px 30px;font-size:17px;line-height:1.6;position:relative;border-bottom:1px solid rgba(255,255,255,0.05)}
-.slide-body li::before{content:'▸';position:absolute;left:0;color:#FF9933;font-weight:800;font-size:20px}
-.slide-body li strong{color:#ffcc02}
-.accent-bar{position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#FF9933,#ffcc02,#138808)}
-.slide-footer{position:absolute;bottom:12px;right:30px;font-size:11px;color:#3f51b5;letter-spacing:1px}
+        .slide {
+            width: 1280px;
+            height: 720px;
+            margin: 20px auto;
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            page-break-after: always;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5)
+        }
 
-/* Colors */
-.red-num{background:linear-gradient(135deg,#d32f2f,#b71c1c)}
-.blue-num{background:linear-gradient(135deg,#1565c0,#0d47a1)}
-.purple-num{background:linear-gradient(135deg,#7b1fa2,#4a148c)}
-.green-num{background:linear-gradient(135deg,#2e7d32,#1b5e20)}
-.orange-num{background:linear-gradient(135deg,#e65100,#bf360c)}
-.teal-num{background:linear-gradient(135deg,#00695c,#004d40)}
-.navy-num{background:linear-gradient(135deg,#1a237e,#0d1b6f)}
-.h-red{color:#ef5350} .h-blue{color:#42a5f5} .h-purple{color:#ab47bc} .h-green{color:#66bb6a} .h-orange{color:#ffa726} .h-teal{color:#26a69a} .h-navy{color:#7986cb}
+        @media print {
+            .slide {
+                box-shadow: none;
+                margin: 0;
+                border-radius: 0
+            }
 
-/* Grid layouts */
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:30px;padding:20px 60px}
-.card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:20px}
-.card h3{font-size:18px;margin-bottom:12px}
-.card ul li{font-size:15px;padding:6px 0 6px 25px}
-.card ul li::before{font-size:16px}
+            body {
+                background: white
+            }
+        }
 
-/* Tech flow */
-.tech-flow{display:flex;align-items:center;justify-content:center;gap:10px;padding:20px 60px;flex-wrap:wrap}
-.tech-box{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:15px 20px;text-align:center;min-width:140px}
-.tech-box .icon{font-size:28px;margin-bottom:6px}
-.tech-box .name{font-size:14px;font-weight:700;color:#ffcc02}
-.tech-box .desc{font-size:11px;color:#9fa8da;margin-top:4px}
-.arrow{font-size:24px;color:#FF9933;font-weight:900}
+        @page {
+            size: landscape;
+            margin: 0
+        }
 
-/* Zone colors */
-.zone-g{background:#1b5e20;color:#a5d6a7;padding:3px 10px;border-radius:20px;font-weight:600;font-size:14px}
-.zone-y{background:#f57f17;color:#fff8e1;padding:3px 10px;border-radius:20px;font-weight:600;font-size:14px}
-.zone-r{background:#b71c1c;color:#ffcdd2;padding:3px 10px;border-radius:20px;font-weight:600;font-size:14px}
+        h1 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 800
+        }
 
-/* Steps */
-.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;padding:15px 60px}
-.step{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:15px;text-align:center}
-.step .snum{font-size:28px;font-weight:900;color:#FF9933}
-.step .stitle{font-size:13px;font-weight:700;color:#ffcc02;margin:6px 0}
-.step .sdesc{font-size:11px;color:#9fa8da;line-height:1.4}
-</style>
+        h2 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700
+        }
+
+        h3 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600
+        }
+
+        /* Slide 1: Title */
+        .s1 {
+            background: linear-gradient(135deg, #0d1b6f, #1a237e, #283593);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center
+        }
+
+        .s1 .nit-logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            overflow: hidden
+        }
+
+        .s1 .nit-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain
+        }
+
+        .s1 .nit-name {
+            font-size: 18px;
+            color: #ffcc02;
+            font-weight: 600;
+            letter-spacing: 2px;
+            margin-bottom: 40px
+        }
+
+        .s1 .app-title {
+            font-size: 64px;
+            font-weight: 900;
+            background: linear-gradient(90deg, #FF9933, #ffcc02);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 4px
+        }
+
+        .s1 .hindi {
+            font-size: 28px;
+            color: #ffcc02;
+            margin: 8px 0 20px
+        }
+
+        .s1 .tagline {
+            font-size: 18px;
+            color: #9fa8da;
+            max-width: 700px;
+            line-height: 1.6
+        }
+
+        .s1 .team {
+            font-size: 13px;
+            color: #7986cb;
+            margin-top: 30px;
+            letter-spacing: 1px
+        }
+
+        .s1 .event {
+            position: absolute;
+            bottom: 20px;
+            font-size: 12px;
+            color: #5c6bc0;
+            letter-spacing: 2px
+        }
+
+        /* Slide 2+: Common */
+        .slide-dark {
+            background: linear-gradient(160deg, #0a0f2e, #111842, #0d1b4a)
+        }
+
+        .slide-header {
+            padding: 40px 60px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px
+        }
+
+        .slide-header .num {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 20px;
+            color: white
+        }
+
+        .slide-header h2 {
+            font-size: 32px;
+            letter-spacing: 1px
+        }
+
+        .slide-body {
+            padding: 30px 60px
+        }
+
+        .slide-body ul {
+            list-style: none;
+            padding: 0
+        }
+
+        .slide-body li {
+            padding: 10px 0 10px 30px;
+            font-size: 17px;
+            line-height: 1.6;
+            position: relative;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05)
+        }
+
+        .slide-body li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: #FF9933;
+            font-weight: 800;
+            font-size: 20px
+        }
+
+        .slide-body li strong {
+            color: #ffcc02
+        }
+
+        .accent-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #FF9933, #ffcc02, #138808)
+        }
+
+        .slide-footer {
+            position: absolute;
+            bottom: 12px;
+            right: 30px;
+            font-size: 11px;
+            color: #3f51b5;
+            letter-spacing: 1px
+        }
+
+        /* Colors */
+        .red-num {
+            background: linear-gradient(135deg, #d32f2f, #b71c1c)
+        }
+
+        .blue-num {
+            background: linear-gradient(135deg, #1565c0, #0d47a1)
+        }
+
+        .purple-num {
+            background: linear-gradient(135deg, #7b1fa2, #4a148c)
+        }
+
+        .green-num {
+            background: linear-gradient(135deg, #2e7d32, #1b5e20)
+        }
+
+        .orange-num {
+            background: linear-gradient(135deg, #e65100, #bf360c)
+        }
+
+        .teal-num {
+            background: linear-gradient(135deg, #00695c, #004d40)
+        }
+
+        .navy-num {
+            background: linear-gradient(135deg, #1a237e, #0d1b6f)
+        }
+
+        .h-red {
+            color: #ef5350
+        }
+
+        .h-blue {
+            color: #42a5f5
+        }
+
+        .h-purple {
+            color: #ab47bc
+        }
+
+        .h-green {
+            color: #66bb6a
+        }
+
+        .h-orange {
+            color: #ffa726
+        }
+
+        .h-teal {
+            color: #26a69a
+        }
+
+        .h-navy {
+            color: #7986cb
+        }
+
+        /* Grid layouts */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 20px 60px
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 20px
+        }
+
+        .card h3 {
+            font-size: 18px;
+            margin-bottom: 12px
+        }
+
+        .card ul li {
+            font-size: 15px;
+            padding: 6px 0 6px 25px
+        }
+
+        .card ul li::before {
+            font-size: 16px
+        }
+
+        /* Tech flow */
+        .tech-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 20px 60px;
+            flex-wrap: wrap
+        }
+
+        .tech-box {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px 20px;
+            text-align: center;
+            min-width: 140px
+        }
+
+        .tech-box .icon {
+            font-size: 28px;
+            margin-bottom: 6px
+        }
+
+        .tech-box .name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #ffcc02
+        }
+
+        .tech-box .desc {
+            font-size: 11px;
+            color: #9fa8da;
+            margin-top: 4px
+        }
+
+        .arrow {
+            font-size: 24px;
+            color: #FF9933;
+            font-weight: 900
+        }
+
+        /* Zone colors */
+        .zone-g {
+            background: #1b5e20;
+            color: #a5d6a7;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px
+        }
+
+        .zone-y {
+            background: #f57f17;
+            color: #fff8e1;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px
+        }
+
+        .zone-r {
+            background: #b71c1c;
+            color: #ffcdd2;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px
+        }
+
+        /* Steps */
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            padding: 15px 60px
+        }
+
+        .step {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center
+        }
+
+        .step .snum {
+            font-size: 28px;
+            font-weight: 900;
+            color: #FF9933
+        }
+
+        .step .stitle {
+            font-size: 13px;
+            font-weight: 700;
+            color: #ffcc02;
+            margin: 6px 0
+        }
+
+        .step .sdesc {
+            font-size: 11px;
+            color: #9fa8da;
+            line-height: 1.4
+        }
+    </style>
 </head>
+
 <body>
 
-<!-- SLIDE 1: TITLE -->
-<div class="slide s1">
-<div class="accent-bar"></div>
-<div class="nit-logo"><img src="nit_logo.png" alt="NIT" onerror="this.parentElement.innerHTML='NIT<br>JLR'"></div>
-<div class="nit-name">DR B R AMBEDKAR NATIONAL INSTITUTE OF TECHNOLOGY, JALANDHAR</div>
-<div class="app-title">LOK DIKSHA</div>
-<div class="hindi">लोक दीक्षा</div>
-<div class="tagline">Anti-Corruption Citizen Verification Platform for India's Public Distribution System</div>
-<div class="team">Gagandeep (CSE) · Gopi Chand (CSE) · Anuj Pratap Singh (ME) · Harmanpreet Singh (ECE)</div>
-<div class="event">OPEN DAY OF DIGITAL THINKING · 2026</div>
-</div>
+    <!-- SLIDE 1: TITLE -->
+    <div class="slide s1">
+        <div class="accent-bar"></div>
+        <div class="nit-logo"><img src="nit_logo.png" alt="NIT" onerror="this.parentElement.innerHTML='NIT<br>JLR'">
+        </div>
+        <div class="nit-name">DR B R AMBEDKAR NATIONAL INSTITUTE OF TECHNOLOGY, JALANDHAR</div>
+        <div class="app-title">LOK DIKSHA</div>
+        <div class="hindi">लोक दीक्षा</div>
+        <div class="tagline">Anti-Corruption Citizen Verification Platform for India's Public Distribution System</div>
+        <div class="team">Gagandeep (CSE) · Gopi Chand (CSE) · Anuj Pratap Singh (ME) · Harmanpreet Singh (ECE)</div>
+        <div class="event">OPEN DAY OF DIGITAL THINKING · 2026</div>
+    </div>
 
-<!-- SLIDE 2: PROBLEM -->
-<div class="slide slide-dark">
-<div class="accent-bar"></div>
-<div class="slide-header"><div class="num red-num">01</div><h2 class="h-red">The Problem</h2></div>
-<div class="slide-body">
-<ul>
-<li>India's PDS serves <strong>81.35 crore beneficiaries</strong> under NFSA — the world's largest food security program</li>
-<li>Annual ration diversion estimated at <strong>₹1 lakh crore</strong> due to supply chain corruption</li>
-<li>Current verification relies on <strong>paper-based dealer self-reporting</strong> — a fundamental conflict of interest</li>
-<li>Citizens have <strong>no digital mechanism</strong> to report non-delivery or short-weighing of rations</li>
-<li>District officers lack <strong>real-time ground-truth data</strong> — corruption stays invisible until delayed audits</li>
-<li>Middlemen exploit opacity to <strong>divert subsidized grains to black markets</strong>, depriving poorest families</li>
-</ul>
-</div>
-<div class="slide-footer">LOK DIKSHA · NIT Jalandhar</div>
-</div>
+    <!-- SLIDE 2: PROBLEM -->
+    <div class="slide slide-dark">
+        <div class="accent-bar"></div>
+        <div class="slide-header">
+            <div class="num red-num">01</div>
+            <h2 class="h-red">The Problem</h2>
+        </div>
+        <div class="slide-body">
+            <ul>
+                <li>India's PDS serves <strong>81.35 crore beneficiaries</strong> under NFSA — the world's largest food
+                    security program</li>
+                <li>Annual ration diversion estimated at <strong>₹1 lakh crore</strong> due to supply chain corruption
+                </li>
+                <li>Current verification relies on <strong>paper-based dealer self-reporting</strong> — a fundamental
+                    conflict of interest</li>
+                <li>Citizens have <strong>no digital mechanism</strong> to report non-delivery or short-weighing of
+                    rations</li>
+                <li>District officers lack <strong>real-time ground-truth data</strong> — corruption stays invisible
+                    until delayed audits</li>
+                <li>Middlemen exploit opacity to <strong>divert subsidized grains to black markets</strong>, depriving
+                    poorest families</li>
+            </ul>
+        </div>
+        <div class="slide-footer">LOK DIKSHA · NIT Jalandhar</div>
+    </div>
 
-<!-- SLIDE 3: EMPATHIZE -->
-<div class="slide slide-dark">
-<div class="accent-bar"></div>
-<div class="slide-header"><div class="num blue-num">02</div><h2 class="h-blue">Empathize the User</h2></div>
-<div class="two-col">
-<div class="card"><h3>👨‍🌾 Citizens (NFSA Beneficiaries)</h3><ul>
-<li>Travel kilometers to FPS — told <strong>"no stock"</strong> despite dispatched supplies</li>
-<li>Semi-literate — <strong>cannot navigate</strong> complaint portals or file written grievances</li>
-<li>Fear retaliation from FPS dealers if they complain directly</li>
-</ul></div>
-<div class="card"><h3>👨‍💼 Government Officers</h3><ul>
-<li>BDOs manage <strong>hundreds of FPS shops</strong> with no real-time dashboard</li>
-<li>DMs need <strong>actionable intelligence</strong> for surprise inspections</li>
-<li>Current system trusts the supply chain — <strong>LOK DIKSHA trusts the citizen</strong></li>
-</ul></div>
-</div>
-<div class="slide-footer">LOK DIKSHA · NIT Jalandhar</div>
-</div>
+    <!-- SLIDE 3: EMPATHIZE -->
+    <div class="slide slide-dark">
+        <div class="accent-bar"></div>
+        <div class="slide-header">
+            <div class="num blue-num">02</div>
+            <h2 class="h-blue">Empathize the User</h2>
+        </div>
+        <div class="two-col">
+            <div class="card">
+                <h3>👨‍🌾 Citizens (NFSA Beneficiaries)</h3>
+                <ul>
+                    <li>Travel kilometers to FPS — told <strong>"no stock"</strong> despite dispatched supplies</li>
+                    <li>Semi-literate — <strong>cannot navigate</strong> complaint portals or file written grievances
+                    </li>
+                    <li>Fear retaliation from FPS dealers if they complain directly</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>👨‍💼 Government Officers</h3>
+                <ul>
+                    <li>BDOs manage <strong>hundreds of FPS shops</strong> with no real-time dashboard</li>
+                    <li>DMs need <strong>actionable intelligence</strong> for surprise inspections</li>
+                    <li>Current system trusts the supply chain — <strong>LOK DIKSHA trusts the citizen</strong></li>
+                </ul>
+            </div>
+        </div>
+        <div class="slide-footer">LOK DIKSHA · NIT Jalandhar</div>
+    </div>
 
-<!-- SLIDE 4: SOLUTION -->
-<div class="slide slide-dark">
-<div class="accent-bar"></div>
-<div class="slide-header"><div class="num green-num">03</div><h2 class="h-green">Our Solution: LOK DIKSHA</h2></div>
-<div class="slide-body">
-<ul>
-<li>A <strong>mobile-first citizen verification platform</strong> that empowers NFSA beneficiaries to report ration delivery status</li>
-<li><strong>GPS geofencing (100m radius)</strong> — citizens must be physically at FPS to participate</li>
-<li><strong>One-device-one-citizen binding</strong> prevents proxy voting and identity fraud</li>
-<li><strong>Hierarchical poll targeting</strong> — District → Subdivision → Block → Village level precision</li>
-<li><strong>Zone classification</strong>: <span class="zone-g">GREEN &gt;80%</span> <span class="zone-y">YELLOW 50-80%</span> <span class="zone-r">RED &lt;50%</span></li>
-<li>Role-based admin dashboard for <strong>DMs, SDOs, and BDOs</strong> with real-time analytics</li>
-</ul>
-</div>
-<div class="slide-footer">LOK DIKSHA · NIT Jalandhar</div>
-</div>
+    <!-- SLIDE 4: SOLUTION -->
+    <div class="slide slide-dark">
+        <div class="accent-bar"></div>
+        <div class="slide-header">
+            <div class="num green-num">03</div>
+            <h2 class="h-green">Our Solution: LOK DIKSHA</h2>
+        </div>
+        <div class="slide-body">
+            <ul>
+                <li>A <strong>mobile-first citizen verification platform</strong> that empowers NFSA beneficiaries to
+                    report ration delivery status</li>
+                <li><strong>GPS geofencing (100m radius)</strong> — citizens must be physically at FPS to participate
+                </li>
+                <li><strong>One-device-one-citizen binding</strong> prevents proxy voting and identity fraud</li>
+                <li><strong>Hierarchical poll targeting</strong> — District → Subdivision → Block → Village level
+                    precision</li>
+                <li><strong>Zone classification</strong>: <span class="zone-g">GREEN &gt;80%</span> <span
+                        class="zone-y">YELLOW 50-80%</span> <span class="zone-r">RED &lt;50%</span></li>
+                <li>Role-based admin dashboard for <strong>DMs, SDOs, and BDOs</strong> with real-time analytics</li>
+            </ul>
+        </div>
+        <div class="slide-footer">LOK DIKSHA · NIT Jalandhar</div>
+    </div>
 
-<!-- SLIDE 5: TECH ARCHITECTURE -->
-<div class="slide slide-dark">
-<div class="accent-bar"></div>
-<div class="slide-header"><div class="num orange-num">04</div><h2 class="h-orange">Technology Architecture</h2></div>
-<div class="tech-flow">
-<div class="tech-box"><div class="icon">📱</div><div class="name">Kotlin</div><div class="desc">Jetpack Compose<br>Material 3 UI</div></div>
-<div class="arrow">→</div>
-<div class="tech-box"><div class="icon">🔗</div><div class="name">Retrofit2</div><div class="desc">OkHttp<br>REST Client</div></div>
-<div class="arrow">→</div>
-<div class="tech-box"><div class="icon">⚡</div><div class="name">Go (Gin)</div><div class="desc">REST API<br>JWT Middleware</div></div>
-<div class="arrow">→</div>
-<div class="tech-box"><div class="icon">🗄️</div><div class="name">PostgreSQL 15</div><div class="desc">PostGIS Extension<br>Supabase Hosted</div></div>
-<div class="arrow">→</div>
-<div class="tech-box"><div class="icon">🔐</div><div class="name">Supabase Auth</div><div class="desc">OTP + JWT<br>Phone Verify</div></div>
-</div>
-<div class="slide-body" style="padding-top:10px">
-<ul>
-<li><strong>20+ premium Compose screens</strong> — glassmorphism, gradient buttons, micro-animations</li>
-<li><strong>PostGIS ST_DistanceSphere</strong> — spatial queries for GPS geofence validation</li>
-<li><strong>5-level RBAC</strong>: State Admin → District Admin → SDO → BDO → Citizen</li>
-</ul>
-</div>
-<div class="slide-footer">LOK DIKSHA · NIT Jalandhar</div>
-</div>
+    <!-- SLIDE 5: TECH ARCHITECTURE -->
+    <div class="slide slide-dark">
+        <div class="accent-bar"></div>
+        <div class="slide-header">
+            <div class="num orange-num">04</div>
+            <h2 class="h-orange">Technology Architecture</h2>
+        </div>
+        <div class="tech-flow">
+            <div class="tech-box">
+                <div class="icon">📱</div>
+                <div class="name">Kotlin</div>
+                <div class="desc">Jetpack Compose<br>Material 3 UI</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="tech-box">
+                <div class="icon">🔗</div>
+                <div class="name">Retrofit2</div>
+                <div class="desc">OkHttp<br>REST Client</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="tech-box">
+                <div class="icon">⚡</div>
+                <div class="name">Go (Gin)</div>
+                <div class="desc">REST API<br>JWT Middleware</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="tech-box">
+                <div class="icon">🗄️</div>
+                <div class="name">PostgreSQL 15</div>
+                <div class="desc">PostGIS Extension<br>Supabase Hosted</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="tech-box">
+                <div class="icon">🔐</div>
+                <div class="name">Supabase Auth</div>
+                <div class="desc">OTP + JWT<br>Phone Verify</div>
+            </div>
+        </div>
+        <div class="slide-body" style="padding-top:10px">
+            <ul>
+                <li><strong>20+ premium Compose screens</strong> — glassmorphism, gradient buttons, micro-animations
+                </li>
+                <li><strong>PostGIS ST_DistanceSphere</strong> — spatial queries for GPS geofence validation</li>
+                <li><strong>5-level RBAC</strong>: State Admin → District Admin → SDO → BDO → Citizen</li>
+            </ul>
+        </div>
+        <div class="slide-footer">LOK DIKSHA · NIT Jalandhar</div>
+    </div>
 
-<!-- SLIDE 6: SECURITY -->
-<div class="slide slide-dark">
-<div class="accent-bar"></div>
-<div class="slide-header"><div class="num purple-num">05</div><h2 class="h-purple">Anti-Fraud & Security</h2></div>
-<div class="steps">
-<div class="step"><div class="snum">1</div><div class="stitle">Poll Active Check</div><div class="sdesc">Verify poll exists, is active, and not expired</div></div>
-<div class="step"><div class="snum">2</div><div class="stitle">Option Validate</div><div class="sdesc">Bounds-check selected option index against poll options</div></div>
-<div class="step"><div class="snum">3</div><div class="stitle">Duplicate Detect</div><div class="sdesc">Block re-voting with DB unique constraint + app check</div></div>
-<div class="step"><div class="snum">4</div><div class="stitle">LGD Eligibility</div><div class="sdesc">Citizen must reside in poll's target LGD area</div></div>
-<div class="step"><div class="snum">5</div><div class="stitle">GPS Geofence</div><div class="sdesc">PostGIS 100m radius check against FPS shop location</div></div>
-<div class="step"><div class="snum">6</div><div class="stitle">Atomic Insert</div><div class="sdesc">Conflict-rejecting INSERT with unique constraint fallback</div></div>
-</div>
-<div class="slide-body" style="padding-top:5px">
-<ul>
-<li><strong>Device Binding:</strong> Hardware UUID locked to one citizen account permanently</li>
-<li><strong>Rate Limiting:</strong> 1 vote per user per 60 seconds (brute-force prevention)</li>
-<li><strong>Mock Location Detection:</strong> Android API detects GPS spoofing apps</li>
-</ul>
-</div>
-<div class="slide-footer">LOK DIKSHA · NIT Jalandhar</div>
-</div>
+    <!-- SLIDE 6: SECURITY -->
+    <div class="slide slide-dark">
+        <div class="accent-bar"></div>
+        <div class="slide-header">
+            <div class="num purple-num">05</div>
+            <h2 class="h-purple">Anti-Fraud & Security</h2>
+        </div>
+        <div class="steps">
+            <div class="step">
+                <div class="snum">1</div>
+                <div class="stitle">Poll Active Check</div>
+                <div class="sdesc">Verify poll exists, is active, and not expired</div>
+            </div>
+            <div class="step">
+                <div class="snum">2</div>
+                <div class="stitle">Option Validate</div>
+                <div class="sdesc">Bounds-check selected option index against poll options</div>
+            </div>
+            <div class="step">
+                <div class="snum">3</div>
+                <div class="stitle">Duplicate Detect</div>
+                <div class="sdesc">Block re-voting with DB unique constraint + app check</div>
+            </div>
+            <div class="step">
+                <div class="snum">4</div>
+                <div class="stitle">LGD Eligibility</div>
+                <div class="sdesc">Citizen must reside in poll's target LGD area</div>
+            </div>
+            <div class="step">
+                <div class="snum">5</div>
+                <div class="stitle">GPS Geofence</div>
+                <div class="sdesc">PostGIS 100m radius check against FPS shop location</div>
+            </div>
+            <div class="step">
+                <div class="snum">6</div>
+                <div class="stitle">Atomic Insert</div>
+                <div class="sdesc">Conflict-rejecting INSERT with unique constraint fallback</div>
+            </div>
+        </div>
+        <div class="slide-body" style="padding-top:5px">
+            <ul>
+                <li><strong>Device Binding:</strong> Hardware UUID locked to one citizen account permanently</li>
+                <li><strong>Rate Limiting:</strong> 1 vote per user per 60 seconds (brute-force prevention)</li>
+                <li><strong>Mock Location Detection:</strong> Android API detects GPS spoofing apps</li>
+            </ul>
+        </div>
+        <div class="slide-footer">LOK DIKSHA · NIT Jalandhar</div>
+    </div>
 
-<!-- SLIDE 7: USER FLOWS -->
-<div class="slide slide-dark">
-<div class="accent-bar"></div>
-<div class="slide-header"><div class="num teal-num">06</div><h2 class="h-teal">User Flows & Prototype</h2></div>
-<div class="two-col">
-<div class="card"><h3>👨‍🌾 Citizen Flow</h3><ul>
-<li>Splash → <strong>Role Selection</strong></li>
-<li>Ration Card (12-digit) + Phone Login</li>
-<li><strong>OTP Verification</strong> (Supabase SMS)</li>
-<li>Profile Setup: District → Block → Village</li>
-<li><strong>Home Dashboard</strong> with active polls</li>
-<li>Vote with GPS verification → Success</li>
-<li>View <strong>voting history</strong> and past responses</li>
-</ul></div>
-<div class="card"><h3>👨‍💼 Admin Flow</h3><ul>
-<li>Officer Login (Phone + Password)</li>
-<li><strong>Admin Dashboard</strong> with stats</li>
-<li>Create Poll → LGD targeting dropdown</li>
-<li><strong>Poll Analytics</strong>: Pie/Bar charts</li>
-<li>Zone Classification: Green/Yellow/Red</li>
-<li><strong>Officer Management</strong>: CRUD + hierarchy</li>
-<li>Close/Expire polls with audit trail</li>
-</ul></div>
-</div>
-<div class="slide-footer">LOK DIKSHA · NIT Jalandhar</div>
-</div>
+    <!-- SLIDE 7: USER FLOWS -->
+    <div class="slide slide-dark">
+        <div class="accent-bar"></div>
+        <div class="slide-header">
+            <div class="num teal-num">06</div>
+            <h2 class="h-teal">User Flows & Prototype</h2>
+        </div>
+        <div class="two-col">
+            <div class="card">
+                <h3>👨‍🌾 Citizen Flow</h3>
+                <ul>
+                    <li>Splash → <strong>Role Selection</strong></li>
+                    <li>Ration Card (12-digit) + Phone Login</li>
+                    <li><strong>OTP Verification</strong> (Supabase SMS)</li>
+                    <li>Profile Setup: District → Block → Village</li>
+                    <li><strong>Home Dashboard</strong> with active polls</li>
+                    <li>Vote with GPS verification → Success</li>
+                    <li>View <strong>voting history</strong> and past responses</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>👨‍💼 Admin Flow</h3>
+                <ul>
+                    <li>Officer Login (Phone + Password)</li>
+                    <li><strong>Admin Dashboard</strong> with stats</li>
+                    <li>Create Poll → LGD targeting dropdown</li>
+                    <li><strong>Poll Analytics</strong>: Pie/Bar charts</li>
+                    <li>Zone Classification: Green/Yellow/Red</li>
+                    <li><strong>Officer Management</strong>: CRUD + hierarchy</li>
+                    <li>Close/Expire polls with audit trail</li>
+                </ul>
+            </div>
+        </div>
+        <div class="slide-footer">LOK DIKSHA · NIT Jalandhar</div>
+    </div>
 
-<!-- SLIDE 8: APP SCREENSHOTS -->
-<div class="slide slide-dark" style="display:flex;flex-direction:column">
-<div class="accent-bar"></div>
-<div class="slide-header"><div class="num orange-num">07</div><h2 class="h-orange">App Screenshots</h2></div>
-<div style="flex:1;display:flex;align-items:center;justify-content:center;padding:20px">
-<img src="app_mockup.png" alt="App Screens" style="max-height:520px;max-width:1100px;object-fit:contain;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.4)" onerror="this.parentElement.innerHTML='<div style=text-align:center;color:#5c6bc0;font-size:24px>App Screenshots Placeholder</div>'">
-</div>
-<div class="slide-footer">LOK DIKSHA · NIT Jalandhar</div>
-</div>
+    <!-- SLIDE 8: APP SCREENSHOTS -->
+    <div class="slide slide-dark" style="display:flex;flex-direction:column">
+        <div class="accent-bar"></div>
+        <div class="slide-header">
+            <div class="num orange-num">07</div>
+            <h2 class="h-orange">App Screenshots</h2>
+        </div>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:20px">
+            <img src="app_mockup.png" alt="App Screens"
+                style="max-height:520px;max-width:1100px;object-fit:contain;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.4)"
+                onerror="this.parentElement.innerHTML='<div style=text-align:center;color:#5c6bc0;font-size:24px>App Screenshots Placeholder</div>'">
+        </div>
+        <div class="slide-footer">LOK DIKSHA · NIT Jalandhar</div>
+    </div>
 
-<!-- SLIDE 9: DATABASE -->
-<div class="slide slide-dark">
-<div class="accent-bar"></div>
-<div class="slide-header"><div class="num blue-num">08</div><h2 class="h-blue">Database Architecture</h2></div>
-<div class="two-col">
-<div class="card"><h3>📊 Core Tables</h3><ul>
-<li><strong>lgd_hierarchy</strong> — 13,000+ Punjab villages with full path (State→District→Block→Village)</li>
-<li><strong>users</strong> — Citizen accounts with ration card, phone, device UUID, GPS, LGD codes</li>
-<li><strong>officers</strong> — Admin accounts with role, jurisdiction codes, designation</li>
-<li><strong>otp_sessions</strong> — OTP verification tracking with expiry</li>
-</ul></div>
-<div class="card"><h3>📋 Polling Tables</h3><ul>
-<li><strong>custom_polls</strong> — Dynamic polls with JSONB options (2-5 choices), LGD targeting</li>
-<li><strong>custom_poll_responses</strong> — Citizen votes with GPS coords, distance, unique constraint</li>
-<li><strong>poll_results_summary</strong> — Materialized view aggregating option-wise vote counts</li>
-<li><strong>PostGIS</strong> — ST_DistanceSphere for geospatial validation queries</li>
-</ul></div>
-</div>
-<div class="slide-footer">LOK DIKSHA · NIT Jalandhar</div>
-</div>
+    <!-- SLIDE 9: DATABASE -->
+    <div class="slide slide-dark">
+        <div class="accent-bar"></div>
+        <div class="slide-header">
+            <div class="num blue-num">08</div>
+            <h2 class="h-blue">Database Architecture</h2>
+        </div>
+        <div class="two-col">
+            <div class="card">
+                <h3>📊 Core Tables</h3>
+                <ul>
+                    <li><strong>lgd_hierarchy</strong> — 13,000+ Punjab villages with full path
+                        (State→District→Block→Village)</li>
+                    <li><strong>users</strong> — Citizen accounts with ration card, phone, device UUID, GPS, LGD codes
+                    </li>
+                    <li><strong>officers</strong> — Admin accounts with role, jurisdiction codes, designation</li>
+                    <li><strong>otp_sessions</strong> — OTP verification tracking with expiry</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>📋 Polling Tables</h3>
+                <ul>
+                    <li><strong>custom_polls</strong> — Dynamic polls with JSONB options (2-5 choices), LGD targeting
+                    </li>
+                    <li><strong>custom_poll_responses</strong> — Citizen votes with GPS coords, distance, unique
+                        constraint</li>
+                    <li><strong>poll_results_summary</strong> — Materialized view aggregating option-wise vote counts
+                    </li>
+                    <li><strong>PostGIS</strong> — ST_DistanceSphere for geospatial validation queries</li>
+                </ul>
+            </div>
+        </div>
+        <div class="slide-footer">LOK DIKSHA · NIT Jalandhar</div>
+    </div>
 
-<!-- SLIDE 10: ANALYTICS -->
-<div class="slide slide-dark">
-<div class="accent-bar"></div>
-<div class="slide-header"><div class="num green-num">09</div><h2 class="h-green">Analytics & Zone Classification</h2></div>
-<div class="slide-body">
-<ul>
-<li><strong>Pie Charts:</strong> Option-wise vote distribution for each poll — visual breakdown of citizen responses</li>
-<li><strong>Bar Charts:</strong> Per-area comparison across villages/blocks — identify underperforming zones</li>
-<li><strong>Zone Classification Engine:</strong> Automatic color-coding based on positive response percentage</li>
-</ul>
-</div>
-<div style="display:flex;justify-content:center;gap:40px;padding:20px 60px">
-<div style="text-align:center">
-<div class="zone-g" style="font-size:22px;padding:12px 30px;margin-bottom:10px">🟢 GREEN ZONE</div>
-<div style="color:#a5d6a7;font-size:15px">&gt;80% positive responses<br>No intervention needed</div>
-</div>
-<div style="text-align:center">
-<div class="zone-y" style="font-size:22px;padding:12px 30px;margin-bottom:10px">🟡 YELLOW ZONE</div>
-<div style="color:#fff8e1;font-size:15px">50-80% positive responses<br>Monitor closely</div>
-</div>
-<div style="text-align:center">
-<div class="zone-r" style="font-size:22px;padding:12px 30px;margin-bottom:10px">🔴 RED ZONE</div>
-<div style="color:#ffcdd2;font-size:15px">&lt;50% positive responses<br>Immediate investigation</div>
-</div>
-</div>
-<div class="slide-footer">LOK DIKSHA · NIT Jalandhar</div>
-</div>
+    <!-- SLIDE 10: ANALYTICS -->
+    <div class="slide slide-dark">
+        <div class="accent-bar"></div>
+        <div class="slide-header">
+            <div class="num green-num">09</div>
+            <h2 class="h-green">Analytics & Zone Classification</h2>
+        </div>
+        <div class="slide-body">
+            <ul>
+                <li><strong>Pie Charts:</strong> Option-wise vote distribution for each poll — visual breakdown of
+                    citizen responses</li>
+                <li><strong>Bar Charts:</strong> Per-area comparison across villages/blocks — identify underperforming
+                    zones</li>
+                <li><strong>Zone Classification Engine:</strong> Automatic color-coding based on positive response
+                    percentage</li>
+            </ul>
+        </div>
+        <div style="display:flex;justify-content:center;gap:40px;padding:20px 60px">
+            <div style="text-align:center">
+                <div class="zone-g" style="font-size:22px;padding:12px 30px;margin-bottom:10px">🟢 GREEN ZONE</div>
+                <div style="color:#a5d6a7;font-size:15px">&gt;80% positive responses<br>No intervention needed</div>
+            </div>
+            <div style="text-align:center">
+                <div class="zone-y" style="font-size:22px;padding:12px 30px;margin-bottom:10px">🟡 YELLOW ZONE</div>
+                <div style="color:#fff8e1;font-size:15px">50-80% positive responses<br>Monitor closely</div>
+            </div>
+            <div style="text-align:center">
+                <div class="zone-r" style="font-size:22px;padding:12px 30px;margin-bottom:10px">🔴 RED ZONE</div>
+                <div style="color:#ffcdd2;font-size:15px">&lt;50% positive responses<br>Immediate investigation</div>
+            </div>
+        </div>
+        <div class="slide-footer">LOK DIKSHA · NIT Jalandhar</div>
+    </div>
 
-<!-- SLIDE 11: IMPACT -->
-<div class="slide slide-dark">
-<div class="accent-bar"></div>
-<div class="slide-header"><div class="num red-num">10</div><h2 class="h-red">Social Impact & SDG Alignment</h2></div>
-<div class="two-col">
-<div class="card"><h3>🌍 Impact</h3><ul>
-<li>Direct benefit to <strong>81+ crore</strong> NFSA beneficiaries</li>
-<li>Potential to save <strong>₹1 lakh crore</strong> in annual ration diversion</li>
-<li>Empowers <strong>rural women</strong> (primary ration collectors) with digital voice</li>
-<li>Creates <strong>accountability chain</strong> from village to state level</li>
-<li>Reduces <strong>malnutrition</strong> by ensuring food reaches intended families</li>
-</ul></div>
-<div class="card"><h3>🎯 UN SDG Goals</h3><ul>
-<li><strong>SDG 1</strong> — No Poverty: Protects food subsidies for BPL families</li>
-<li><strong>SDG 2</strong> — Zero Hunger: Ensures ration delivery transparency</li>
-<li><strong>SDG 16</strong> — Peace & Justice: Builds accountable institutions</li>
-<li><strong>SDG 10</strong> — Reduced Inequalities: Gives voice to marginalized communities</li>
-<li><strong>SDG 9</strong> — Innovation: Tech-driven governance solution</li>
-</ul></div>
-</div>
-<div class="slide-footer">LOK DIKSHA · NIT Jalandhar</div>
-</div>
+    <!-- SLIDE 11: IMPACT -->
+    <div class="slide slide-dark">
+        <div class="accent-bar"></div>
+        <div class="slide-header">
+            <div class="num red-num">10</div>
+            <h2 class="h-red">Social Impact & SDG Alignment</h2>
+        </div>
+        <div class="two-col">
+            <div class="card">
+                <h3>🌍 Impact</h3>
+                <ul>
+                    <li>Direct benefit to <strong>81+ crore</strong> NFSA beneficiaries</li>
+                    <li>Potential to save <strong>₹1 lakh crore</strong> in annual ration diversion</li>
+                    <li>Empowers <strong>rural women</strong> (primary ration collectors) with digital voice</li>
+                    <li>Creates <strong>accountability chain</strong> from village to state level</li>
+                    <li>Reduces <strong>malnutrition</strong> by ensuring food reaches intended families</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>🎯 UN SDG Goals</h3>
+                <ul>
+                    <li><strong>SDG 1</strong> — No Poverty: Protects food subsidies for BPL families</li>
+                    <li><strong>SDG 2</strong> — Zero Hunger: Ensures ration delivery transparency</li>
+                    <li><strong>SDG 16</strong> — Peace & Justice: Builds accountable institutions</li>
+                    <li><strong>SDG 10</strong> — Reduced Inequalities: Gives voice to marginalized communities</li>
+                    <li><strong>SDG 9</strong> — Innovation: Tech-driven governance solution</li>
+                </ul>
+            </div>
+        </div>
+        <div class="slide-footer">LOK DIKSHA · NIT Jalandhar</div>
+    </div>
 
-<!-- SLIDE 12: FUTURE SCOPE -->
-<div class="slide slide-dark">
-<div class="accent-bar"></div>
-<div class="slide-header"><div class="num navy-num">11</div><h2 class="h-navy">Future Scope</h2></div>
-<div class="steps">
-<div class="step"><div class="snum">🔔</div><div class="stitle">FCM Push Notifications</div><div class="sdesc">Real-time alerts when ration stock dispatched to FPS</div></div>
-<div class="step"><div class="snum">🌐</div><div class="stitle">Multi-language</div><div class="sdesc">Hindi, Punjabi, English for wider rural accessibility</div></div>
-<div class="step"><div class="snum">📦</div><div class="stitle">EPDS Integration</div><div class="sdesc">Live stock tracking from government ePoS machines</div></div>
-<div class="step"><div class="snum">🤖</div><div class="stitle">AI Anomaly Detection</div><div class="sdesc">ML to flag suspicious voting patterns and bot accounts</div></div>
-<div class="step"><div class="snum">📷</div><div class="stitle">QR Ration Card Scan</div><div class="sdesc">Fast citizen verification without manual entry</div></div>
-<div class="step"><div class="snum">📶</div><div class="stitle">Offline-First Mode</div><div class="sdesc">Vote in low-connectivity areas with background sync</div></div>
-</div>
-<div class="slide-footer">LOK DIKSHA · NIT Jalandhar</div>
-</div>
+    <!-- SLIDE 12: FUTURE SCOPE -->
+    <div class="slide slide-dark">
+        <div class="accent-bar"></div>
+        <div class="slide-header">
+            <div class="num navy-num">11</div>
+            <h2 class="h-navy">Future Scope</h2>
+        </div>
+        <div class="steps">
+            <div class="step">
+                <div class="snum">🔔</div>
+                <div class="stitle">FCM Push Notifications</div>
+                <div class="sdesc">Real-time alerts when ration stock dispatched to FPS</div>
+            </div>
+            <div class="step">
+                <div class="snum">🌐</div>
+                <div class="stitle">Multi-language</div>
+                <div class="sdesc">Hindi, Punjabi, English for wider rural accessibility</div>
+            </div>
+            <div class="step">
+                <div class="snum">📦</div>
+                <div class="stitle">EPDS Integration</div>
+                <div class="sdesc">Live stock tracking from government ePoS machines</div>
+            </div>
+            <div class="step">
+                <div class="snum">🤖</div>
+                <div class="stitle">AI Anomaly Detection</div>
+                <div class="sdesc">ML to flag suspicious voting patterns and bot accounts</div>
+            </div>
+            <div class="step">
+                <div class="snum">📷</div>
+                <div class="stitle">QR Ration Card Scan</div>
+                <div class="sdesc">Fast citizen verification without manual entry</div>
+            </div>
+            <div class="step">
+                <div class="snum">📶</div>
+                <div class="stitle">Offline-First Mode</div>
+                <div class="sdesc">Vote in low-connectivity areas with background sync</div>
+            </div>
+        </div>
+        <div class="slide-footer">LOK DIKSHA · NIT Jalandhar</div>
+    </div>
 
-<!-- SLIDE 13: THANK YOU -->
-<div class="slide s1">
-<div class="accent-bar"></div>
-<div class="app-title" style="font-size:56px">THANK YOU</div>
-<div class="hindi" style="margin-top:10px">धन्यवाद</div>
-<div class="tagline" style="margin-top:30px;font-size:20px">LOK DIKSHA — Empowering Citizens, Eliminating Corruption</div>
-<div style="display:flex;gap:40px;margin-top:40px;font-size:14px;color:#9fa8da">
-<div>📧 25103053@nitj.ac.in</div>
-<div>🏫 NIT Jalandhar</div>
-</div>
-<div class="team" style="margin-top:20px">Gagandeep · Gopi Chand · Anuj Pratap Singh · Harmanpreet Singh</div>
-<div style="margin-top:30px;padding:15px 25px;border:2px dashed rgba(255,255,255,0.2);border-radius:12px;color:#5c6bc0;font-size:13px">📱 Scan QR to Download LOK DIKSHA (Coming Soon)</div>
-<div class="event">OPEN DAY OF DIGITAL THINKING · NIT JALANDHAR · 2026</div>
-</div>
+    <!-- SLIDE 13: THANK YOU -->
+    <div class="slide s1">
+        <div class="accent-bar"></div>
+        <div class="app-title" style="font-size:56px">THANK YOU</div>
+        <div class="hindi" style="margin-top:10px">धन्यवाद</div>
+        <div class="tagline" style="margin-top:30px;font-size:20px">LOK DIKSHA — Empowering Citizens, Eliminating
+            Corruption</div>
+        <div style="display:flex;gap:40px;margin-top:40px;font-size:14px;color:#9fa8da">
+            <div>📧 25103053@nitj.ac.in</div>
+            <div>🏫 NIT Jalandhar</div>
+        </div>
+        <div class="team" style="margin-top:20px">Gagandeep · Gopi Chand · Anuj Pratap Singh · Harmanpreet Singh</div>
+        <div
+            style="margin-top:30px;padding:15px 25px;border:2px dashed rgba(255,255,255,0.2);border-radius:12px;color:#5c6bc0;font-size:13px">
+            📱 Scan QR to Download LOK DIKSHA (Coming Soon)</div>
+        <div class="event">OPEN DAY OF DIGITAL THINKING · NIT JALANDHAR · 2026</div>
+    </div>
 
 </body>
+
 </html>

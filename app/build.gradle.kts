@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.fairprice.app"
+    namespace = "com.gagan.lokdiksha"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.fairprice.app"
+        applicationId = "com.gagan.lokdiksha"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
