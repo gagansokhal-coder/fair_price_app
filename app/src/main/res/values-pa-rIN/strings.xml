@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- General -->
-    <string name="app_name">ਲੋਕ ਦੀਕਸ਼ਾ</string>
+    <string name="app_name">ਲੋਕਲੈਂਸ</string>
     <string name="app_tagline">ਤੁਹਾਡੇ ਅਧਿਕਾਰਾਂ ਦੀ ਰਾਖੀ</string>
     <string name="pds_subtitle">ਜਨਤਕ ਵੰਡ ਪ੍ਰਣਾਲੀ</string>
     <string name="govt_initiative">ਭਾਰਤ ਸਰਕਾਰ ਦੀ ਪਹਿਲ</string>
@@ -205,7 +205,7 @@
     <string name="designation_label">ਅਹੁਦਾ</string>
     <string name="role_label">ਭੂਮਿਕਾ</string>
     <string name="district_label">ਜ਼ਿਲ੍ਹਾ</string>
-    <string name="app_version">ਲੋਕ ਦੀਕਸ਼ਾ v1.0.0</string>
+    <string name="app_version">ਲੋਕਲੈਂਸ v1.0.0</string>
     <string name="pds_monitoring_footer">PDS ਨਿਗਰਾਨੀ • ਭਾਰਤ ਸਰਕਾਰ</string>
 
     <!-- Language -->
